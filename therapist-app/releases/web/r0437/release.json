@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0437",
+  "versionName": "1.0.129-cockpit-qr-resume",
+  "notes": "Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar.",
+  "createdAt": "2026-10-26T17:05:38Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0437",
+      "profile": "admin",
+      "versionName": "1.0.129-cockpit-qr-resume",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
+      "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
+      "notes": "Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar."
+    },
+    "colleague": {
+      "releaseId": "r0437",
+      "profile": "colleague",
+      "versionName": "1.0.129-cockpit-qr-resume",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/colleague.html",
+      "sha256": "a29bb3e8a8b3120f1c4a995b70e9cfc1e352ac90e924f46f22fca5ee9b98cb87",
+      "notes": "Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar."
+    }
+  }
+}

@@ -706,7 +706,9 @@ async function runPhoneCockpitEntry(browser) {
     const secondLink = await page.evaluate(() => {
       const plan = window.KGGDataStore.getCurrentPlan();
       const api = window.KGGTherapyCockpit;
-      return api.makeLink(api.fromPlan(plan));
+      // This fixture represents a second plan; changed exercise content alone
+      // no longer creates another slot for the same exact plan identity.
+      return api.makeLink(api.fromPlan({ ...plan, id: "ticket037-phone-second-plan" }));
     });
     await entry.click();
     await waitForCockpitState(page, 1);
@@ -787,26 +789,37 @@ async function runPositive(browser, test) {
     await waitForNormalState(page);
     const secondContractBefore = await readPlanContract(page);
     await addExerciseFromVisibleUi(page, "Adduktion Maschine", 2);
-    const secondContract = await readPlanContract(page);
-    assert(secondContract.plan.id === secondContractBefore.plan.id, `${test.id}: planId änderte sich trotz normaler UI-Änderung`);
-    assert(secondContract.contentKey !== slot1Contract.contentKey, `${test.id}: UI-Änderung erzeugte keinen neuen contentKey`);
+    const changedCurrentPlan = await readPlanContract(page);
+    assert(changedCurrentPlan.plan.id === secondContractBefore.plan.id, `${test.id}: planId änderte sich trotz normaler UI-Änderung`);
+    assert(changedCurrentPlan.contentKey !== slot1Contract.contentKey, `${test.id}: UI-Änderung erzeugte keinen neuen contentKey`);
     await openFinishDialog(page);
+    // Give the deliberately separate second-plan fixture its own identity.
+    // Keep the visible Finish import and all multi-slot behavior assertions.
+    await page.evaluate(planId => {
+      const store = window.KGGDataStore;
+      store.setCurrentPlan({ ...store.getCurrentPlan(), id: planId }, "synthetic_ticket037_second_plan");
+    }, `ticket037-${test.id}-second-plan`);
+    const secondContract = await readPlanContract(page);
+    assert(secondContract.plan.id !== slot1Contract.plan.id, `${test.id}: Slot-2-Fixture hat keine eigene Plan-ID`);
     await page.locator("#finishCockpitBtn").click();
     await waitForCockpitState(page, 2);
     result = await readUiState(page);
-    assert(result.state.slotCount === 2, `${test.id}: geänderter gleicher-planId-Import erzeugte nicht Slot 2`);
+    assert(result.state.slotCount === 2, `${test.id}: zweiter Plan mit eigener Plan-ID erzeugte nicht Slot 2`);
     assertSlotMatches(result.state, 0, slot1Contract, `${test.id}: Slot 1 nach Slot 2`);
     assertSlotMatches(result.state, 1, secondContract, `${test.id}: Slot 2`);
     assertNoPositiveError(result, `${test.id}: Slot-2-Import`);
 
     await page.locator('[data-tc-action="normal"]').click();
     await waitForNormalState(page);
-    const thirdContractBefore = await readPlanContract(page);
     await addExerciseFromVisibleUi(page, "Beinpresse", 3);
-    const thirdContract = await readPlanContract(page);
-    assert(thirdContract.plan.id === thirdContractBefore.plan.id, `${test.id}: planId änderte sich vor Slot 3`);
-    assert(thirdContract.contentKey !== secondContract.contentKey, `${test.id}: weiterer UI-Inhalt erzeugte keinen neuen contentKey`);
     await openFinishDialog(page);
+    await page.evaluate(planId => {
+      const store = window.KGGDataStore;
+      store.setCurrentPlan({ ...store.getCurrentPlan(), id: planId }, "synthetic_ticket037_third_plan");
+    }, `ticket037-${test.id}-third-plan`);
+    const thirdContract = await readPlanContract(page);
+    assert(thirdContract.plan.id !== slot1Contract.plan.id && thirdContract.plan.id !== secondContract.plan.id, `${test.id}: Slot-3-Fixture hat keine eigene Plan-ID`);
+    assert(thirdContract.contentKey !== secondContract.contentKey, `${test.id}: weiterer UI-Inhalt erzeugte keinen neuen contentKey`);
     const gaugeButton = page.locator("#finishCockpitGaugeBtn");
     assert(await visible(gaugeButton), `${test.id}: separater Finish-Gaugebutton fehlt`);
     await gaugeButton.dblclick({ delay: 25 });
@@ -895,8 +908,8 @@ async function runInvalidIdNegative(browser, test) {
       "continuous visible Cockpit add/edit/reorder/progression/delete/finish and fresh-link import",
       "second root click navigates without duplicating slot 1",
       "identical Finish text import deduplication",
-      "same planId with normal UI content change to slot 2",
-      "separate Finish Gauge import to slot 3",
+      "separate plan identity with normal UI content change to slot 2",
+      "separate plan identity through Finish Gauge import to slot 3",
       "third-import double-click has no slot 4 and no slots_full toast",
       "full slots root return",
       "contentKey equals api.contentKey(api.fromPlan(currentPlan))",

@@ -135,8 +135,10 @@ def run_patient_per_set_pain() -> None:
 
 
 def run_therapy_cockpit() -> None:
-    log("== Therapie-Cockpit codec and RAM-slot contract ==")
+    log("== Therapie-Cockpit codec, slots and patient QR resume contract ==")
     run([node_executable(), "release-pipeline/kgg_therapy_cockpit_smoke.js"])
+    run([node_executable(), "release-pipeline/kgg_cockpit_qr_resume_contract.js"])
+    run_playwright_script("kgg_cockpit_qr_resume_smoke.js")
 
 
 def run_ticket_015_smoke() -> None:

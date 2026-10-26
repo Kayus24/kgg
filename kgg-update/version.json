@@ -1,7 +1,7 @@
 {
-  "versionCode": 128,
-  "versionName": "1.0.128-button-touch-responsiveness",
-  "indexUrl": "index.html?v=128",
-  "sha256": "e264fead1248c0aa503467bc26555fbe55a0e11c8584e161efd7750162e7e04a",
-  "notes": "v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten."
+  "versionCode": 129,
+  "versionName": "1.0.129-cockpit-qr-resume",
+  "indexUrl": "index.html?v=129",
+  "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
+  "notes": "v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
 }

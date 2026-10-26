@@ -102,27 +102,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "library-image-names",
     "responsive-library-sync",
     "menu-sync-qr-responsiveness",
-    "button-touch-responsiveness"
+    "button-touch-responsiveness",
+    "cockpit-qr-resume"
   ],
   "currentVersion": {
-    "versionCode": 128,
-    "versionName": "1.0.128-button-touch-responsiveness",
-    "lastPatchId": "kgg-v128-button-touch-responsiveness",
+    "versionCode": 129,
+    "versionName": "1.0.129-cockpit-qr-resume",
+    "lastPatchId": "kgg-v129-cockpit-qr-resume",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v128-button-touch-responsiveness",
+  "latestPatchId": "kgg-v129-cockpit-qr-resume",
   "lastUpdateIntent": {
-    "id": "kgg-v128-button-touch-responsiveness",
-    "summary": "Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.",
+    "id": "kgg-v129-cockpit-qr-resume",
+    "summary": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
     "touched": [
-      "UI"
+      "QR/Patienten-App",
+      "Scan/OCR",
+      "Plan-State",
+      "Cockpit"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Scan/OCR",
       "Parser",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -228,27 +229,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "library-image-names",
     "responsive-library-sync",
     "menu-sync-qr-responsiveness",
-    "button-touch-responsiveness"
+    "button-touch-responsiveness",
+    "cockpit-qr-resume"
   ],
   "currentVersion": {
-    "versionCode": 128,
-    "versionName": "1.0.128-button-touch-responsiveness",
-    "lastPatchId": "kgg-v128-button-touch-responsiveness",
+    "versionCode": 129,
+    "versionName": "1.0.129-cockpit-qr-resume",
+    "lastPatchId": "kgg-v129-cockpit-qr-resume",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v128-button-touch-responsiveness",
+  "latestPatchId": "kgg-v129-cockpit-qr-resume",
   "lastUpdateIntent": {
-    "id": "kgg-v128-button-touch-responsiveness",
-    "summary": "Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.",
+    "id": "kgg-v129-cockpit-qr-resume",
+    "summary": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
     "touched": [
-      "UI"
+      "QR/Patienten-App",
+      "Scan/OCR",
+      "Plan-State",
+      "Cockpit"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Scan/OCR",
       "Parser",
-      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
@@ -263,8 +265,40 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 128,
+  "latestVersionCode": 129,
   "entries": [
+    {
+      "versionCode": 129,
+      "versionName": "1.0.129-cockpit-qr-resume",
+      "patchId": "kgg-v129-cockpit-qr-resume",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Cockpit-Link nach Patienten-QR mit manueller Prioritaet",
+      "reason": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
+      "whatChanged": [
+        "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "PASS: QR scan, portable/local resume, field priority, notes and failure recovery",
+        "certification": "pending"
+      },
+      "approvalNote": "Max beauftragt am 2026-10-26 Cockpit-Aktivierungslink nach Patienten-QR und Vorrang eigener Eintraege bei erneutem Scan; nur lokale reversible Umsetzung, kein Release."
+    },
     {
       "versionCode": 128,
       "versionName": "1.0.128-button-touch-responsiveness",
@@ -711,41 +745,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max fordert in 296053 die identische Verschiebedarstellung wie bei Uebungen im Plan; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 114,
-      "versionName": "1.0.114-cockpit-seam-stable-cover",
-      "patchId": "kgg-v114-cockpit-seam-stable-cover",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Trennkante ohne Leerstreifen",
-      "reason": "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung.",
-      "whatChanged": [
-        "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max fordert anhand 296064 und Bildschirmvideo die kompakte Trennkante und stabile Haupt-App beim Ziehen; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.128-button-touch-responsiveness",
+  "latestVersionName": "1.0.129-cockpit-qr-resume",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -866,6 +868,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "75972d0e60271435587871786bd0407538b61c6cc7c340be3fb2df78a5a57f0f",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v128-button-touch-responsiveness"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v129.json",
+      "snapshotVersionCode": 129,
+      "entryCount": 70,
+      "entriesSha256": "65d34efdd099aa0cbeb367ae7e2e4e343bd2a7f5b7fc36bba5cff57758332366",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v129-cockpit-qr-resume"
     }
   ]
 }
@@ -983,7 +993,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v128-button-touch-responsiveness",
+  "lastUpdatedByPatchId": "kgg-v129-cockpit-qr-resume",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1118,7 +1128,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v128 Direkte Touchreaktion fuer Buttons</title>
+  <title>KGG Update v129 Cockpit-Link nach Patienten-QR mit manueller Prioritaet</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17042,11 +17052,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v128_button_touch_responsiveness';
+  const VERSION='KGG_GITHUB_UPDATE_v129_cockpit_qr_resume';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v128","buildTime":"2026-10-23T21:30:51Z","buildCode":"module-v128-button-touch-responsiveness","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v129","buildTime":"2026-10-26T15:23:31Z","buildCode":"module-v129-cockpit-qr-resume","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -23503,6 +23513,10 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
         job.status='ready';
         job.short=job.short||patientShortGuess();
         scanState.next='plan';
+        if(typeof window.KGGCockpitQrAccepted==='function'){
+          try{job.result.cockpit=window.KGGCockpitQrAccepted(job.result,patientPrimaryNames(parsed.json)||{});}
+          catch(error){job.result.cockpitError=error&&error.code||'cockpit_import_failed';job.warnings.push('Cockpit-Link nicht erzeugt ('+job.result.cockpitError+').');}
+        }
         return job;
       }catch(err){
         setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
@@ -23919,10 +23933,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       try{
         let syncCodeCount=0;
         let acceptedCount=0;
+        let cockpitCount=0;
         for(const file of files){
           const accepted=await scanAcceptFile(file,normalizedKind);
           if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
-          else if(accepted)acceptedCount++;
+          else if(accepted){acceptedCount++;if(accepted.result&&accepted.result.cockpit)cockpitCount++;}
         }
         if(syncCodeCount&&!acceptedCount){
           scanState.decision=false;
@@ -23931,11 +23946,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
           render();
           return scanStateSnapshot();
         }
-        scanState.decision=true;
+        scanState.decision=!(cockpitCount&&cockpitCount===acceptedCount);
         state.scanPanelOpen='scanned';
         save();
         render();
-        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
+        setScanStatus(scanState.decision?'Foto hinzugefügt. Bitte entscheiden.':'Cockpit-Link erzeugt.');
       }catch(err){
         scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
         setScanStatus(scanState.lastError);
@@ -23960,7 +23975,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
           scanState.decision=false;
           state.scanPanelOpen='plan';
         }else{
-          scanState.decision=true;
+          scanState.decision=!(accepted.result&&accepted.result.cockpit);
           state.scanPanelOpen='scanned';
         }
         save();
@@ -28384,6 +28399,9 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function cleanUnit(value,fallback){var text=String(value||fallback||"").trim().slice(0,12);if(!text||/[^\wÄÖÜäöüß+\/-]/.test(text))return String(fallback||"").slice(0,12);return text;}
   function cleanOptionalText(value,max){var text=String(value==null?"":value).trim();return text.slice(0,max||160);}
+  function cleanNotes(value){return String(value==null?"":value).replace(/\u0000/g,"").slice(0,2000);}
+  var MANUAL_FIELDS=["name","nameDe","nameEn","sets","side","loadUnit","metricUnit","weightUnit","unit","measure","startLoad","startMetric","videoUrl","videoLabel","media","progressionGroupId","progressionVariants","activeProgressionId"];
+  function manualCells(value,count){return Array.from({length:count},function(_,i){return [!!(value&&value[i]&&value[i][0]),!!(value&&value[i]&&value[i][1])];});}
   function germanNameField(value){return typeof value==="string"&&value.length<=200&&!/[\x00-\x1f\x7f]/.test(value)?{nameDe:value.trim()}:{};}
   function cleanEnglishName(value){var text=String(value).trim();if(text.length>200)throw error("english_name_invalid");return text;}
   function cleanVideoUrl(value){var text=cleanOptionalText(value,500);return /^(?:https?:\/\/)/i.test(text)?text:"";}
@@ -28425,7 +28443,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var group=cleanOptionalText(raw.progressionGroupId||"",80),variants=cleanProgressionVariants(raw.progressionVariants,group),activeProgressionId=cleanOptionalText(raw.activeProgressionId||raw.progressionVariantId||"",80);
     if(variants.length){if(!activeProgressionId)activeProgressionId=variants[0].id;if(!variants.some(function(item){return item.id===activeProgressionId;}))throw error("progression_id_invalid");}
     else if(activeProgressionId)throw error("progression_id_invalid");
-    return {id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,...germanNameField(raw.nameDe),...(typeof raw.nameEn==="string"?{nameEn:cleanEnglishName(raw.nameEn)}:{}),sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
+    var result={id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,...germanNameField(raw.nameDe),...(typeof raw.nameEn==="string"?{nameEn:cleanEnglishName(raw.nameEn)}:{}),sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
+    if(Array.isArray(raw.manual))result.manual=manualCells(raw.manual,sets);
+    if(Array.isArray(raw.manualFields))result.manualFields=raw.manualFields.filter(function(field){return MANUAL_FIELDS.indexOf(field)>=0;});
+    return result;
   }
   function compactExerciseExtras(ex){
     var extra={};
@@ -28439,6 +28460,8 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(ex.videoLabel&&ex.videoLabel!=="Video öffnen")extra.vl=cleanOptionalText(ex.videoLabel,120);
     if(ex.media&&ex.media.length)extra.md=cleanMediaList(ex.media);
     if(ex.progressionGroupId||ex.progressionVariants&&ex.progressionVariants.length){extra.g=cleanOptionalText(ex.progressionGroupId,80);extra.pv=cleanProgressionVariants(ex.progressionVariants,extra.g);if(ex.activeProgressionId)extra.a=cleanOptionalText(ex.activeProgressionId,80);}
+    if(ex.manual&&ex.manual.some(function(pair){return pair[0]||pair[1];}))extra.o=ex.manual;
+    if(ex.manualFields&&ex.manualFields.length)extra.f=ex.manualFields;
     return Object.keys(extra).length?extra:null;
   }
   function encodePayload(input){
@@ -28448,6 +28471,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
       var ex=exerciseInput(item);if(ids[ex.id])throw error("duplicate_exercise_id");ids[ex.id]=true;
       var row={i:ex.id,s:ex.sets,q:ex.side,u:ex.loadUnit,m:ex.metricUnit,p:ex.previous,t:ex.today},extra=compactExerciseExtras(ex);if(extra)row.x=extra;return row;
     });
+    if(source.notes!=null||source.notesManual||source.editedAt||source.removedIds&&source.removedIds.length){
+      encodedExercises[0].x=encodedExercises[0].x||{};
+      encodedExercises[0].x.c={n:obfuscateName(cleanNotes(source.notes)),m:!!source.notesManual,u:Number(source.editedAt)||0,r:Array.isArray(source.removedIds)?source.removedIds.slice(0,MAX_EXERCISES).filter(function(id){return typeof id==="string"&&id.length===2;}):[]};
+    }
     var body={v:1,p:cleanPlanId(source.planId||source.id||""),n:obfuscateName(cleanName(source.name||source.patientName||"")),d:cleanDate(source.date),e:encodedExercises};
     var payload={v:body.v,p:body.p,n:body.n,d:body.d,e:body.e,h:fnv(JSON.stringify(body))};
     var code=PREFIX+b64Encode(utf8(JSON.stringify(payload)));
@@ -28468,13 +28495,17 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(fnv(JSON.stringify(unsigned))!==parsed.h)throw error("integrity_failed");
     var name;try{name=cleanName(revealName(parsed.n));}catch(e){throw error("name_decode_failed");}
     var ids=Object.create(null),exercises=parsed.e.map(function(raw){
-      if(!raw||typeof raw.i!=="string"||raw.i.length!==2||!byId[raw.i])throw error("unknown_exercise_id");
+      if(!raw||typeof raw.i!=="string"||raw.i.length!==2)throw error("unknown_exercise_id");
+      if(!byId[raw.i]&&raw.x&&raw.x.n&&stableIdForName(raw.x.n)===raw.i)ensureDerived(raw.x.n,{sets:raw.s,loadUnit:raw.u,metricUnit:raw.m});
+      if(!byId[raw.i])throw error("unknown_exercise_id");
       if(ids[raw.i])throw error("duplicate_exercise_id");ids[raw.i]=true;
       var ref=byId[raw.i],sets=cleanSetCount(raw.s),extra=raw.x&&typeof raw.x==="object"?raw.x:{};if(sets!==Number(raw.s))throw error("set_structure_invalid");
       if(raw.q!=="BI"&&raw.q!=="LR")throw error("set_structure_invalid");
-      return exerciseInput({id:raw.i,name:extra.n||ref.name,...germanNameField(extra.nd),...(typeof extra.ne==="string"?{nameEn:extra.ne}:{}),sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets)});
+      return exerciseInput({id:raw.i,name:extra.n||ref.name,...germanNameField(extra.nd),...(typeof extra.ne==="string"?{nameEn:extra.ne}:{}),sets:sets,side:raw.q,loadUnit:raw.u,metricUnit:raw.m,weightUnit:raw.u,unit:raw.m,measure:extra.m,startLoad:extra.l,startMetric:extra.r,videoUrl:extra.v,videoLabel:extra.vl,media:extra.md,progressionGroupId:extra.g,progressionVariants:extra.pv,activeProgressionId:extra.a,previous:validateValueList(raw.p,sets),today:validateValueList(raw.t,sets),manual:extra.o,manualFields:extra.f});
     });
-    return {version:1,planId:cleanPlanId(parsed.p),name:name,date:cleanDate(parsed.d),exercises:exercises};
+    var result={version:1,planId:cleanPlanId(parsed.p),name:name,date:cleanDate(parsed.d),exercises:exercises},resume=parsed.e[0].x&&parsed.e[0].x.c;
+    if(resume){if(typeof resume.n!=="string"||resume.n.length>12000||!Number.isFinite(resume.u)||resume.u<0)throw error("resume_invalid");result.notes=resume.n?cleanNotes(revealName(resume.n)):"";result.notesManual=!!resume.m;result.editedAt=resume.u;result.removedIds=Array.isArray(resume.r)?resume.r.filter(function(id){return typeof id==="string"&&id.length===2;}).slice(0,MAX_EXERCISES):[];}
+    return result;
   }
   function extractCode(value){
     var text=String(value||"").trim();if(text.slice(0,PREFIX.length).toUpperCase()===PREFIX)return text;
@@ -28534,10 +28565,59 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function slotCount(){return slots.reduce(function(total,slot){return total+(slot?1:0);},0);}
   function firstFreeSlot(){for(var i=0;i<MAX_SLOTS;i++)if(!slots[i])return i;return -1;}
   function slotProgress(slot){var total=0,done=0;(slot&&slot.exercises||[]).forEach(function(ex){(ex.today||[]).forEach(function(pair){total+=2;if(pair[0])done++;if(pair[1])done++;});});return total?Math.round(done/total*100):0;}
-  function normalizeSlot(decoded){var key=contentKey(decoded);return {planId:decoded.planId,name:decoded.name,date:decoded.date,exercises:(decoded.exercises||[]).map(exerciseInput),contentKey:key,sourceContentKey:key,openExercise:null,lastCompletion:null};}
-  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),exercises:slot.exercises.map(function(ex){var next=exerciseInput(ex);next.previous=(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();});next.today=ex.today.map(function(p){return p.slice();});return next;})};}
+  function normalizeSlot(decoded){var key=contentKey(decoded);return {planId:decoded.planId,name:decoded.name,date:decoded.date,notes:cleanNotes(decoded.notes),notesManual:!!decoded.notesManual,editedAt:Number(decoded.editedAt)||0,removedIds:Array.isArray(decoded.removedIds)?decoded.removedIds.slice():[],exercises:(decoded.exercises||[]).map(exerciseInput),contentKey:key,sourceContentKey:key,openExercise:null,lastCompletion:null};}
+  function payloadFromSlot(slot,useTodayAsPrevious){return {planId:slot.planId,name:slot.name,date:new Date().toISOString().slice(0,10),notes:slot.notes,notesManual:slot.notesManual,editedAt:slot.editedAt,removedIds:slot.removedIds,exercises:slot.exercises.map(function(ex){var next=exerciseInput(ex);next.previous=(useTodayAsPrevious?ex.today:ex.previous).map(function(p){return p.slice();});next.today=ex.today.map(function(p){return p.slice();});return next;})};}
   function cloneJson(value){try{return JSON.parse(JSON.stringify(value));}catch(e){return value;}}
-  function slotSnapshot(slot){if(!slot)return null;return {planId:slot.planId,name:slot.name,date:slot.date,exercises:cloneJson(slot.exercises||[]),openExercise:Number.isInteger(slot.openExercise)?slot.openExercise:null};}
+  function slotSnapshot(slot){if(!slot)return null;return {planId:slot.planId,name:slot.name,date:slot.date,notes:slot.notes,notesManual:slot.notesManual,editedAt:slot.editedAt,removedIds:cloneJson(slot.removedIds||[]),exercises:cloneJson(slot.exercises||[]),openExercise:Number.isInteger(slot.openExercise)?slot.openExercise:null};}
+  function resumeStorageKey(planId){return "kgg_cockpit_resume_v1:"+encodeURIComponent(planId);}
+  function readRemembered(planId){
+    if(!planId)return null;
+    try{var text=window.localStorage&&window.localStorage.getItem(resumeStorageKey(planId));if(!text)return null;var decoded=decodeCode(text);return decoded.planId===planId?normalizeSlot(decoded):null;}catch(e){return null;}
+  }
+  var resumeSaveFailed=false;
+  function resumeStatus(){var status=document.getElementById("kggTherapyCockpitStatus");if(status){status.setAttribute("role","status");status.textContent=resumeSaveFailed?'Nicht lokal gespeichert. Vor dem Schließen „Plan fertig“ wählen und den neuen Link speichern.':"Wiederaufnahme per Link · maximal 3 Slots";}}
+  function rememberSlot(slot){
+    if(!slot||!slot.planId||!slot.exercises.length)return false;
+    try{var code=encodePayload(payloadFromSlot(slot,false));if(!window.localStorage)throw error("storage_unavailable");window.localStorage.setItem(resumeStorageKey(slot.planId),code);resumeSaveFailed=false;resumeStatus();return true;}catch(e){resumeSaveFailed=true;resumeStatus();return false;}
+  }
+  function markEdited(slot){slot.editedAt=Math.max(Date.now(),Number(slot.editedAt||0)+1);return rememberSlot(slot);}
+  function markCell(slot,ex,set,field){ex.manual=manualCells(ex.manual,ex.sets);ex.manual[set][field]=true;markEdited(slot);}
+  function matchingSlot(planId){if(!planId)return -1;for(var i=0;i<MAX_SLOTS;i++)if(slots[i]&&slots[i].planId===planId)return i;return -1;}
+  function mergePatientSlot(incoming,saved,keepIncomingManual){
+    if(!saved||saved.planId!==incoming.planId)return incoming;
+    var previous=Object.create(null);saved.exercises.forEach(function(ex){previous[ex.id]=ex;});
+    var removed=(keepIncomingManual?incoming.removedIds:saved.removedIds)||[],items=incoming.exercises.filter(function(ex){return removed.indexOf(ex.id)<0;}).map(function(ex){
+      var old=previous[ex.id];if(!old)return ex;
+      var incomingFields=keepIncomingManual?(ex.manualFields||[]).slice():[];
+      (old.manualFields||[]).forEach(function(field){if(incomingFields.indexOf(field)<0)ex[field]=cloneJson(old[field]);});
+      ex.manualFields=Array.from(new Set(incomingFields.concat(old.manualFields||[])));
+      var incomingCells=manualCells(keepIncomingManual&&ex.manual,ex.sets),oldCells=manualCells(old.manual,ex.sets);ex.manual=manualCells(null,ex.sets);
+      ex.previous=valueArray(ex.previous,ex.sets);ex.today=valueArray(ex.today,ex.sets);
+      ex.manual.forEach(function(pair,set){pair.forEach(function(_,field){
+        if(incomingCells[set][field]){pair[field]=true;return;}
+        if(oldCells[set][field]){var value=old.today[set]&&old.today[set][field]||"";ex.previous[set][field]=value;ex.today[set][field]=value;pair[field]=true;}
+        else{var previousValue=old.today[set]&&old.today[set][field]||"";if(ex.previous[set][field]==="")ex.previous[set][field]=previousValue;if(ex.today[set][field]==="")ex.today[set][field]=previousValue;}
+      });});
+      if(oldCells.some(function(pair){return pair[0];})&&!incomingCells.some(function(pair){return pair[0];})){ex.loadUnit=old.loadUnit;ex.weightUnit=old.weightUnit;}
+      if(oldCells.some(function(pair){return pair[1];})&&!incomingCells.some(function(pair){return pair[1];})){ex.metricUnit=old.metricUnit;ex.unit=old.unit;ex.measure=old.measure;}
+      return exerciseInput(ex);
+    });
+    saved.exercises.forEach(function(ex){if(!items.some(function(item){return item.id===ex.id;})&&removed.indexOf(ex.id)<0)items.push(exerciseInput(ex));});
+    incoming.exercises=items;incoming.removedIds=removed.slice();incoming.editedAt=Math.max(incoming.editedAt,saved.editedAt);
+    if(!(keepIncomingManual&&incoming.notesManual)){incoming.notes=saved.notesManual?saved.notes:(incoming.notes||saved.notes);incoming.notesManual=saved.notesManual;}
+    // Names remain therapist-side display data; they are never the matching key.
+    if(!keepIncomingManual&&saved.name&&saved.name!=="Plan ohne Patientendaten")incoming.name=saved.name;
+    incoming.contentKey=contentKey(incoming);return incoming;
+  }
+  function importPatientPlan(payload){
+    if(!payload||!String(payload.planId||"").trim())throw error("plan_id_required");
+    // Validate every field before touching a loaded slot or a saved snapshot.
+    var incoming=normalizeSlot(decodeCode(encodePayload(payload))),index=matchingSlot(incoming.planId),saved=index>=0?slots[index]:readRemembered(incoming.planId);
+    var merged=mergePatientSlot(incoming,saved);encodePayload(payloadFromSlot(merged,false));
+    if(index<0)index=firstFreeSlot();if(index<0)throw error("slots_full");
+    slots[index]=merged;notice="";var persisted=rememberSlot(merged);currentView="cockpit";setCockpitOpen(true);render();
+    return {slot:index,link:makeLink(payloadFromSlot(merged,false)),persisted:persisted,state:getState()};
+  }
   function valuesLabel(pair,ex){var load=pair&&pair[0]||"–",metric=pair&&pair[1]||"–";return load+" "+(ex.loadUnit||"")+" / "+metric+" "+(ex.metricUnit||"");}
   function mediaMarkup(ex){var current=ex&&ex.media&&Array.isArray(ex.media)?ex.media[0]:null;if(current&&current.downloadUrl&&/^data:image\//i.test(current.downloadUrl))return '<img alt="" src="'+htmlEscape(current.downloadUrl)+'">';return htmlEscape(initials(ex&&ex.name));}
   function renderPad(slotIndex,exerciseIndex,setIndex,field,ex){
@@ -28549,7 +28629,8 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function renderExercise(slot,slotIndex,ex,exerciseIndex){
     var open=slot.openExercise===exerciseIndex,summary=(ex.today||[]).map(function(pair){return valuesLabel(pair,ex);}).join(" · ");
-    var html='<article class="kgg-tc-exercise '+(open?"open":"")+'"><button type="button" class="kgg-tc-card-toggle" data-tc-action="toggle" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'"><span class="kgg-tc-thumb" aria-hidden="true">'+mediaMarkup(ex)+'</span><span class="kgg-tc-exercise-summary"><strong>'+htmlEscape(ex.name)+'</strong><small>'+ex.sets+' Sätze · '+htmlEscape(ex.side==="LR"?"links/rechts":"beidseitig")+(summary?" · "+htmlEscape(summary):"")+'</small></span><span class="kgg-tc-chevron" aria-hidden="true">'+(open?"⌃":"⌄")+'</span></button>';
+    var sideMatch=String(ex.name).match(/^(.*) \((links|rechts)\)$/i),displayName=sideMatch?sideMatch[2]+" · "+sideMatch[1]:ex.name,sideLabel=sideMatch?sideMatch[2]:ex.side==="LR"?"links/rechts":"beidseitig";
+    var html='<article class="kgg-tc-exercise '+(open?"open":"")+'"><button type="button" class="kgg-tc-card-toggle" data-tc-action="toggle" data-tc-slot="'+slotIndex+'" data-tc-ex="'+exerciseIndex+'"><span class="kgg-tc-thumb" aria-hidden="true">'+mediaMarkup(ex)+'</span><span class="kgg-tc-exercise-summary"><strong>'+htmlEscape(displayName)+'</strong><small>'+ex.sets+' Sätze · '+htmlEscape(sideLabel)+(summary?" · "+htmlEscape(summary):"")+'</small></span><span class="kgg-tc-chevron" aria-hidden="true">'+(open?"⌃":"⌄")+'</span></button>';
     if(open){
       html+='<div class="kgg-tc-exercise-detail"><div class="kgg-tc-values-head"><span>Satz</span><span>Vorwert</span><span>Heute</span></div>';
       for(var setIndex=0;setIndex<ex.sets;setIndex++){
@@ -28564,9 +28645,11 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function renderCard(slot,slotIndex){
     var progress=slotProgress(slot),color=COLORS[slotIndex%COLORS.length],html='<article class="kgg-tc-card" style="--tc-color:'+color+'" data-tc-card="'+slotIndex+'"><div class="kgg-tc-card-head"><span class="kgg-tc-avatar" aria-hidden="true">'+htmlEscape(initials(slot.name))+'</span><span class="kgg-tc-card-title"><strong>'+htmlEscape(slot.name)+'</strong><small>'+slot.exercises.length+' Übungen · '+progress+' % erledigt</small></span><span class="kgg-tc-card-tools"><button type="button" class="kgg-tc-icon-btn" data-tc-action="remove" data-tc-slot="'+slotIndex+'" aria-label="Patient entfernen">×</button></span></div><div class="kgg-tc-progress" aria-label="Fortschritt '+progress+' Prozent"><span style="width:'+progress+'%"></span></div><div class="kgg-tc-card-body"><div class="kgg-tc-scroll">';
     html+=slot.exercises.map(function(ex,index){return renderExercise(slot,slotIndex,ex,index);}).join("");
+    html+='<label class="kgg-tc-notes-label">Therapienotizen<textarea class="kgg-tc-input" data-tc-notes="'+slotIndex+'" maxlength="2000" rows="2" placeholder="Eigene Notizen zu diesem Plan">'+htmlEscape(slot.notes)+'</textarea></label>';
     return html+'</div></div><div class="kgg-tc-card-foot"><button type="button" class="kgg-tc-btn primary" data-tc-action="finish" data-tc-slot="'+slotIndex+'">Plan fertig</button></div></article>';
   }
   function render(){
+    resumeStatus();
     var scrollPositions={};if(board)board.querySelectorAll('.kgg-tc-card[data-tc-card]').forEach(function(card){var scroller=card.querySelector('.kgg-tc-scroll');if(scroller)scrollPositions[card.dataset.tcCard]=scroller.scrollTop;});
     var count=slotCount(),button=document.getElementById("kggTherapyCockpitButton");
     if(button)button.textContent=count?"Cockpit "+count+"/3":"Cockpit";
@@ -28585,7 +28668,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var target=slots[slot],ex=target&&target.exercises[exercise];if(!ex)return;var pair=ex.today[set]||(ex.today[set]=["",""]),index=field==="load"?0:1,current=String(pair[index]||"");
     if(keyValue==="OK"){activeInput=null;render();return;}
     if(keyValue==="⌫")current=current.slice(0,-1);else if(keyValue==="C")current="";else if(keyValue==="–")current="0";else if(keyValue===","){if(!current.includes("."))current=current?current+".":"0.";}else if(/^\d$/.test(keyValue)){if(current.length<8)current+=keyValue;}
-    pair[index]=current;render();
+    pair[index]=current;markCell(target,ex,set,index);render();
   }
   function dispatchPlanHook(slot){
     var store=window["KGGDataStore"];if(!store||typeof store.getCurrentPlan!=="function"||typeof store.setCurrentPlan!=="function")return "hook_unavailable";
@@ -28606,14 +28689,14 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     try{var updatedPlan=Object.assign({},current,{exercises:exercises});store.setCurrentPlan(updatedPlan,"therapy_cockpit_edit");slot.sourceContentKey=contentKey(buildFromPlan(updatedPlan));if(typeof CustomEvent!=="undefined")window.dispatchEvent(new CustomEvent("kgg:therapy-cockpit-finished",{detail:{planId:slot.planId,exerciseCount:changed}}));return "updated";}catch(e){return "hook_failed";}
   }
   function documentationFor(slot,link){
-    var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
+    var lines=["KGG Therapie-Cockpit · "+new Date().toLocaleDateString("de-DE"),"Patient: "+slot.name,"Plan fertig · heutige Werte"];slot.exercises.forEach(function(ex){lines.push("",ex.name);ex.today.forEach(function(pair,index){lines.push("S"+(index+1)+": "+valuesLabel(pair,ex));});});if(slot.notes)lines.push("","Therapienotizen:",slot.notes);lines.push("","Neuer Cockpit-Link:",link);return lines.join("\n");
   }
   function showOutput(results){
-    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);var allUpdated=results.length>0&&results.every(function(result){return result.hook==="updated";}),title=modal.querySelector("h2"),hint=modal.querySelector("p");if(title)title.textContent=allUpdated?"Dokumentation bereit":"Dokumentationstext bereit";if(hint)hint.textContent=allUpdated?"Die verknüpften Planquellen wurden mit der vorhandenen Aktion aktualisiert.":"Link und Text sind bereit. Mindestens eine Planquelle wurde nicht übernommen; bitte den Status im Text prüfen.";var labels={updated:"Planquelle aktualisiert",plan_mismatch:"Planquelle nicht übernommen: Plan stimmt nicht überein",exercise_mismatch:"Planquelle nicht übernommen: keine Übung zugeordnet",hook_unavailable:"Planquelle nicht übernommen: Aktualisierung nicht verfügbar",hook_failed:"Planquelle nicht übernommen: Aktualisierung fehlgeschlagen","nicht übernommen":"Planquelle nicht übernommen"};output.value=results.map(function(result){return result.text+"\n\n"+(labels[result.hook]||"Planquelle nicht übernommen");}).join("\n\n--------------------\n\n");modal.hidden=false;
+    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);var allUpdated=results.length>0&&results.every(function(result){return result.hook==="updated";}),title=modal.querySelector("h2"),hint=modal.querySelector("p");if(title)title.textContent=allUpdated?"Dokumentation bereit":"Dokumentationstext bereit";if(hint)hint.textContent=allUpdated?"Die verknüpften Planquellen wurden mit der vorhandenen Aktion aktualisiert.":"Link und Text sind bereit. Mindestens eine Planquelle wurde nicht übernommen; bitte den Status im Text prüfen.";var labels={updated:"Planquelle aktualisiert",plan_mismatch:"Planquelle nicht übernommen: Plan stimmt nicht überein",exercise_mismatch:"Planquelle nicht übernommen: keine Übung zugeordnet",hook_unavailable:"Planquelle nicht übernommen: Aktualisierung nicht verfügbar",hook_failed:"Planquelle nicht übernommen: Aktualisierung fehlgeschlagen","nicht übernommen":"Planquelle nicht übernommen"};output.value=results.map(function(result){return result.text+"\n\n"+(labels[result.hook]||"Planquelle nicht übernommen");}).join("\n\n--------------------\n\n");modal.hidden=false;if(typeof window.KGGCockpitSetOutputLink==="function")window.KGGCockpitSetOutputLink(results.length===1?results[0].link:"");
   }
   function finishSlot(index,skipRender){
     var slot=slots[index];if(!slot)return null;var link,hook="nicht übernommen";try{link=makeLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
-    var result={slot:index,link:link,text:documentationFor(slot,link),hook:hook};slot.lastCompletion=result;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;if(!slotCount()){currentView="normal";setCockpitOpen(false);}if(!skipRender)render();return result;
+    var result={slot:index,link:link,text:documentationFor(slot,link),hook:hook};rememberSlot(normalizeSlot(payloadFromSlot(slot,true)));slot.lastCompletion=result;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;if(!slotCount()){currentView="normal";setCockpitOpen(false);}if(!skipRender)render();return result;
   }
   function setCockpitOpen(open){if(document.body&&document.body.classList)document.body.classList.toggle("kggTherapyCockpitOpen",!!open);}
   function finishAll(){var results=[];for(var i=0;i<MAX_SLOTS;i++){var result=finishSlot(i,true);if(result)results.push(result);}currentView="normal";setCockpitOpen(false);render();if(results.length)showOutput(results);}
@@ -28622,13 +28705,25 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(index<0||index>=MAX_SLOTS||!slots[index])throw error("slot_not_found");
     var current=slots[index],source=next||{},name=String(source.name==null?current.name:source.name).trim()||"Plan ohne Patientendaten",exercises=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[];
     if(exercises.length>MAX_EXERCISES)throw error("exercise_count_invalid");
-    var candidate={planId:source.planId==null?current.planId:cleanPlanId(source.planId),name:name,date:cleanDate(source.date==null?current.date:source.date),exercises:exercises};
+    var candidate={planId:source.planId==null?current.planId:cleanPlanId(source.planId),name:name,date:cleanDate(source.date==null?current.date:source.date),notes:source.notes==null?current.notes:cleanNotes(source.notes),notesManual:current.notesManual||source.notes!=null&&cleanNotes(source.notes)!==current.notes,editedAt:Math.max(Date.now(),Number(current.editedAt||0)+1),removedIds:(current.removedIds||[]).slice(),exercises:exercises};
+    if(candidate.planId!==current.planId)throw error("plan_id_mismatch");
+    current.exercises.forEach(function(old){if(!exercises.some(function(ex){return ex.id===old.id;})&&candidate.removedIds.indexOf(old.id)<0)candidate.removedIds.push(old.id);});
+    exercises.forEach(function(ex){
+      candidate.removedIds=candidate.removedIds.filter(function(id){return id!==ex.id;});
+      var old=current.exercises.find(function(item){return item.id===ex.id;}),cells=manualCells(old&&old.manual,ex.sets),fields=(old&&old.manualFields||[]).slice();
+      ex.today.forEach(function(pair,set){pair.forEach(function(value,field){if(!old||value!==(old.today[set]&&old.today[set][field]||""))cells[set][field]=true;});});
+      MANUAL_FIELDS.forEach(function(field){if((!old||JSON.stringify(ex[field])!==JSON.stringify(old[field]))&&fields.indexOf(field)<0)fields.push(field);});
+      ex.manual=cells;ex.manualFields=fields;
+    });
     if(exercises.length)encodePayload(candidate);
-    var normalized=normalizeSlot(candidate);normalized.sourceContentKey=current.sourceContentKey||current.contentKey;normalized.openExercise=Number.isInteger(source.openExercise)&&source.openExercise>=0&&source.openExercise<exercises.length?source.openExercise:null;normalized.contentKey=contentKey(candidate);slots[index]=normalized;notice="";render();return slotSnapshot(normalized);
+    var normalized=normalizeSlot(candidate);normalized.sourceContentKey=current.sourceContentKey||current.contentKey;normalized.openExercise=Number.isInteger(source.openExercise)&&source.openExercise>=0&&source.openExercise<exercises.length?source.openExercise:null;normalized.contentKey=contentKey(candidate);slots[index]=normalized;rememberSlot(normalized);notice="";render();return slotSnapshot(normalized);
   }
   function syncSlotToPlan(index){if(index<0||index>=MAX_SLOTS||!slots[index])return "slot_not_found";return dispatchPlanHook(slots[index]);}
   function importCode(value){
-    var code=extractCode(value)||String(value||"").trim(),decoded=decodeCode(code),index=firstFreeSlot();if(index<0)throw error("slots_full");slots[index]=normalizeSlot(decoded);notice="";currentView="cockpit";setCockpitOpen(true);render();return {slot:index,state:getState()};
+    var code=extractCode(value)||String(value||"").trim(),decoded=decodeCode(code),index=matchingSlot(decoded.planId),incoming=normalizeSlot(decoded),saved=index>=0?slots[index]:readRemembered(decoded.planId);
+    if(saved){var newer=saved.editedAt>=incoming.editedAt?saved:incoming,older=newer===saved?incoming:saved;incoming=mergePatientSlot(normalizeSlot(payloadFromSlot(newer,false)),older,true);}
+    if(incoming.exercises.length)encodePayload(payloadFromSlot(incoming,false));
+    if(index<0)index=firstFreeSlot();if(index<0)throw error("slots_full");slots[index]=incoming;rememberSlot(incoming);notice="";currentView="cockpit";setCockpitOpen(true);render();return {slot:index,state:getState()};
   }
   function openView(){currentView="cockpit";setCockpitOpen(true);render();}
   function closeView(){currentView="normal";activeInput=null;setCockpitOpen(false);render();}
@@ -28647,6 +28742,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");
     var rootButton=document.getElementById("kggTherapyCockpitButton");if(rootButton){var directPlanClick=function(event){var handler=window.KGGTherapyCockpitDirectPlanClick;return typeof handler==="function"&&handler(event)===true;};rootButton.addEventListener("click",function(event){event.stopPropagation();if(directPlanClick(event))return;openView();});rootButton.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.stopPropagation();if(directPlanClick(event))return;openView();}});}
     root.addEventListener("click",handleClick);
+    root.addEventListener("input",function(event){var input=event.target;if(!input||!input.hasAttribute("data-tc-notes"))return;var slot=slots[Number(input.getAttribute("data-tc-notes"))];if(slot){slot.notes=cleanNotes(input.value);slot.notesManual=true;markEdited(slot);}});
     document.addEventListener("pointerdown",handleOutsidePointer,true);
     render();
     var incoming=extractCode(window.location.href);if(incoming){try{importCode(incoming);clearIncomingParam();}catch(e){notice="Cockpit-Link nicht geladen ("+(e.code||"invalid_format")+").";render();notify("Cockpit-Link konnte nicht geladen werden.");}}
@@ -28661,7 +28757,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function handleClick(event){
     var target=event.target&&event.target.closest?event.target.closest("[data-tc-action]"):null;if(!target||!root.contains(target))return;var action=target.getAttribute("data-tc-action"),slot=numberAttribute(target,"data-tc-slot"),exercise=numberAttribute(target,"data-tc-ex"),set=numberAttribute(target,"data-tc-set"),field=target.getAttribute("data-tc-field");
     if(action==="normal"){closeView();return;}
-    if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();activeInput=null;render();}return;}
+    if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();markCell(slots[slot],previousExercise,set,0);markCell(slots[slot],previousExercise,set,1);activeInput=null;render();}return;}
     if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
     if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
     if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}
@@ -28677,7 +28773,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,contentKey:slot.contentKey,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
   installBankRegistryHooks();
-  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importCode:importCode,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importPatientPlan:importPatientPlan,getResumePlan:function(planId){return slotSnapshot(readRemembered(String(planId||"")));},importCode:importCode,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
   window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
 })();
@@ -29537,6 +29633,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function patch(){
     if(installed)return;api=window.KGGTherapyCockpit;if(!api||!root||!board)return;installed=true;installModals();root.addEventListener("click",handleCustomClick,true);document.addEventListener("click",interceptCockpitDelete,true);bindCockpitSwipeDelete();observer=new MutationObserver(function(){if(board.dataset.tceRendering==="1")return;enhance();});observer.observe(board,{childList:true,subtree:true});window.addEventListener("resize",refresh,{passive:true});enhance();
+    api.selectSlot=function(index){if(!slot(index))return false;activeSlot=Number(index);refresh();return true;};
     window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v091-plan-add-exercise-card",contract:"cockpit live plan editing and mobile active-slot navigation"};
   }
   function init(){root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");if(root&&board&&window.KGGTherapyCockpit)patch();else window.setTimeout(init,50);}
@@ -31334,6 +31431,75 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v125-library-image-names -->
+<!-- KGG PATCH START kgg-v129-cockpit-qr-resume -->
+<!-- Cockpit-Link nach Patienten-QR mit manueller Prioritaet -->
+<style id="kgg-v129-cockpit-qr-resume-style">
+  .kgg-tc-notes-label{display:grid;gap:6px;margin-top:14px;font-size:14px;font-weight:700;min-width:0}
+  .kgg-tc-notes-label textarea{box-sizing:border-box;min-height:72px;width:100%;resize:vertical;font:inherit;font-weight:400}
+  #kggTherapyCockpitActivationLink{display:block;box-sizing:border-box;text-align:center;text-decoration:none;overflow-wrap:anywhere;margin:10px 0}
+</style>
+<script id="kgg-v129-cockpit-qr-resume">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v129-cockpit-qr-resume";
+  var api=window.KGGTherapyCockpit;
+  function fail(code){var error=new Error(code);error.code=code;throw error;}
+  function currentSnapshot(planId){
+    var state=api.getState(),entry=state.slots.find(function(slot){return slot&&slot.planId===planId;});
+    return entry?api.getSlot(entry.slot):api.getResumePlan(planId);
+  }
+  function pair(value){if(!Array.isArray(value)||value.length!==2)fail("return_set_invalid");return [value[0]==null?"":String(value[0]),value[1]==null?"":String(value[1])];}
+  function sideValue(value,index){var parts=String(value==null?"":value).split(/\s*\/\s*/);return parts.length===2?parts[index]:parts[0];}
+  function scanPayload(result,primaryNames){
+    if(!result||["KGGH2","KGGH3","KGGD1"].indexOf(result.qrType)<0)return null;
+    var data=result.json||{},isReturn=result.qrType==="KGGD1",planId=String(isReturn?data.i||"":data.meta&&data.meta.planId||"").trim();
+    if(!planId)fail("plan_id_required");
+    var saved=currentSnapshot(planId),patient=data.patient||{},rows=isReturn?data.e:data.plan;
+    if(!Array.isArray(rows)||!rows.length)fail("exercise_count_invalid");
+    var exercises=[];
+    rows.forEach(function(row){
+      var source=isReturn?{name:row&&row[0],sets:row&&row[1],side:row&&row[2],loadUnit:row&&row[3],metricUnit:row&&row[4]}:row;
+      if(!source||!source.name)fail("exercise_name_required");
+      var name=String(primaryNames&&primaryNames[source.name]||source.name),count=Number(source.sets)||3;
+      if(!Number.isInteger(count)||count<1||count>8)fail("set_structure_invalid");
+      var sides=source.side==="LR"?[0,1]:[null];
+      sides.forEach(function(side){
+        // Separate labelled sides preserve every return value in the existing
+        // two-field Cockpit editor, without changing the patient wire format.
+        var displayName=name+(side==null?"":side===0?" (links)":" (rechts)"),ref=api.registry.lookup(displayName)||api.registry.derive(displayName,source);
+        var previous=saved&&saved.exercises.find(function(ex){return ex.id===ref.id;}),values;
+        if(isReturn){
+          var sets=row[5];if(!Array.isArray(sets)||sets.length!==count)fail("return_set_invalid");
+          values=sets.map(function(set){if(side==null)return pair(set);if(!Array.isArray(set)||set.length!==4)fail("return_set_invalid");return pair(set.slice(side*2,side*2+2));});
+        }else values=Array.from({length:count},function(){return [sideValue(source.startLoad,side||0),sideValue(source.startMetric,side||0)];});
+        var exercise=Object.assign({},isReturn&&previous||{},source,{id:ref.id,name:displayName,sets:count,side:"BI",loadUnit:source.loadUnit||source.weightUnit||"kg",metricUnit:source.metricUnit||source.unit||"Wdh",previous:values,today:values.map(function(value){return value.slice();})});
+        exercises.push(exercise);
+      });
+    });
+    return {planId:planId,name:patient.name||saved&&saved.name||"Plan ohne Patientendaten",date:patient.date||saved&&saved.date||new Date().toISOString().slice(0,10),notes:typeof patient.notes==="string"?patient.notes:"",exercises:exercises};
+  }
+  function outputLink(link){
+    var modal=document.getElementById("kggTherapyCockpitOutputModal");if(!modal)return;
+    var anchor=document.getElementById("kggTherapyCockpitActivationLink");
+    if(!anchor){anchor=document.createElement("a");anchor.id="kggTherapyCockpitActivationLink";anchor.className="kgg-tc-btn primary";anchor.textContent="Cockpit öffnen";var output=document.getElementById("kggTherapyCockpitOutput");output.before(anchor);anchor.addEventListener("click",function(event){event.preventDefault();try{var decoded=api.decode(anchor.href),entry=api.getState().slots.find(function(slot){return slot&&slot.planId===decoded.planId;}),index=entry?entry.slot:api.importCode(anchor.href).slot;modal.hidden=true;api.open();if(typeof api.selectSlot==="function")api.selectSlot(index);}catch(error){anchor.textContent="Cockpit konnte nicht geöffnet werden";}});}
+    anchor.hidden=!link;if(link)anchor.href=link;else anchor.removeAttribute("href");
+  }
+  function showActivation(imported){
+    var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;
+    var slot=api.getSlot(imported.slot);
+    if(typeof api.selectSlot==="function")api.selectSlot(imported.slot);
+    modal.querySelector("h2").textContent="Cockpit-Link bereit";
+    modal.querySelector("p").textContent=imported.persisted?"Diesen Link in der Dokumentation speichern. Eigene Einträge haben bei weiteren Scans Vorrang.":"Diesen Link in der Dokumentation speichern. Der Browser konnte den Stand nicht dauerhaft speichern.";
+    output.value=["KGG Therapie-Cockpit",slot.name,"Aktivierungslink:",imported.link].join("\n");
+    outputLink(imported.link);modal.hidden=false;
+  }
+  window.KGGCockpitQrAccepted=function(result,primaryNames){var payload=scanPayload(result,primaryNames);if(!payload)return null;var imported=api.importPatientPlan(payload);showActivation(imported);return imported;};
+  window.KGGCockpitSetOutputLink=outputLink;
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,contract:"patient QR activation, durable notes and per-cell therapist priority"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v129-cockpit-qr-resume -->
 
 </body>
 </html>

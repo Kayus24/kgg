@@ -221,10 +221,11 @@
       try{
         let syncCodeCount=0;
         let acceptedCount=0;
+        let cockpitCount=0;
         for(const file of files){
           const accepted=await scanAcceptFile(file,normalizedKind);
           if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
-          else if(accepted)acceptedCount++;
+          else if(accepted){acceptedCount++;if(accepted.result&&accepted.result.cockpit)cockpitCount++;}
         }
         if(syncCodeCount&&!acceptedCount){
           scanState.decision=false;
@@ -233,11 +234,11 @@
           render();
           return scanStateSnapshot();
         }
-        scanState.decision=true;
+        scanState.decision=!(cockpitCount&&cockpitCount===acceptedCount);
         state.scanPanelOpen='scanned';
         save();
         render();
-        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
+        setScanStatus(scanState.decision?'Foto hinzugefügt. Bitte entscheiden.':'Cockpit-Link erzeugt.');
       }catch(err){
         scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
         setScanStatus(scanState.lastError);
@@ -262,7 +263,7 @@
           scanState.decision=false;
           state.scanPanelOpen='plan';
         }else{
-          scanState.decision=true;
+          scanState.decision=!(accepted.result&&accepted.result.cockpit);
           state.scanPanelOpen='scanned';
         }
         save();

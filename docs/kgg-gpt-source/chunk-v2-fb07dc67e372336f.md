@@ -110,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v128-button-touch-responsiveness",
+  "lastUpdatedByPatchId": "kgg-v129-cockpit-qr-resume",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
