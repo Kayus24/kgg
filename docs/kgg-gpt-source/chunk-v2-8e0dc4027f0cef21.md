@@ -74,7 +74,8 @@
     "kgg-v124-cockpit-main-integration",
     "kgg-v125-exercise-library-drive-sync",
     "kgg-v125-exercise-image-names-gemini",
-    "kgg-v125-library-image-names"
+    "kgg-v125-library-image-names",
+    "kgg-v129-cockpit-qr-resume"
   ],
   "parts": [
     "base-head.html",
@@ -166,6 +167,7 @@
     "patches/v125-exercise-library-drive-sync.html",
     "patches/v125-exercise-image-names-gemini.html",
     "patches/v125-library-image-names.html",
+    "patches/v129-cockpit-qr-resume.html",
     "footer.html"
   ]
 }

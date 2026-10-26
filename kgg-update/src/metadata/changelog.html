@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 128,
+  "latestVersionCode": 129,
   "entries": [
+    {
+      "versionCode": 129,
+      "versionName": "1.0.129-cockpit-qr-resume",
+      "patchId": "kgg-v129-cockpit-qr-resume",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Cockpit-Link nach Patienten-QR mit manueller Prioritaet",
+      "reason": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
+      "whatChanged": [
+        "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "PASS: QR scan, portable/local resume, field priority, notes and failure recovery",
+        "certification": "pending"
+      },
+      "approvalNote": "Max beauftragt am 2026-10-26 Cockpit-Aktivierungslink nach Patienten-QR und Vorrang eigener Eintraege bei erneutem Scan; nur lokale reversible Umsetzung, kein Release."
+    },
     {
       "versionCode": 128,
       "versionName": "1.0.128-button-touch-responsiveness",
@@ -451,41 +483,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max fordert in 296053 die identische Verschiebedarstellung wie bei Uebungen im Plan; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 114,
-      "versionName": "1.0.114-cockpit-seam-stable-cover",
-      "patchId": "kgg-v114-cockpit-seam-stable-cover",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Trennkante ohne Leerstreifen",
-      "reason": "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung.",
-      "whatChanged": [
-        "Die Trennkante reserviert keinen leeren Streifen; beim Ziehen bleibt die Haupt-App in ihrer bestehenden Darstellung."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max fordert anhand 296064 und Bildschirmvideo die kompakte Trennkante und stabile Haupt-App beim Ziehen; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.128-button-touch-responsiveness",
+  "latestVersionName": "1.0.129-cockpit-qr-resume",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -606,6 +606,14 @@
       "entriesSha256": "75972d0e60271435587871786bd0407538b61c6cc7c340be3fb2df78a5a57f0f",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v128-button-touch-responsiveness"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v129.json",
+      "snapshotVersionCode": 129,
+      "entryCount": 70,
+      "entriesSha256": "65d34efdd099aa0cbeb367ae7e2e4e343bd2a7f5b7fc36bba5cff57758332366",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v129-cockpit-qr-resume"
     }
   ]
 }

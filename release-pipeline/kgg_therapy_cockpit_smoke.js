@@ -197,7 +197,9 @@ assert(api.getState().slotCount === 1 && api.getState().view === "normal", "view
 api.importCode(api.encode({ ...payload, planId: "plan-2", name: "Jonas J", exercises: five.slice(0, 1) }));
 api.importCode(api.encode({ ...payload, planId: "plan-3", name: "Lea L", exercises: five.slice(0, 1) }));
 assert(api.getState().slotCount === 3, "three slots did not fill independently");
-expectCode(() => api.importCode(code), "slots_full");
+// The same exact plan now reuses its slot, including native app-link delivery.
+assert(api.importCode(code).slot === 0 && api.getState().slotCount === 3, "repeat link did not reuse its plan slot");
+expectCode(() => api.importCode(api.encode({ ...payload, planId: "plan-4", name: "Vierter", exercises: five.slice(0, 1) })), "slots_full");
 api.remove(1);
 assert(api.getState().slotCount === 2 && !api.getState().slots[1], "middle slot removal changed the wrong slot");
 const finished = api.finish(0);
@@ -207,5 +209,8 @@ assert(next.exercises[0].previous[0][0] === decoded.exercises[0].today[0][0], "f
 assert(api.getState().slotCount === 1, "finish did not release exactly one slot");
 
 const staticText = source.toLowerCase();
-assert(!staticText.includes("localstorage") && !staticText.includes("sessionstorage") && !staticText.includes("indexeddb"), "cockpit patch introduced persistent patient storage");
+// v129 deliberately adds plan-ID scoped local resume. The no-implicit-slot-
+// restore boundary remains covered by the real-browser reload assertion;
+// portable notes and local precedence have their own regression contract.
+assert(!staticText.includes("sessionstorage") && !staticText.includes("indexeddb"), "cockpit introduced an unrelated storage backend");
 console.log(JSON.stringify({ status: "PASS", patchId: api.patchId, registryEntries: entries.length, sizes, remainingSlots: api.getState().slotCount }, null, 2));

@@ -240,6 +240,7 @@
   }
   function patch(){
     if(installed)return;api=window.KGGTherapyCockpit;if(!api||!root||!board)return;installed=true;installModals();root.addEventListener("click",handleCustomClick,true);document.addEventListener("click",interceptCockpitDelete,true);bindCockpitSwipeDelete();observer=new MutationObserver(function(){if(board.dataset.tceRendering==="1")return;enhance();});observer.observe(board,{childList:true,subtree:true});window.addEventListener("resize",refresh,{passive:true});enhance();
+    api.selectSlot=function(index){if(!slot(index))return false;activeSlot=Number(index);refresh();return true;};
     window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v091-plan-add-exercise-card",contract:"cockpit live plan editing and mobile active-slot navigation"};
   }
   function init(){root=document.getElementById("kggTherapyCockpitRoot");board=document.getElementById("kggTherapyCockpitBoard");if(root&&board&&window.KGGTherapyCockpit)patch();else window.setTimeout(init,50);}

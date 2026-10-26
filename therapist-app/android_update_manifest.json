@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0436",
+      "releaseId": "r0437",
       "profile": "admin",
-      "versionName": "1.0.128-button-touch-responsiveness",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html",
-      "sha256": "e264fead1248c0aa503467bc26555fbe55a0e11c8584e161efd7750162e7e04a",
-      "notes": "Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert.",
-      "rolloutCode": 436,
-      "previousReleaseId": "r0435",
-      "releasedAt": "2026-10-25T19:04:08Z"
+      "versionName": "1.0.129-cockpit-qr-resume",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
+      "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
+      "notes": "Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar.",
+      "rolloutCode": 437,
+      "previousReleaseId": "r0436",
+      "releasedAt": "2026-10-26T17:05:38Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v406",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html",
-  "adminSha256": "e264fead1248c0aa503467bc26555fbe55a0e11c8584e161efd7750162e7e04a",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
+  "adminSha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",
   "androidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_ADMIN_v406_responsive_drive_debug.apk",
   "adminAndroidApkSha256": "2cd6ec13ae01652c5f5e851f1d1b06747a9208f86d88cfa4ef2c2756a4bb5e93",
-  "notes": "Admin beta r0436: Tablet/Cockpit-Fix: Das geschlossene Fenster 'Therapeuten-App weitergeben' bleibt bei Hoch-/Querformat und Layoutwechseln ausgeblendet. Bestehende Plan-, QR-, Scan- und Sync-Funktionen bleiben unveraendert.",
+  "notes": "Admin beta r0437: Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",
   "latestAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",

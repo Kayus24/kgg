@@ -415,7 +415,7 @@ async function runViewport(page, viewport, code) {
   const fullGuard = await page.evaluate(() => {
     const api = window.KGGTherapyCockpit;
     try {
-      api.importCode(api.encode({ name: "Vierter", exercises: [{ id: api.registry.entries()[5].id, sets: 1, previous: [["1", "1"]], today: [["1", "1"]] }] }));
+      api.importCode(api.encode({ planId: "browser-plan-4", name: "Vierter", exercises: [{ id: api.registry.entries()[5].id, sets: 1, previous: [["1", "1"]], today: [["1", "1"]] }] }));
       return { code: "no-error", slots: api.getState().slotCount };
     } catch (error) { return { code: error.code, slots: api.getState().slotCount }; }
   });

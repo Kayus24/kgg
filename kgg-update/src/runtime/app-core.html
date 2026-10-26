@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v128_button_touch_responsiveness';
+  const VERSION='KGG_GITHUB_UPDATE_v129_cockpit_qr_resume';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v128","buildTime":"2026-10-23T21:30:51Z","buildCode":"module-v128-button-touch-responsiveness","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v129","buildTime":"2026-10-26T15:23:31Z","buildCode":"module-v129-cockpit-qr-resume","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -6461,6 +6461,10 @@
         job.status='ready';
         job.short=job.short||patientShortGuess();
         scanState.next='plan';
+        if(typeof window.KGGCockpitQrAccepted==='function'){
+          try{job.result.cockpit=window.KGGCockpitQrAccepted(job.result,patientPrimaryNames(parsed.json)||{});}
+          catch(error){job.result.cockpitError=error&&error.code||'cockpit_import_failed';job.warnings.push('Cockpit-Link nicht erzeugt ('+job.result.cockpitError+').');}
+        }
         return job;
       }catch(err){
         setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
@@ -6877,10 +6881,11 @@
       try{
         let syncCodeCount=0;
         let acceptedCount=0;
+        let cockpitCount=0;
         for(const file of files){
           const accepted=await scanAcceptFile(file,normalizedKind);
           if(accepted&&(accepted.type==='syncInvite'||accepted.type==='syncBundle'))syncCodeCount++;
-          else if(accepted)acceptedCount++;
+          else if(accepted){acceptedCount++;if(accepted.result&&accepted.result.cockpit)cockpitCount++;}
         }
         if(syncCodeCount&&!acceptedCount){
           scanState.decision=false;
@@ -6889,11 +6894,11 @@
           render();
           return scanStateSnapshot();
         }
-        scanState.decision=true;
+        scanState.decision=!(cockpitCount&&cockpitCount===acceptedCount);
         state.scanPanelOpen='scanned';
         save();
         render();
-        setScanStatus('Foto hinzugefügt. Bitte entscheiden.');
+        setScanStatus(scanState.decision?'Foto hinzugefügt. Bitte entscheiden.':'Cockpit-Link erzeugt.');
       }catch(err){
         scanState.lastError='Scan fehlgeschlagen: '+(err&&err.message||err);
         setScanStatus(scanState.lastError);
@@ -6918,7 +6923,7 @@
           scanState.decision=false;
           state.scanPanelOpen='plan';
         }else{
-          scanState.decision=true;
+          scanState.decision=!(accepted.result&&accepted.result.cockpit);
           state.scanPanelOpen='scanned';
         }
         save();

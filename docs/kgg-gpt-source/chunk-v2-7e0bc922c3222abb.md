@@ -1,0 +1,24 @@
+    var target=event.target&&event.target.closest?event.target.closest("[data-tc-action]"):null;if(!target||!root.contains(target))return;var action=target.getAttribute("data-tc-action"),slot=numberAttribute(target,"data-tc-slot"),exercise=numberAttribute(target,"data-tc-ex"),set=numberAttribute(target,"data-tc-set"),field=target.getAttribute("data-tc-field");
+    if(action==="normal"){closeView();return;}
+    if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();markCell(slots[slot],previousExercise,set,0);markCell(slots[slot],previousExercise,set,1);activeInput=null;render();}return;}
+    if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
+    if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
+    if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}
+    if(action==="output-close"){document.getElementById("kggTherapyCockpitOutputModal").hidden=true;if(!slotCount())closeView();return;}
+    if(action==="output-copy"){var output=document.getElementById("kggTherapyCockpitOutput");if(output&&navigator.clipboard)navigator.clipboard.writeText(output.value).then(function(){notify("Dokumentation kopiert.");}).catch(function(){notify("Kopieren im Browser nicht verfügbar.");});return;}
+    if(action==="finish-all"){finishAll();return;}
+    if(action==="toggle"){if(slots[slot]){slots[slot].openExercise=slots[slot].openExercise===exercise?null:exercise;activeInput=null;render();}return;}
+    if(action==="input"){setActiveInput(slot,exercise,set,field);return;}
+    if(action==="mode"){setActiveInput(slot,exercise,set,field);return;}
+    if(action==="key"){applyKey(slot,exercise,set,field,target.getAttribute("data-tc-key"));return;}
+    if(action==="remove"){removeSlot(slot);return;}
+    if(action==="finish"){var result=finishSlot(slot);if(result)showOutput([result]);return;}
+  }
+  function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,contentKey:slot.contentKey,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
+  installBankRegistryHooks();
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importPatientPlan:importPatientPlan,getResumePlan:function(planId){return slotSnapshot(readRemembered(String(planId||"")));},importCode:importCode,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
+})();
+</script>
+<!-- KGG PATCH END kgg-v082-therapy-cockpit -->

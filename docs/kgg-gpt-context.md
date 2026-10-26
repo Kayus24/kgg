@@ -42,11 +42,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v128 / `1.0.128-button-touch-responsiveness`.
-- Source index URL: `index.html?v=128`.
-- Source notes: v128: Buttons deklarieren touch-action:manipulation gegen verzoegerte Touch-Clicks; spezifische Scroll- und Ziehgesten sowie bestehende Handler bleiben erhalten.
-- Live Admin release: `r0436` / `1.0.128-button-touch-responsiveness`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0436/admin.html`.
+- Source web version: v129 / `1.0.129-cockpit-qr-resume`.
+- Source index URL: `index.html?v=129`.
+- Source notes: v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.
+- Live Admin release: `r0437` / `1.0.129-cockpit-qr-resume`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v406`.
