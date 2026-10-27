@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 129,
+  "latestVersionCode": 130,
   "entries": [
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130-plan-card-height-stability",
+      "patchId": "kgg-v130-plan-card-height-stability",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Stabile Plan-Karten im Tablet-Split",
+      "reason": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
+      "whatChanged": [
+        "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
+      ],
+      "touchedAreas": [
+        "Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Nutzer am 27.10.2026 ausdruecklich beauftragter UI-Fix; keine Release-Freigabe."
+    },
     {
       "versionCode": 129,
       "versionName": "1.0.129-cockpit-qr-resume",
@@ -451,41 +483,9 @@
         "certification": "pending"
       },
       "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 115,
-      "versionName": "1.0.115-cockpit-reorder-plan-parity",
-      "patchId": "kgg-v115-cockpit-reorder-plan-parity",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Verschieben wie im normalen Plan",
-      "reason": "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her.",
-      "whatChanged": [
-        "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Handy-Layout"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max fordert in 296053 die identische Verschiebedarstellung wie bei Uebungen im Plan; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.129-cockpit-qr-resume",
+  "latestVersionName": "1.0.130-plan-card-height-stability",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -614,6 +614,14 @@
       "entriesSha256": "65d34efdd099aa0cbeb367ae7e2e4e343bd2a7f5b7fc36bba5cff57758332366",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v129-cockpit-qr-resume"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v130.json",
+      "snapshotVersionCode": 130,
+      "entryCount": 71,
+      "entriesSha256": "38f2c4fd94104a6bf1141af3e0f1f34e5b0e7b6faee80392c51f865eb529d921",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v130-plan-card-height-stability"
     }
   ]
 }
