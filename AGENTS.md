@@ -81,7 +81,8 @@ rg --no-ignore --files therapist-app/releases
 
 - Vor Beginn oder Wiederaufnahme einer KGG-Arbeit `docs/ACTIVE_WORK.md` lesen und anschließend Branch-/PR-/CI-Status frisch aus GitHub prüfen.
 - Vor Änderungen an gemeinsam genutzten Dateien Überschneidungen mit anderen Workstreams prüfen; niemals uncommittete Arbeit anderer überschreiben.
-- Nach relevanten Meilensteinen einen kurzen, belegten Status im eigenen PR/Issue oder im Koordinationsindex hinterlassen (Branch, betroffene Dateien, letzter GREEN mit SHA, nächster Schritt).
+- Besprochene Änderungen/Fehler bei konkretem Auftrag im bestehenden Issue/PR oder Drive-Plan erfassen (Ziel, Bereich, nächster Schritt); vorher Duplikate prüfen. Idee ≠ Freigabe.
+- Status dort nur bei Meilensteinen mit PR/SHA, Test-/Release-Beleg und Restpunkt fortschreiben: besprochen ≠ implementiert ≠ getestet ≠ integriert ≠ veröffentlicht. BLOCKIERT/NOT_RUN/UNKNOWN kennzeichnen; keine zweite Liste und kein Toolaufruf-Protokoll.
 - Bei Hängern oder unklaren Tool-Ergebnissen Status UNKNOWN vermerken und vor Wiederholung tatsächlichen Zustand prüfen.
 - Der Index ist kein Lock und keine Live-Synchronisierung; Repo und aktuelle Tests bleiben maßgeblich. Fehlt die Datei auf dem gerade gelesenen Branch, ihren Status im Koordinations-PR prüfen, nicht als vorhanden voraussetzen.
 
