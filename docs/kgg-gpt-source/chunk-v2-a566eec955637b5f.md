@@ -1,4 +1,13 @@
-<script type="application/json" id="kgg-source-truth">
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<!--
+KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
+
+Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
+Before editing this app, any LLM/agent/human should read these blocks:
+1. <script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -94,33 +103,35 @@
     "responsive-library-sync",
     "menu-sync-qr-responsiveness",
     "button-touch-responsiveness",
-    "cockpit-qr-resume"
+    "cockpit-qr-resume",
+    "plan-card-height-stability"
   ],
   "currentVersion": {
-    "versionCode": 129,
-    "versionName": "1.0.129-cockpit-qr-resume",
-    "lastPatchId": "kgg-v129-cockpit-qr-resume",
+    "versionCode": 130,
+    "versionName": "1.0.130-plan-card-height-stability",
+    "lastPatchId": "kgg-v130-plan-card-height-stability",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v129-cockpit-qr-resume",
+  "latestPatchId": "kgg-v130-plan-card-height-stability",
   "lastUpdateIntent": {
-    "id": "kgg-v129-cockpit-qr-resume",
-    "summary": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
+    "id": "kgg-v130-plan-card-height-stability",
+    "summary": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
     "touched": [
-      "QR/Patienten-App",
-      "Scan/OCR",
-      "Plan-State",
-      "Cockpit"
+      "Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
+      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
 </script>
+<!-- END kgg-source-truth -->
