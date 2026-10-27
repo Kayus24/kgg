@@ -186,6 +186,17 @@ async function verifyPhoneActivationSelectsScannedPatient(browser) {
     await notes.blur();
     assert.equal((await slot(page, 1)).notes, "Synthetische Handy-B-Notiz", "phone notes must belong to the scanned patient");
     assert.equal((await slot(page, 0)).notes, "", "editing the second phone patient must not alter the first patient's notes");
+    // Mobile Chromium can still be settling the visual viewport after textarea blur.
+    // Require the real active card to fit before taking the final geometry sample.
+    // Persistent overflow remains a failure rather than widening the tolerance.
+    await page.waitForFunction(() => {
+      const card = document.querySelector('.kgg-tce-active-card[data-tc-card="1"]');
+      if (!card) return false;
+      const rect = card.getBoundingClientRect();
+      return document.documentElement.scrollWidth <= innerWidth + 1 &&
+        document.body.scrollWidth <= innerWidth + 1 &&
+        rect.left >= -1 && rect.right <= innerWidth + 1;
+    }, null, { timeout: 4000, polling: "raf" });
     const geometry = await activeCard.evaluate(card => {
       const rect = card.getBoundingClientRect();
       return { viewport: innerWidth, documentWidth: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, left: rect.left, right: rect.right };

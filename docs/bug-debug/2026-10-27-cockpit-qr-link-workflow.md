@@ -90,3 +90,22 @@ mit 71 gesicherten Versionseinträgen, eingebettetes 15-Einträge-Fenster.
 `test_kgg_changelog_archive.py` erwartete Snapshot-Zahlen an v130 angepasst;
 6/6 PASS, Archiv-Validator PASS, Quellgeneratorabgleich PASS.
 Ein zweiter normaler Commit-Hook-Lauf steht aus.
+
+## Fortsetzung nach Chat-Haenger – Linux-CI-Handy-Layout
+GitHub PR #345 hatte mit HEAD `90bb318` in Actions Run `40540368777` im
+`core-gate` **FAIL**, nachdem die release-, Android- und sonstigen
+Vertraege erfolgreich durchlaufen waren. Der gezielte Cockpit-Browserfall
+`phone activation selects newly scanned patient` meldete auf Linux
+`viewport=390, documentWidth=390, bodyWidth=390, card.right=394.16`:
+die einzelne sichtbare Karte ragte kurzfristig um 4.16px nach rechts,
+waehrend das Dokument selbst nicht horizontal scrollte. Windows lokal PASS.
+
+Der Browser-Regressionsfall wartet nun nach dem Blur der Handy-Notizen
+ueber requestAnimationFrame-basiertes Playwright `waitForFunction`
+maximal 4 Sekunden auf eine **real** im Viewport befindliche aktive Karte.
+Der strenge geometrische End-Assert bleibt unveraendert. Ein anhaltender
+Ueberlauf bleibt ein FAIL; es wurden **keine** Produkt-CSS-Regeln,
+Breakpoints oder Test-Toleranzen geloest bzw. vergroessert.
+Gezielter Node-Cockpit-QR-Smoke unter Windows: PASS. Linux-CI gegen die
+Aenderung bis zur Rueckmeldung **NOT_RUN/IN_PROGRESS**; keine Behauptung,
+dass der Fehler dort bereits behoben ist.
