@@ -1,7 +1,7 @@
 {
   "schema": "kgg/action-routes/v1",
   "source": "docs/kgg-custom-gpt-action-api-openapi.yaml",
-  "source_sha256": "69012522f5bcdd7fa9fb89773deb65e911e3aa8759d29ce5c497e42e36af0711",
+  "source_sha256": "3f7731be8eedf9a35a004510c9406796d138d6d6736b6ce4a076e6f2e8186ffd",
   "actions": [
     {
       "operation": "getKggMainCommit",
