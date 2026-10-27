@@ -2,7 +2,7 @@
 
 This generated compatibility pack contains the complete production knowledge set. Prefer the four smaller curated packs in the GPT editor so retrieval stays focused.
 
-Source digest: `c7ebfb6b6ed51dd8`
+Source digest: `aa04e9f1b4fbfbc6`
 
 ## Usage Rules
 
@@ -77,11 +77,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v129 / `1.0.129-cockpit-qr-resume`.
-- Source index URL: `index.html?v=129`.
-- Source notes: v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.
-- Live Admin release: `r0437` / `1.0.129-cockpit-qr-resume`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html`.
+- Source web version: v130 / `1.0.130-qr-cockpit-background-compact-link`.
+- Source index URL: `index.html?v=130`.
+- Source notes: v130: Patienten-QR bleibt im Scanablauf; Abschluss-Dokumentation enthält nur Übungen, optionale Notizen und am Ende den komprimierten Cockpit-Link. Technische Übernahmewarnungen bleiben separat sichtbar. Android-Link-Öffnung erfordert Domain-assetlinks.json.
+- Live Admin release: `r0438` / `1.0.130-qr-cockpit-background-compact-link`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v406`.
@@ -2573,6 +2573,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: Keep patch scoped to the requested area.
 - Tests: Die unveraenderten Geraeteprofile oeffneten den gedrosselten Scanner mit einem bereits gestarteten grauen Canvas-Stream. Erst nach den UI-Wartebedingungen wurde das QR-Bild eingespeist. Dadurch pruefte jsQR zunaechst graue/cached Frames, waehrend die Geraetefrist bereits lief. Instrumentiert beobachtet: mehrere leere Decoderaufrufe; unter CPU-Drosselung kann
 
+### Patienten-QR: Scantext und Cockpit-Link ohne Auto-Oeffnung
+
+- Source: `docs/bug-debug/2026-10-27-cockpit-qr-link-workflow.md`
+- Areas: debug, modal, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Ausgang: `main` `96a82f08ca674ec3195c20ec3d16bb45f9965b16`, Admin-Web r0437 / Quelle v129. Bei QR-Scans wird das Cockpit bislang durch `importPatientPlan()` aktiviert und eine separate Cockpit-Link-Ausgabe angezeigt. Der urspruengliche Scantext wird verdeckt. - Scan verarbeitet QR-Daten weiterhin im bisherigen Job/Inbox-Workflow. - `importPatientPlan(payload
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
 ### Debug JSON Seite
 
 - Source: `docs/bug-debug/README.md`
@@ -2724,13 +2732,13 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
   - `tabletLayoutResizeHandle`: `docs/kgg-gpt-source/chunk-v2-6312112f51263fc5.md` from `kgg-update/src/document/head-ui.html` line 1714
   - `--kgg-tablet-left-col`: `docs/kgg-gpt-source/chunk-v2-6312112f51263fc5.md` from `kgg-update/src/document/head-ui.html` line 1813
   - `--kgg-tablet-ui-scale`: `docs/kgg-gpt-source/chunk-v2-22071abd1ef89599.md` from `kgg-update/src/document/head-ui.html` line 744
-  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 7048
-  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-v2-8b9415d4864a23cd.md` from `kgg-update/src/runtime/app-core.html` line 7188
+  - `updateTabletLayoutHandle`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 7049
+  - `initTabletLayoutControls`: `docs/kgg-gpt-source/chunk-v2-8b9415d4864a23cd.md` from `kgg-update/src/runtime/app-core.html` line 7189
 
 ## phone-layout
 
 - Triggers: `phone`, `handy`, `dock`, `drawer`, `scan button`, `759`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-fb07dc67e372336f.md`, `docs/kgg-gpt-source/chunk-v2-74dd7ce89bcd7656.md`, `docs/kgg-gpt-source/chunk-v2-22071abd1ef89599.md`, `docs/kgg-gpt-source/chunk-v2-48801c41482633dd.md`, `docs/kgg-gpt-source/chunk-v2-7148376ffc56b310.md`, `docs/kgg-gpt-source/chunk-v2-f4b2d210c83d4148.md`, `docs/kgg-gpt-source/chunk-v2-ef0b58c6b5b2bf0a.md`, `docs/kgg-gpt-source/chunk-v2-ff09e6b1ba093e76.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-fb07dc67e372336f.md`, `docs/kgg-gpt-source/chunk-v2-687d51fe4f828892.md`, `docs/kgg-gpt-source/chunk-v2-22071abd1ef89599.md`, `docs/kgg-gpt-source/chunk-v2-48801c41482633dd.md`, `docs/kgg-gpt-source/chunk-v2-7148376ffc56b310.md`, `docs/kgg-gpt-source/chunk-v2-f4b2d210c83d4148.md`, `docs/kgg-gpt-source/chunk-v2-ef0b58c6b5b2bf0a.md`, `docs/kgg-gpt-source/chunk-v2-ff09e6b1ba093e76.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`
 - Notes: Do not change the 759/760 px breakpoint incidentally.
 - Markers:
@@ -2743,7 +2751,7 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## qr-patient
 
 - Triggers: `qr`, `patient`, `patienten-app`, `plan qr`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-91a70596533f4f5f.md`, `docs/kgg-gpt-source/chunk-v2-149070a0516344a4.md`, `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md`, `docs/kgg-gpt-source/chunk-v2-66e77f020a460bad.md`, `docs/kgg-gpt-source/chunk-v2-e3eeee1a8a0275be.md`, `docs/kgg-gpt-source/chunk-v2-98df8484b46ca7de.md`, `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md`, `docs/kgg-gpt-source/chunk-v2-8b9415d4864a23cd.md`, `docs/kgg-gpt-source/chunk-v2-6f72c87927a47a34.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`, `docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-91a70596533f4f5f.md`, `docs/kgg-gpt-source/chunk-v2-149070a0516344a4.md`, `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md`, `docs/kgg-gpt-source/chunk-v2-66e77f020a460bad.md`, `docs/kgg-gpt-source/chunk-v2-e3eeee1a8a0275be.md`, `docs/kgg-gpt-source/chunk-v2-56f504b12af65b0f.md`, `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md`, `docs/kgg-gpt-source/chunk-v2-8b9415d4864a23cd.md`, `docs/kgg-gpt-source/chunk-v2-6f72c87927a47a34.md`, `docs/kgg-gpt-source/chunk-v2-45550afade9ceee6.md`, `docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`
 - Notes: Patient output must not expose raw JSON, Base64 or debug payloads.
 - Markers:
@@ -2752,8 +2760,8 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
   - `KGGH3`: `docs/kgg-gpt-source/chunk-v2-91a70596533f4f5f.md` from `kgg-update/src/document/body-shell.html` line 223
   - `makeKggH3ShareUrl`: `docs/kgg-gpt-source/chunk-v2-66e77f020a460bad.md` from `kgg-update/src/runtime/app-core.html` line 4947
   - `tryApplyKggSetupFromHash`: `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md` from `kgg-update/src/runtime/app-core.html` line 3272
-  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-v2-6f72c87927a47a34.md` from `kgg-update/src/runtime/app-core.html` line 7603
-  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6911
+  - `openKggTherapistAppOnlyQr`: `docs/kgg-gpt-source/chunk-v2-6f72c87927a47a34.md` from `kgg-update/src/runtime/app-core.html` line 7604
+  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6912
 
 ## camera-qr
 
@@ -2762,11 +2770,11 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite ui-stability --level regression`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite camera-qr --level regression`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite patient-scan --level regression`
 - Notes: Browser QR logic and Android WebView video permission are separate contracts. Never force zoom or audio.
 - Markers:
-  - `KGGNativeCamera`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6841
-  - `getCameraCapabilities`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6941
-  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6911
+  - `KGGNativeCamera`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6842
+  - `getCameraCapabilities`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6942
+  - `handleQrRaw`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6912
   - `LIVE_VARIANTS`: `docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md` from `kgg-update/src/patches/v061-cross-app-live-qr-camera.html` line 10
-  - `getUserMedia`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6942
+  - `getUserMedia`: `docs/kgg-gpt-source/chunk-v2-f0a80bda6e162045.md` from `kgg-update/src/runtime/app-core.html` line 6943
 
 ## pdf
 
@@ -2793,11 +2801,11 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## sync
 
 - Triggers: `sync`, `paket`, `uebungsbank`, `peer`, `kollegen`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-9842eac54194985d.md`, `docs/kgg-gpt-source/chunk-v2-c399a91bc1a42a84.md`, `docs/kgg-gpt-source/chunk-v2-57fb9722c411a800.md`, `docs/kgg-gpt-source/chunk-v2-b47845ac4342135d.md`, `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md`, `docs/kgg-gpt-source/chunk-v2-d4ae4133b4e424b4.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-074a6d5cbddf04e3.md`, `docs/kgg-gpt-source/chunk-v2-c399a91bc1a42a84.md`, `docs/kgg-gpt-source/chunk-v2-57fb9722c411a800.md`, `docs/kgg-gpt-source/chunk-v2-b47845ac4342135d.md`, `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md`, `docs/kgg-gpt-source/chunk-v2-d4ae4133b4e424b4.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite sync --level regression`
 - Notes: Sync export must exclude patients and secrets.
 - Markers:
-  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-v2-9842eac54194985d.md` from `kgg-update/src/runtime/app-core.html` line 51
+  - `KGGDataStore`: `docs/kgg-gpt-source/chunk-v2-074a6d5cbddf04e3.md` from `kgg-update/src/runtime/app-core.html` line 51
   - `kgg_sync_bundle`: `docs/kgg-gpt-source/chunk-v2-1546593b84682cc2.md` from `kgg-update/src/runtime/app-core.html` line 3374
   - `nativeExerciseBankSync`: not found
   - `KGGNativeSync`: `docs/kgg-gpt-source/chunk-v2-57fb9722c411a800.md` from `kgg-update/src/runtime/app-core.html` line 779
@@ -2805,7 +2813,7 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## parser-textblocks
 
 - Triggers: `parser`, `textblock`, `satz`, `ocr`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-def07cc9ee7bbca6.md`, `docs/kgg-gpt-source/chunk-v2-6a47624c7ceb8859.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-def07cc9ee7bbca6.md`, `docs/kgg-gpt-source/chunk-v2-552835ad2bd758be.md`
 - Tests: `cmd /c release-pipeline\run-kgg-tests.cmd --level critical`; `cmd /c release-pipeline\run-kgg-tests.cmd --suite textblocks --level regression`
 - Notes: Parser and text-block behavior must not create bogus Satz cards.
 - Markers:
@@ -2816,10 +2824,10 @@ Generated from `kgg-update/src` modular source. Use this before loading source c
 ## preview-gate
 
 - Triggers: `preview`, `beta`, `test-html`, `custom gpt`, `write gate`
-- Source chunks: `docs/kgg-gpt-source/chunk-v2-28dfe8bc1e90d143.md`, `docs/kgg-gpt-source/chunk-v2-0042a3c6156744d2.md`, `docs/kgg-gpt-source/chunk-v2-fb7bd5ab219195f1.md`, `docs/kgg-gpt-source/chunk-v2-fb07dc67e372336f.md`
+- Source chunks: `docs/kgg-gpt-source/chunk-v2-8bb4b3f096fe0ce3.md`, `docs/kgg-gpt-source/chunk-v2-3abac889cce3838f.md`, `docs/kgg-gpt-source/chunk-v2-9e2ceb8e3914afd0.md`, `docs/kgg-gpt-source/chunk-v2-fb07dc67e372336f.md`
 - Tests: `python release-pipeline\kgg_gpt_payload_preflight.py --self-test`; `python release-pipeline\kgg_gpt_eval.py`
 - Notes: A missing preview URL is not success; inspect the GitHub run first.
 - Markers:
   - `kgg-gpt-preview-banner`: not found
-  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-v2-28dfe8bc1e90d143.md` from `kgg-update/src/base-head.html` line 10
-  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-v2-fb7bd5ab219195f1.md` from `kgg-update/src/metadata/changelog.html` line 2
+  - `kgg-source-truth`: `docs/kgg-gpt-source/chunk-v2-8bb4b3f096fe0ce3.md` from `kgg-update/src/base-head.html` line 10
+  - `kgg-changelog`: `docs/kgg-gpt-source/chunk-v2-9e2ceb8e3914afd0.md` from `kgg-update/src/metadata/changelog.html` line 2

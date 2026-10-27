@@ -465,6 +465,7 @@
     if(result.type)lines.push('Typ: '+result.type);
     if(quality.warnings&&quality.warnings.length)lines.push('Prüfen: '+quality.warnings.join(', '));
     if(text)lines.push('',text);
+    if(result.cockpit&&result.cockpit.link)lines.push('','Cockpit-Link:',result.cockpit.link);
     return lines.join('\n').trim();
   }
   function scanPaperQuality(text,result){
@@ -672,4 +673,3 @@
     if(box.measure==='Sek.'){
       const s1=nums.length>=6?nums[1]:(nums[0]||'');
       const s2=nums.length>=6?nums[3]:(nums[1]||'');
-      const s3=nums.length>=6?nums[5]:(nums[2]||'');

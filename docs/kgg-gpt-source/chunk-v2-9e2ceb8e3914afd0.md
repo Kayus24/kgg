@@ -3,8 +3,42 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 129,
+  "latestVersionCode": 130,
   "entries": [
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130-qr-cockpit-background-compact-link",
+      "patchId": "kgg-v130-qr-cockpit-link-fixes",
+      "status": "implemented",
+      "type": "module-patch",
+      "title": "Passiver Patienten-QR-Scan, kurze Cockpit-Links und verifizierbare Android-App-Links",
+      "reason": "Kopierbare Scan- und Abschlussausgaben statt automatischer Cockpit-Oeffnung; installierte Admin-App soll verifizierte HTTPS-Links entgegennehmen.",
+      "whatChanged": [
+        "QR-Scan behaelt seine bisherige Ausgabe und haengt den Cockpit-Link am Ende an, ohne das Cockpit automatisch zu oeffnen.",
+        "Abschlussausgabe enthaelt nur Uebungen/Saetze, optionale Notizen und am Schluss den komprimierten Cockpit-Link; Planquellenwarnungen erscheinen separat.",
+        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad."
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Plan-State",
+        "Cockpit",
+        "Android/APK"
+      ],
+      "notTouched": [
+        "PDF",
+        "Parser",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "PASS: Cockpit QR browser regression, native app-link contract, offline Admin debug APK build, binary manifest and signing-cert checks",
+        "certification": "pending: no-release PR; Android physical-device verification NOT_RUN"
+      },
+      "approvalNote": "Max beauftragt am 2026-10-27 KGG QR/Cockpit-Fixes und Android-App-Link-Verifikation samt fortlaufender Drive-Dokumentation; kein produktiver Merge/Release vor Abnahme."
+    },
     {
       "versionCode": 129,
       "versionName": "1.0.129-cockpit-qr-resume",
@@ -451,41 +485,9 @@
         "certification": "pending"
       },
       "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
-    },
-    {
-      "versionCode": 115,
-      "versionName": "1.0.115-cockpit-reorder-plan-parity",
-      "patchId": "kgg-v115-cockpit-reorder-plan-parity",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Verschieben wie im normalen Plan",
-      "reason": "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her.",
-      "whatChanged": [
-        "Karte, Schatten, Platzhalter und Luecken entsprechen dem normalen Plan; die Karte folgt dem Finger ohne doppelte Hoehenreserve und Abbrechen stellt die Darstellung wieder her."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Handy-Layout"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max fordert in 296053 die identische Verschiebedarstellung wie bei Uebungen im Plan; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.129-cockpit-qr-resume",
+  "latestVersionName": "1.0.130-qr-cockpit-background-compact-link",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -614,6 +616,14 @@
       "entriesSha256": "65d34efdd099aa0cbeb367ae7e2e4e343bd2a7f5b7fc36bba5cff57758332366",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v129-cockpit-qr-resume"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v130.json",
+      "snapshotVersionCode": 130,
+      "entryCount": 71,
+      "entriesSha256": "4aae12496389f0bb34cdc68351c7e89559bfd68f5e0f38698c2dbd47f9b61378",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v130-qr-cockpit-link-fixes"
     }
   ]
 }

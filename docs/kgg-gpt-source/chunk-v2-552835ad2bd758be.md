@@ -1,3 +1,4 @@
+      const s3=nums.length>=6?nums[5]:(nums[2]||'');
       return [box.name,'Satz 1: '+(s1||'')+' Sek.','Satz 2: '+(s2||'')+' Sek.','Satz 3: '+(s3||'')+' Sek.'].join('\n');
     }
     const kg1=nums[0]||'', w1=nums[1]||'';
