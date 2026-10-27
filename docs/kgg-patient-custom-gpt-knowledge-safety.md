@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Safety
 
-Generated retrieval pack. Source digest: `ac28d302a8d5702a`.
+Generated retrieval pack. Source digest: `397b8c7c41b09ccd`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -268,6 +268,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Lesson: Auftrag: Bei Aktualisieren/Ergaenzen und Plan ersetzen pruefen, ob die letzte Trainingseinheit automatisch als neue Trainingseingabe uebernommen wird. Basis: `origin/main` `f59bc55e6e22e1b04061557c710069f6cf8f0b21`, Patienten-App v90. Branch: `fix/patient-import-session-values-20261014`, Kandidat v92. Verantwortlicher Schreibbereich: Patienten-Scanner, notwe
 - Caution: Keep patch scoped to the requested area.
 - Tests: Die unveraenderten Geraeteprofile oeffneten den gedrosselten Scanner mit einem bereits gestarteten grauen Canvas-Stream. Erst nach den UI-Wartebedingungen wurde das QR-Bild eingespeist. Dadurch pruefte jsQR zunaechst graue/cached Frames, waehrend die Geraetefrist bereits lief. Instrumentiert beobachtet: mehrere leere Decoderaufrufe; unter CPU-Drosselung kann
+
+### Patienten-QR: Scantext und Cockpit-Link ohne Auto-Oeffnung
+
+- Source: `docs/bug-debug/2026-10-27-cockpit-qr-link-workflow.md`
+- Areas: debug, modal, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Ausgang: `main` `96a82f08ca674ec3195c20ec3d16bb45f9965b16`, Admin-Web r0437 / Quelle v129. Bei QR-Scans wird das Cockpit bislang durch `importPatientPlan()` aktiviert und eine separate Cockpit-Link-Ausgabe angezeigt. Der urspruengliche Scantext wird verdeckt. - Scan verarbeitet QR-Daten weiterhin im bisherigen Job/Inbox-Workflow. - `importPatientPlan(payload
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
 
 ### Debug JSON Seite
 
