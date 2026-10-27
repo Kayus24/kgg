@@ -1,14 +1,99 @@
 <!-- KGG PATCH START kgg-v103-plan-card-action-touch-spacing -->
 <!-- Normaler Plan: 44px-Aktionsziele ohne Überlappung von Bearbeiten und Löschen -->
 <style id="kgg-v103-plan-card-action-touch-spacing-style">
+  /* Original desktop action clearance; keep untouched outside narrow layouts. */
   #currentPlanBlock #planList .planCardActions{padding-right:50px!important;gap:4px!important;min-height:44px!important;}
+  @media (max-width:759px){
+    /* Side-by-side 44px actions: avoid increasing the 2-slot Cockpit card height. */
+    #currentPlanBlock #planList .planCard{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 92px!important;
+      grid-template-rows:auto!important;
+      gap:6px!important;
+      min-height:0!important;
+      align-items:center!important;
+      padding:8px!important;
+    }
+    #currentPlanBlock #planList .planCard .planMain{
+      grid-column:1!important;grid-row:1!important;
+      min-width:0!important;width:100%!important;
+      align-items:center!important;gap:6px!important;
+    }
+    #currentPlanBlock #planList .planCard .drag{
+      flex:0 0 44px!important;width:44px!important;min-width:44px!important;
+      height:44px!important;min-height:44px!important;
+    }
+    #currentPlanBlock #planList .planCard .planThumb{
+      width:34px!important;min-width:34px!important;
+      height:34px!important;min-height:34px!important;
+    }
+    #currentPlanBlock #planList .planCard .planText{
+      flex:1 1 auto!important;min-width:0!important;max-width:100%!important;
+    }
+    #currentPlanBlock #planList .planCard .planText b{
+      display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;
+      align-items:start!important;gap:2px 4px!important;
+      min-width:0!important;white-space:normal!important;
+    }
+    #currentPlanBlock #planList .planCard .planIndex{grid-column:1!important;grid-row:1!important;}
+    #currentPlanBlock #planList .planCard .planName{
+      grid-column:2!important;grid-row:1!important;min-width:0!important;
+      display:-webkit-box!important;-webkit-box-orient:vertical!important;
+      -webkit-line-clamp:2!important;line-clamp:2;
+      white-space:normal!important;overflow:hidden!important;
+      overflow-wrap:anywhere!important;word-break:normal!important;text-overflow:clip!important;
+    }
+    #currentPlanBlock #planList .planCard .planBadges{
+      grid-column:2!important;grid-row:2!important;min-width:0!important;
+    }
+    #currentPlanBlock #planList .planCard .planBadges:empty{display:none!important;}
+    #currentPlanBlock #planList .planCard:has(.planThumb img) .planBadge.media{display:none!important;}
+    #currentPlanBlock #planList .planCard .planMetaLine{
+      display:-webkit-box!important;-webkit-box-orient:vertical!important;
+      -webkit-line-clamp:2!important;line-clamp:2;
+      white-space:normal!important;overflow:hidden!important;
+      overflow-wrap:anywhere!important;text-overflow:clip!important;
+    }
+    #currentPlanBlock #planList .planCard .planCardActions{
+      position:static!important;inset:auto!important;
+      grid-column:2!important;grid-row:1!important;
+      display:flex!important;flex-wrap:nowrap!important;
+      align-items:center!important;justify-content:flex-end!important;
+      gap:4px!important;min-height:44px!important;
+      padding:0!important;width:92px!important;
+    }
+    #currentPlanBlock #planList .planCard .planCardActions>[data-planedit],
+    #currentPlanBlock #planList .planCard .planCardActions>[data-del]{
+      box-sizing:border-box!important;flex:0 0 44px!important;
+      width:44px!important;min-width:44px!important;
+      height:44px!important;min-height:44px!important;padding:0!important;
+    }
+    #currentPlanBlock #planList .planCard .planDeleteBtn{
+      position:static!important;inset:auto!important;
+    }
+  }
+  @media (max-width:359px){
+    /* Only truly narrow panes get a second action row, including the 820px split. */
+    #currentPlanBlock #planList .planCard{
+      grid-template-columns:minmax(0,1fr)!important;
+      grid-template-rows:auto auto!important;
+    }
+    #currentPlanBlock #planList .planCard .planMain{
+      grid-column:1!important;grid-row:1!important;
+      min-height:64px!important; /* Keep two-line name + metadata stable while Cockpit seam is dragged. */
+    }
+    #currentPlanBlock #planList .planCard .planCardActions{
+      grid-column:1!important;grid-row:2!important;
+      width:100%!important;
+    }
+  }
 </style>
 <script id="kgg-v103-plan-card-action-touch-spacing">
 (function(){
   "use strict";
   var PATCH_ID="kgg-v103-plan-card-action-touch-spacing";
   window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"44px edit/delete touch targets remain separately hit-testable in normal plan cards"};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:3,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"Narrow plan cards show two-line names; only under 360px pane width actions use a second row; keep 44px edit/delete and existing handlers"};
 })();
 </script>
 <!-- KGG PATCH END kgg-v103-plan-card-action-touch-spacing -->

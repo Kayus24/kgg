@@ -1,7 +1,7 @@
 {
-  "versionCode": 129,
-  "versionName": "1.0.129-cockpit-qr-resume",
-  "indexUrl": "index.html?v=129",
-  "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
-  "notes": "v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
+  "versionCode": 130,
+  "versionName": "1.0.130-plan-card-height-stability",
+  "indexUrl": "index.html?v=130",
+  "sha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
+  "notes": "v130: Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
 }
