@@ -18,6 +18,20 @@ import kgg_custom_gpt_resource_audit as audit
 
 
 class AdminEditorSyncPrGateTests(unittest.TestCase):
+    def test_snapshot_workflow_requires_reviewed_environment_before_write_token(self) -> None:
+        workflow_path = HERE.parent / ".github/workflows/kgg-admin-editor-sync-snapshot-pr.yml"
+        workflow = workflow_path.read_text(encoding="utf-8")
+        self.assertIn("    environment: kgg-admin-editor-sync-approval\n", workflow)
+        self.assertIn(
+            "KGG_ADMIN_EDITOR_REVIEW_LOCK: ${{ secrets.KGG_ADMIN_EDITOR_REVIEW_LOCK }}",
+            workflow,
+        )
+        self.assertIn('if [ -z "$KGG_ADMIN_EDITOR_REVIEW_LOCK" ]; then', workflow)
+        self.assertLess(
+            workflow.index("      - name: Require reviewed environment configuration"),
+            workflow.index("      - name: Create scoped GitHub App installation token"),
+        )
+
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="kgg-admin-editor-sync-pr-")
         self.root = Path(self.temp.name)

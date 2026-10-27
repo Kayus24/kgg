@@ -24,9 +24,23 @@ concurrency:
 jobs:
   admin-editor-sync-pr:
     runs-on: ubuntu-latest
+    environment: kgg-admin-editor-sync-approval
     env:
       KGG_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
+      # Review occurs in the protected GitHub Environment, outside model-supplied
+      # workflow inputs. Missing environment-specific secret fails closed.
+      - name: Require reviewed environment configuration
+        shell: bash
+        env:
+          KGG_ADMIN_EDITOR_REVIEW_LOCK: ${{ secrets.KGG_ADMIN_EDITOR_REVIEW_LOCK }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KGG_ADMIN_EDITOR_REVIEW_LOCK" ]; then
+            echo "Admin editor review environment is not configured" >&2
+            exit 1
+          fi
+
       - name: Create scoped GitHub App installation token
         id: app-token
         uses: actions/create-github-app-token@v3
