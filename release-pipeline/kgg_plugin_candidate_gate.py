@@ -27,7 +27,7 @@ def _fail(code: str, detail: str = "") -> None:
 def validate_candidate(
     plugin_root: Path,
     *,
-    expected_version: str = "0.1.0",
+    expected_version: str = "0.5.0",
     mcp_available: bool = True,
     mcp_authorized: bool = True,
     fresh_main: bool = True,

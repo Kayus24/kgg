@@ -1,6 +1,6 @@
 {
   "name": "kgg-plugin",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "KGG shared agent workflow and UI-Lab candidate",
   "author": {
     "name": "Local developer"
@@ -13,7 +13,12 @@
     "longDescription": "A candidate Skills layer for the KGG Custom GPT, Codex, and UI Lab comparison surface.",
     "developerName": "KGG local workspace",
     "category": "Productivity",
-    "capabilities": [],
-    "defaultPrompt": "Route this small KGG ticket through the shared test loop and report evidence before suggesting a change."
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": "Route this small KGG ticket through the shared test loop and report evidence before suggesting a change.",
+    "composerIcon": "./assets/kgg-ui-lab.png",
+    "logo": "./assets/kgg-ui-lab.png"
   }
 }

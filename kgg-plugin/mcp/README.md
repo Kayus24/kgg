@@ -6,8 +6,7 @@ stdio MCP server at `mcp/server.py`. Those fixture names are an evaluation
 surface, not additional MCP tools. The repository adapter remains the
 canonical contract boundary over `release-pipeline/kgg_ui_lab_contract.py`,
 `kgg_ui_lab_session.py`, `kgg_ui_lab_evidence.py`, and `kgg_ui_lab_runtime.py`;
-the installed server exposes the same fixed bounded tool catalog without needing
-the repository checkout.
+the installed server exposes bounded tools without needing the repository checkout.
 
 Each tool validates the complete request at the trusted
 boundary, bind actor and lease to the session, use Fresh Main and application
@@ -22,6 +21,61 @@ ephemeral page alive for exactly one bounded observe/decide/act/verify cycle.
 The decision is supplied by the calling agent; the bridge never invents a
 model decision. The default remains synthetic and the real host fails closed
 when Playwright or the session helper is unavailable.
+
+Version 0.2.0 adds public `back` and `reload` decisions and saved Flow steps.
+Back requires an existing permitted history entry. Main-frame redirects outside
+the permitted origin are blocked. Reload may preserve the state only after
+the browser confirms navigation and produces a fresh screenshot artifact.
+
+Version 0.3.0 adds opt-in `KGG_GITHUB_READS=1` on the trusted PC host. It uses
+the existing GitHub CLI keyring login; no credential is exported or packaged.
+`get_kgg_action_capabilities` declares all 30 canonical Action definitions;
+`run_kgg_action` binds their GET routes with exact parameter validation and
+blocks every POST with `external_gate_required`. Existing Action workflows
+remain the write boundary. The callable adapter also works with the repository's
+`KggCompatibilityShim`. A declaration is not evidence of external write parity.
+`get_kgg_resource` reads fixed Main resources. `get_current_state` reads live
+Main when enabled; `get_ticket_state` reads a GitHub issue summary, explicitly
+distinguished from Memory ticket IDs. Memory ticket analysis starts from the
+Memory index and a relevant bounded pack. Disabled hosts remain synthetic.
+
+Version 0.4.0 integrates these preserved candidates on current Main and adds
+real `run_width_sweep` captures when the trusted host opts into the browser.
+Each of up to ten validated viewports gets an isolated page, PNG hash and
+state evidence. The entire sweep has a 30-second deadline and an 8-MiB image
+budget; failure preserves completed evidence and marks remaining widths
+`NOT_RUN`. A successful sweep verifies `capture_only`; `visual_comparison`
+remains `NOT_RUN` until approved references are compared separately. Without
+real-browser opt-in it remains `PREVIEW_ONLY`.
+
+The installed ChatGPT endpoint requires a separate approved package/runtime
+activation and fresh catalog check. Local tests do not establish ChatGPT on
+physical phone/tablet, cold-PC reconnect, or protected KGG write/release parity.
+The existing Update-Agents remain the production fallback until those gates
+are independently accepted. The package contains no credentials.
+
+Version0.5.0 adds the explicit write-annotated `dispatch_kgg_workflow` tool
+(server1.4.0,24 tools). The existing `run_kgg_action` stays read-only and rejects
+all POST routes. Workflow dispatch is disabled by default. The trusted host may
+set `KGG_GITHUB_WORKFLOW_OPERATIONS` to a comma-separated list of canonical
+operations in addition to `KGG_GITHUB_READS=1`. A tool payload or `actor=max`
+cannot change that host policy. Device tests and editor certification require
+their actual separate device/editor authorization and evidence.
+
+The six non-consequential workflows and Memory `validate_only` can be enabled
+individually. Main/Snapshot PR workflows and Memory `apply` remain externally
+gated: model-supplied approval phrases are not a trusted human-approval record.
+Only canonical Main schemas and fixed workflow paths are accepted. HTTP204
+means `dispatch_accepted`, never a completed validation, preview or release.
+Reconcile the exact request ID, source SHA, run and result artifact through the
+existing read operations. Repeated/unknown requests are latched for the process
+lifetime; after a restart reconcile GitHub state before any new dispatch.
+
+The package icon reuses a previously generated KGG training-and-target motif.
+Its `composerIcon` and `logo` are package-relative PNG assets. The existing
+private ChatGPT listing is a separate remote plugin and must be updated and
+visually checked through its own Edit Plugin connection; changing this package
+does not silently update that listing.
 
 `compare_visual_reference` compares the latest observed PNG against an
 explicitly transferred artifact, an approved golden, or an earlier screenshot

@@ -1,5 +1,12 @@
 # KGG Project Completion – Master-Gates
 
+Aktueller Wiedereinstieg (2026-10-25): Der September-Stand dieses Verzeichnisses
+ist historisch. Die spätere V1-Abnahme und der aktuelle LLM CONTROL HEADER
+stehen im [kanonischen Arbeitsauftrag](https://docs.google.com/document/d/1Lq1V2BFrDkj2Q5thMVEaoyWnUeIO5PxFZfby33k6gtA/edit).
+Codebasis für die lokale Fortsetzung ist Fresh Main `97a1218` auf
+`feat/plugin-completion-20261025`. Lokale Nachweise ersetzen keine Abnahme des
+ChatGPT-Hosts, physischer Geräte oder geschützter Releaseaktionen.
+
 Stand dieses Kandidaten: 2026-09-21
 
 Fresh Remote Main beim Abschluss der Planungsnachbereitung: `12b13767cc1667f97d428e1f7f7b7978fe2e4ac4`

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Synthetic navigation fixture</title></head>
+<body data-kgg-state="navigation-entry">
+<h1>Synthetic navigation fixture</h1>
+<p id="state">navigation-entry</p>
+<script>
+  const state = document.getElementById('state');
+  function update() {
+    const value = new URL(location.href).searchParams.get('route') === 'second' ? 'navigation-second' : 'navigation-entry';
+    document.body.dataset.kggState = value;
+    state.textContent = value;
+  }
+  if (new URL(location.href).searchParams.get('history') === '1' && !sessionStorage.getItem('navigation-history-seeded')) {
+    sessionStorage.setItem('navigation-history-seeded', '1');
+    history.pushState({}, '', '?route=second');
+  }
+  addEventListener('popstate', update);
+  update();
+</script></body></html>

@@ -1,0 +1,1183 @@
+{
+  "schema": "kgg/action-routes/v1",
+  "source": "docs/kgg-custom-gpt-action-api-openapi.yaml",
+  "source_sha256": "69012522f5bcdd7fa9fb89773deb65e911e3aa8759d29ce5c497e42e36af0711",
+  "actions": [
+    {
+      "operation": "getKggMainCommit",
+      "path": "/repos/Kayus24/kgg/git/ref/heads/main",
+      "method": "GET",
+      "consequential": false,
+      "parameters": []
+    },
+    {
+      "operation": "submitKggReadOnlyValidation",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-readonly-validation.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "request_id",
+              "source_sha",
+              "validation_profile"
+            ],
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "source_sha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$",
+                "description": "Exact current main commit SHA; the workflow fails closed if Main differs."
+              },
+              "validation_profile": {
+                "type": "string",
+                "enum": [
+                  "tablet-splitter-scale-drag",
+                  "gpt-contracts"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggReadOnlyValidationRuns",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-readonly-validation.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "submitKggPreviewAuto",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "request_id",
+              "payload_json"
+            ],
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "payload_json": {
+                "type": "string",
+                "description": "Guarded modular v2 payload. It may include only declarative contains/not_contains regression_contract assertions. Cross-app QR work uses protected_scope cross-app-qr-preview and all four exact impact tests."
+              },
+              "ui_stability": {
+                "type": "string",
+                "enum": [
+                  "false",
+                  "true"
+                ],
+                "default": "false"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "submitKggDeviceTest",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "request_id",
+              "source_sha"
+            ],
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "source_sha": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$",
+                "description": "Exact current main commit SHA. The workflow stops if main drifts before publication."
+              },
+              "device_test_profile": {
+                "type": "string",
+                "enum": [
+                  "quick",
+                  "full"
+                ],
+                "default": "quick"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggDeviceTestRuns",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-device-test.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "submitKggMainGate",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/dispatches",
+      "method": "POST",
+      "consequential": true,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "mode",
+              "request_id",
+              "payload_json",
+              "approval_phrase"
+            ],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "create_pr",
+                  "publish_admin_beta"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "payload_json": {
+                "type": "string",
+                "description": "JSON string containing request_id, title, summary, version_slug, touched_areas, required_tests and patch_content, plus optional declarative regression_contract assertions. Do not send executable tests, operations, old_text, new_text or path. UI payloads must include critical and ui-stability regression tests."
+              },
+              "ui_stability": {
+                "type": "string",
+                "enum": [
+                  "false",
+                  "true"
+                ],
+                "default": "false"
+              },
+              "approval_phrase": {
+                "type": "string",
+                "enum": [
+                  "Gut für Main"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggMainGateRuns",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-gate.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "listKggPreviewAutoRuns",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-gpt-preview-auto.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggPreviewGateRun",
+      "path": "/repos/Kayus24/kgg/actions/runs/{run_id}",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggPreviewGateJobs",
+      "path": "/repos/Kayus24/kgg/actions/runs/{run_id}/jobs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggPreviewGateArtifacts",
+      "path": "/repos/Kayus24/kgg/actions/runs/{run_id}/artifacts",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "submitKggAdminEditorSyncPreflight",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-admin-editor-sync-preflight.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main",
+            "description": "Fixed GitHub workflow dispatch ref; it is not a caller-selectable certification value."
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "request_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "submitKggAdminEditorSyncSnapshotPr",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-admin-editor-sync-snapshot-pr.yml/dispatches",
+      "method": "POST",
+      "consequential": true,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main",
+            "description": "Fixed GitHub workflow dispatch ref; it is not a caller-selectable certification value."
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "request_id",
+              "approval_phrase"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "approval_phrase": {
+                "type": "string",
+                "enum": [
+                  "Gut für Main"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "submitKggPatientPreviewFromAdmin",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-from-admin.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "mode",
+              "request_id",
+              "payload_json"
+            ],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "validate_only",
+                  "publish_preview"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "payload_json": {
+                "type": "string",
+                "maxLength": 60000,
+                "description": "Patient payload v1 with synthetic-only test data and no secrets."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggPatientPreviewRunsFromAdmin",
+      "path": "/repos/Kayus24/kgg/actions/workflows/kgg-patient-gpt-preview-from-admin.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryIndex",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/memory/index.json",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryPack",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/memory/packs/{pack_name}",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "pack_name",
+          "in": "path",
+          "required": true,
+          "description": "Basename from memory/index.json, for example workflow.md. Never include memory/packs/ or another directory prefix.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}\\.md$"
+          }
+        },
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryRecord",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/memory/records/{record_name}",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "record_name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{5,63}\\.md$"
+          }
+        },
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryHistory",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/memory/history.json",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggAgentCoordinationIndex",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/coordination/index.json",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggAgentCoordinationThread",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/coordination/threads/{coordination_request_id}.json",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "coordination_request_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+          }
+        },
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggAgentCoordinationBridgeTask",
+      "path": "/repos/Kayus24/kgg-project-memory/contents/coordination-bridge/tasks/{task_id}.json",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "task_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+          }
+        },
+        {
+          "name": "Accept",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "application/vnd.github.raw+json"
+            ],
+            "default": "application/vnd.github.raw+json"
+          }
+        },
+        {
+          "name": "ref",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "submitKggAgentCoordinationEvent",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/dispatches",
+      "method": "POST",
+      "consequential": false,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "mode",
+              "request_id",
+              "payload_json"
+            ],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "validate_only",
+                  "apply"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "payload_json": {
+                "type": "string",
+                "description": "One guarded request, response or close event. Never include patient data, raw QR payloads, chats, secrets or Base64."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggAgentCoordinationRuns",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/workflows/kgg-agent-coordination-gate.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ],
+            "default": "workflow_dispatch"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "submitKggMemoryUpdate",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/dispatches",
+      "method": "POST",
+      "consequential": true,
+      "parameters": [],
+      "request_schema": {
+        "type": "object",
+        "required": [
+          "ref",
+          "inputs"
+        ],
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "main"
+            ]
+          },
+          "inputs": {
+            "type": "object",
+            "required": [
+              "mode",
+              "request_id",
+              "payload_json"
+            ],
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "validate_only",
+                  "apply"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"
+              },
+              "payload_json": {
+                "type": "string",
+                "description": "JSON string containing the identical request_id and one curated record. Never include chats, patient data, secrets or raw Base64."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "operation": "listKggMemoryUpdateRuns",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/workflows/kgg-memory-gate.yml/runs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "branch",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "main"
+            ],
+            "default": "main"
+          }
+        },
+        {
+          "name": "event",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "workflow_dispatch"
+            ],
+            "default": "workflow_dispatch"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "in_progress",
+              "completed"
+            ]
+          }
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryUpdateRun",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "memory_run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryUpdateStatus",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/jobs",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "memory_run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "getKggMemoryUpdateArtifacts",
+      "path": "/repos/Kayus24/kgg-project-memory/actions/runs/{memory_run_id}/artifacts",
+      "method": "GET",
+      "consequential": false,
+      "parameters": [
+        {
+          "name": "memory_run_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    }
+  ]
+}
