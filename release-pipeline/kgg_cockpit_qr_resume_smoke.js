@@ -123,6 +123,7 @@ async function verifyIndependentPortableEdits(browser) {
     await open(older.page);
     const initial = await scan(older.page, fullPlan("synthetic-portable-union", "Synthetischer Portabler Plan"));
     await closeOutput(older.page);
+    await older.page.evaluate(() => window.KGGTherapyCockpit.open());
     await setLoadWithNumpad(older.page, "25");
     await older.page.locator('textarea[data-tc-notes]').first().fill("Synthetische aeltere Notiz");
     await older.page.locator('textarea[data-tc-notes]').first().blur();
@@ -168,11 +169,13 @@ async function verifyPhoneActivationSelectsScannedPatient(browser) {
     await open(page);
     const first = await scan(page, fullPlan("synthetic-phone-qr-a", "Synthetischer Handy A"));
     assert.equal(first.cockpit?.slot, 0, "first phone scan must occupy slot zero");
-    await page.locator("#kggTherapyCockpitActivationLink").click();
+    assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().view), "normal", "phone QR scan must not switch into the Cockpit");
+    assert.equal(await page.locator("#kggTherapyCockpitOutputModal").isVisible(), false, "phone QR scan must not open a Cockpit modal");
+    await page.evaluate(() => { window.KGGTherapyCockpit.open(); window.KGGTherapyCockpit.selectSlot(0); });
     await page.waitForSelector('.kgg-tce-active-card[data-tc-card="0"]');
     const second = await scan(page, fullPlan("synthetic-phone-qr-b", "Synthetischer Handy B"));
     assert.equal(second.cockpit?.slot, 1, "second phone scan must occupy slot one");
-    await page.locator("#kggTherapyCockpitActivationLink").click();
+    await page.evaluate(() => window.KGGTherapyCockpit.selectSlot(1));
     const activeCard = page.locator('.kgg-tce-active-card[data-tc-card="1"]');
     await activeCard.waitFor({ state: "visible" });
     assert.equal(await page.locator(".kgg-tce-active-card").count(), 1, "phone must display one active patient card");
@@ -216,6 +219,7 @@ async function verifyCustomLeftRightPortableLink(browser) {
     const sourceIds = initial.exercises.map(exercise => exercise.id);
     assert.notEqual(sourceIds[0], sourceIds[1], "derived side exercises must have separate identities");
     await closeOutput(source.page);
+    await source.page.evaluate(() => window.KGGTherapyCockpit.open());
     await setLoadWithNumpad(source.page, "25");
     await source.page.locator('[data-tc-action="finish"][data-tc-slot="0"]').click();
     await source.page.waitForSelector("#kggTherapyCockpitOutputModal:not([hidden])");
@@ -273,9 +277,32 @@ async function main() {
     assert.ok(first.cockpit?.link, "successful patient QR scan must attach job.result.cockpit with an activation link");
     assert.equal(first.cockpit.slot, 0, "first scanned plan must occupy the first slot");
     const activationLink = first.cockpit.link;
-    const visibleLink = page.locator("#kggTherapyCockpitActivationLink");
-    assert.equal(await visibleLink.isVisible(), true, "activation link must be rendered in the output modal");
-    assert.equal(await visibleLink.getAttribute("href"), activationLink, "rendered activation link must target the imported plan");
+    assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().view), "normal", "QR scan must not automatically open the Cockpit");
+    assert.equal(await page.locator("#kggTherapyCockpitOutputModal").isVisible(), false, "QR scan must not interrupt the normal scan workflow with a modal");
+    assert.equal(await page.evaluate(() => document.body.classList.contains("kggTherapyCockpitOpen")), false, "normal therapist view must remain visible");
+    assert.equal(new URL(activationLink).pathname, "/kgg/kgg-update/index.html", "generated link must match the native app's allowed deep-link path");
+    assert.match(new URL(activationLink).searchParams.get("cockpit") || "", /^KGGTC1:z/, "automatic Cockpit link must be compressed");
+    const codecCompatibility = await page.evaluate(link => {
+      const code = new URL(link).searchParams.get("cockpit");
+      const url64 = code.slice("KGGTC1:z".length);
+      const base64 = url64.replace(/-/g, "+").replace(/_/g, "/");
+      const packed = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+      const originalBytes = window.fflate.inflateSync(packed);
+      let binary = "";
+      for (const byte of originalBytes) binary += String.fromCharCode(byte);
+      const oldCode = "KGGTC1:" + btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      return {
+        oldId: window.KGGTherapyCockpit.decode(oldCode).planId,
+        newId: window.KGGTherapyCockpit.decode(code).planId,
+        oldChars: oldCode.length, newChars: code.length,
+      };
+    }, activationLink);
+    assert.equal(codecCompatibility.oldId, PLAN_A, "legacy uncompressed links must remain readable");
+    assert.equal(codecCompatibility.newId, PLAN_A, "compressed links must decode to the same plan");
+    assert.ok(codecCompatibility.newChars < codecCompatibility.oldChars, "compressed code must be shorter than the legacy code");
+    const scanText = await page.locator("#kggScanInboxField0").inputValue();
+    assert.equal(scanText.endsWith("Cockpit-Link:\n" + activationLink), true, "normal scan result text must end with the Cockpit link");
+    assert.ok(scanText.includes("Abduktion"), "scan result must still contain the usual patient exercise text");
     assert.equal((await slot(page, 0)).planId, PLAN_A, "scan must retain the QR plan identity");
     await screenshot(page, "01-scan-activation-link");
 
@@ -298,6 +325,12 @@ async function main() {
     const exportedLink = output.match(/https?:\/\/[^\s]+[?&]cockpit=[^\s]+/)?.[0];
     assert.ok(exportedLink, "finish documentation must include the reusable Cockpit link");
     assert.ok(output.includes(MANUAL_NOTES), "finish documentation must retain therapist notes");
+    assert.ok(output.startsWith("Abduktion\nS1: "), "documentation must start directly with the first exercise and sets");
+    assert.ok(!output.includes("KGG Therapie-Cockpit") && !output.includes("Patient: ") && !output.includes("Plan fertig"), "documentation must omit heading, patient placeholder, and completion preamble");
+    assert.ok(!output.includes("Planquelle nicht übernommen"), "technical plan-source status must never pollute copied patient documentation");
+    assert.ok(output.trimEnd().endsWith("Neuer Cockpit-Link:\n" + exportedLink), "portable Cockpit link must be the final documentation line");
+    const transferWarning = await page.locator("#kggTherapyCockpitOutputModal p").innerText();
+    assert.match(transferWarning, /Planquelle nicht übernommen/i, "failed plan-source transfer must remain clearly visible in the app, outside copied text");
     await screenshot(page, "03-finish-documentation");
 
     phase = "old activation link and fresh return scan";
@@ -385,6 +418,7 @@ async function main() {
     const storageImport = await scan(storagePage, fullPlan("synthetic-qr-storage-failure", "Synthetischer Speicherpatient"));
     assert.equal(storageImport.cockpit?.slot, 0, "storage scenario must start with a successfully imported plan");
     await closeOutput(storagePage);
+    await storagePage.evaluate(() => window.KGGTherapyCockpit.open());
     await storagePage.evaluate(() => {
       const originalSetItem = Storage.prototype.setItem;
       Storage.prototype.setItem = function (key, value) {
@@ -423,7 +457,7 @@ async function main() {
     assert.deepEqual(storageCase.errors, [], "storage failure must be handled without uncaught page errors");
     assert.deepEqual(storagePortable.errors, [], "portable recovery must not raise page errors");
     const result = {
-      status: "PASS", checks: ["real KGGH2/KGGD1 scanner", "visible activation link", "visible numpad edit", "manual notes", "old link resume", "finish promotes today to previous", "fresh QR merge per cell", "portable finish link and priority", "independent portable manual-cell union and newer conflicts", "same-name plan isolation", "same-plan QR and link reuse at three slots", "partial blank QR supplements values", "missing identity and invalid QR are side-effect free", "phone activation selects scanned patient without overflow", "custom left/right values and derived registry survive old and new portable links", "visible storage failure warning", "portable recovery without local saving"],
+      status: "PASS", checks: ["real KGGH2/KGGD1 scanner", "scan text and compact link without auto-open", "visible numpad edit", "manual notes", "old link resume", "finish promotes today to previous", "fresh QR merge per cell", "portable finish link and priority", "independent portable manual-cell union and newer conflicts", "same-name plan isolation", "same-plan QR and link reuse at three slots", "partial blank QR supplements values", "missing identity and invalid QR are side-effect free", "phone activation selects scanned patient without overflow", "custom left/right values and derived registry survive old and new portable links", "visible storage failure warning", "portable recovery without local saving"],
       screenshots: path.relative(ROOT, OUTPUT),
     };
     fs.writeFileSync(path.join(OUTPUT, "result.json"), JSON.stringify(result, null, 2) + "\n");

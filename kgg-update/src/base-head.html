@@ -106,8 +106,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-qr-resume"
   ],
   "currentVersion": {
-    "versionCode": 129,
-    "versionName": "1.0.129-cockpit-qr-resume",
+    "versionCode": 130,
+    "versionName": "1.0.130-qr-cockpit-background-compact-link",
     "lastPatchId": "kgg-v129-cockpit-qr-resume",
     "updatedBy": "kgg-module-scaffolder"
   },

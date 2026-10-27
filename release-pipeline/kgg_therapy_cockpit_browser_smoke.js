@@ -429,7 +429,7 @@ async function runViewport(page, viewport, code) {
   await page.locator('[data-tc-action="finish"][data-tc-slot="0"]').click();
   await page.waitForSelector("#kggTherapyCockpitOutputModal:not([hidden])", { timeout: 5000 });
   const output = await page.locator("#kggTherapyCockpitOutput").inputValue();
-  assert(output.includes("Neuer Cockpit-Link") && output.includes("Browser Müller") && output.includes("https://kayus24.github.io/kgg/kgg-update/index.html?cockpit="), "finish output missing documentation/public link");
+  assert(output.includes("S1: ") && output.includes("Neuer Cockpit-Link:\nhttps://kayus24.github.io/kgg/kgg-update/index.html?cockpit=") && !output.includes("Patient:") && !output.includes("Plan fertig") && !output.includes("Planquelle nicht übernommen"), "finish output must show sets and end with the public link without obsolete patient header or technical status");
   await page.locator('[data-tc-action="output-close"]').click();
   const afterFinish = await page.evaluate(() => window.KGGTherapyCockpit.getState());
   assert(afterFinish.slotCount === 1, `finish did not release one slot: ${JSON.stringify(afterFinish)}`);

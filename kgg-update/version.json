@@ -1,7 +1,7 @@
 {
-  "versionCode": 129,
-  "versionName": "1.0.129-cockpit-qr-resume",
-  "indexUrl": "index.html?v=129",
-  "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
-  "notes": "v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
+  "versionCode": 130,
+  "versionName": "1.0.130-qr-cockpit-background-compact-link",
+  "indexUrl": "index.html?v=130",
+  "sha256": "d6c0f4cd3869a3f91d0ae9e0fea552c939443c3986ae5fc22214783da908da0c",
+  "notes": "v130: Patienten-QR bleibt im Scanablauf; Abschluss-Dokumentation enthält nur Übungen, optionale Notizen und am Ende den komprimierten Cockpit-Link. Technische Übernahmewarnungen bleiben separat sichtbar. Android-Link-Öffnung erfordert Domain-assetlinks.json."
 }
