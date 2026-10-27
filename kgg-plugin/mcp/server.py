@@ -6,8 +6,9 @@ does not depend on the repository checkout.  Runtime/session/evidence state is
 in memory; only explicitly saved synthetic Flow definitions use the bounded,
 namespaced atomic store.  Synthetic evidence remains the default and the
 server exposes the same bounded operations as the repository adapter.  There
-is no shell, arbitrary browser, network, editor, ticket, preview, merge, or
-external-message operation.
+is no arbitrary command, browser target, editor, merge, or external-message
+operation. GitHub reads and canonical workflow dispatches require explicit
+trusted-host configuration and use fixed routes through the existing CLI login.
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import math
+import os
 from pathlib import Path
 import re
 import struct
@@ -30,7 +33,7 @@ import zlib
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "kgg-ui-lab"
-SERVER_VERSION = "1.0.0"
+SERVER_VERSION = "1.4.0"
 MCP_SCHEMA = "kgg-ui-lab/mcp-server/v1"
 SESSION_SCHEMA = "kgg-ui-lab/session/v1"
 REQUEST_SCHEMA = "kgg-ui-lab/request/v1"
@@ -41,6 +44,10 @@ TOOL_NAMES = (
     "project_status_checkpoint",
     "get_current_state",
     "get_ticket_state",
+    "get_kgg_action_capabilities",
+    "run_kgg_action",
+    "dispatch_kgg_workflow",
+    "get_kgg_resource",
     "start_ui_session",
     "set_device_profile",
     "run_quick_flow",
@@ -103,6 +110,15 @@ def _load_real_browser_module():
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
         return module
+
+
+def _load_kgg_actions_module():
+    spec = importlib.util.spec_from_file_location("kgg_plugin_actions", Path(__file__).with_name("kgg_actions.py"))
+    if spec is None or spec.loader is None:
+        _fail("kgg_action_helper_missing")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _load_flow_store_module():
@@ -317,9 +333,9 @@ def _comparison_masks(value: Any, viewport: Mapping[str, Any]) -> list[dict[str,
     return masks
 
 
-def _visual_reference(value: Any, session: Mapping[str, Any]) -> dict[str, Any]:
+def _visual_reference(value: Any, session: Mapping[str, Any], source_session: Mapping[str, Any] | None = None) -> dict[str, Any]:
     reference = _object(value, "reference")
-    allowed = {"reference_class", "reference_id", "reference_sha256", "content_type", "image_data", "approval_id", "observation_id", "viewport", "threshold", "masks"}
+    allowed = {"reference_class", "reference_id", "reference_sha256", "content_type", "image_data", "approval_id", "observation_id", "source_session_id", "viewport", "threshold", "masks"}
     required = {"reference_class", "reference_id", "reference_sha256", "viewport", "threshold"}
     if set(reference) - allowed or not required.issubset(reference):
         _fail("reference_invalid")
@@ -347,6 +363,38 @@ def _visual_reference(value: Any, session: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(artifact, Mapping) or artifact.get("sha256") != reference_sha256 or not isinstance(image, Mapping):
             _fail("reference_provenance_invalid")
         image_data = image.get("data_base64")
+    elif reference_class == "approved_golden" and source_session is not None:
+        source_session_id = _slug(reference.get("source_session_id"), "reference_source_session_id")
+        if source_session.get("session_id") != source_session_id:
+            _fail("reference_provenance_invalid")
+        _comparison_viewport(reference["viewport"], source_session)
+        observation_id = _sha256(reference.get("observation_id"), "reference_observation_id")
+        history = source_session.get("visual_observations")
+        stored = history.get(observation_id) if isinstance(history, Mapping) else None
+        stored_artifact = stored.get("artifact") if isinstance(stored, Mapping) else None
+        image = stored.get("image") if isinstance(stored, Mapping) else None
+        if (
+            not isinstance(stored_artifact, Mapping)
+            or stored_artifact.get("id") != reference_id
+            or stored_artifact.get("sha256") != reference_sha256
+            or not isinstance(image, Mapping)
+        ):
+            _fail("reference_provenance_invalid")
+        _comparison_viewport(reference["viewport"], {"viewport": stored.get("viewport", source_session["viewport"])})
+        if reference.get("content_type", "image/png") != "image/png":
+            _fail("reference_content_type_invalid")
+        image_data = image.get("data_base64")
+        if not isinstance(image_data, str):
+            _fail("reference_image_missing")
+        try:
+            decoded = base64.b64decode(image_data, validate=True)
+        except (ValueError, TypeError):
+            _fail("reference_image_invalid")
+        if hashlib.sha256(decoded).hexdigest() != reference_sha256:
+            _fail("reference_hash_mismatch")
+        approval_id = reference.get("approval_id")
+        if not isinstance(approval_id, str) or not re.fullmatch(r"approved:[A-Za-z0-9._:-]{3,120}", approval_id):
+            _fail("reference_approval_invalid")
     else:
         if reference.get("content_type", "image/png") != "image/png":
             _fail("reference_content_type_invalid")
@@ -432,7 +480,7 @@ def _visual_decision(value: Any) -> dict[str, Any]:
     if set(decision) - allowed or not {"operation", "label", "expected_state_after", "observation_id"}.issubset(decision):
         _fail("visual_decision_invalid")
     operation = decision["operation"]
-    if operation not in {"click", "tap", "type", "scroll", "wait", "swipe"}:
+    if operation not in {"click", "tap", "type", "scroll", "wait", "swipe", "back", "reload"}:
         _fail("visual_decision_invalid")
     label = decision["label"]
     if not isinstance(label, str) or not 1 <= len(label) <= 200 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}", label):
@@ -675,7 +723,7 @@ def tool_catalog() -> list[dict[str, Any]]:
         "type": "object",
         "description": "One bounded agent decision derived from the previously returned screenshot; no selectors or JavaScript.",
         "properties": {
-            "operation": {"type": "string", "enum": ["click", "tap", "type", "scroll", "wait", "swipe"]},
+            "operation": {"type": "string", "enum": ["click", "tap", "type", "scroll", "wait", "swipe", "back", "reload"]},
             "label": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,199}$"},
             "coordinates": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
             "start": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}, "required": ["x", "y"], "additionalProperties": False},
@@ -692,7 +740,7 @@ def tool_catalog() -> list[dict[str, Any]]:
     }
     visual_reference = {
         "type": "object",
-        "description": "An explicitly transferred PNG, approved golden, or earlier screenshot from the same fixture; no implicit chat upload or filesystem lookup.",
+        "description": "An explicitly transferred PNG, approved golden, or explicitly identified earlier screenshot from the same actor's in-memory session; no implicit chat upload or filesystem lookup.",
         "properties": {
             "reference_class": {"type": "string", "enum": ["explicit_artifact", "approved_golden", "fixture_screenshot"]},
             "reference_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"},
@@ -701,6 +749,7 @@ def tool_catalog() -> list[dict[str, Any]]:
             "image_data": {"type": "string", "maxLength": MAX_REFERENCE_BYTES * 2},
             "approval_id": {"type": "string", "pattern": "^approved:[A-Za-z0-9._:-]{3,120}$"},
             "observation_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "source_session_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{5,63}$"},
             "viewport": {"type": "object", "properties": {"width": {"type": "integer", "minimum": 240, "maximum": 10000}, "height": {"type": "integer", "minimum": 240, "maximum": 10000}, "device_scale_factor": {"type": "number", "minimum": 0.5, "maximum": 4}}, "required": ["width", "height", "device_scale_factor"], "additionalProperties": False},
             "threshold": {"type": "object", "properties": {"max_changed_pixels": {"type": "integer", "minimum": 0, "maximum": MAX_REFERENCE_PIXELS}, "max_changed_ratio": {"type": "number", "minimum": 0, "maximum": 1}, "pixel_delta": {"type": "integer", "minimum": 0, "maximum": 255}}, "required": ["max_changed_pixels", "max_changed_ratio", "pixel_delta"], "additionalProperties": False},
             "masks": {"type": "array", "maxItems": 10, "items": {"type": "object", "properties": {"x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}, "width": {"type": "integer", "minimum": 1}, "height": {"type": "integer", "minimum": 1}}, "required": ["x", "y", "width", "height"], "additionalProperties": False}},
@@ -782,8 +831,12 @@ def tool_catalog() -> list[dict[str, Any]]:
             idempotent=True,
             open_world=False,
         ),
-        _tool("get_current_state", "Read bounded synthetic UI-Lab state. Never writes or reaches a browser.", {"actor": actor}, ["actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
-        _tool("get_ticket_state", "Read a bounded synthetic ticket summary only. Never writes, dispatches, or reaches a ticket system.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"], read_only=True, destructive=False, idempotent=True, open_world=False),
+        _tool("get_current_state", "Read bounded UI-Lab state; with the explicit GitHub binding read actual current Main. Never writes or reaches a browser.", {"actor": actor}, ["actor"], read_only=True, destructive=False, idempotent=True, open_world=True),
+        _tool("get_ticket_state", "Read a bounded GitHub issue summary when the GitHub binding is enabled; synthetic mode is labeled explicitly. Issue numbers are not Memory ticket IDs. Never writes or dispatches.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"], read_only=True, destructive=False, idempotent=True, open_world=True),
+        _tool("get_kgg_action_capabilities", "List the 30 canonical KGG Action routes and distinguish bound reads from external write gates.", {"actor": actor}, ["actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
+        _tool("run_kgg_action", "Read one allowlisted KGG Main, Memory, coordination, run, job or artifact operation. Every remote write fails with external_gate_required; use its established Action gate.", {"actor": actor, "operation": {"type": "string", "enum": list(_load_kgg_actions_module().KggActions().actions)}, "payload": {"type": "object", "additionalProperties": True}}, ["actor", "operation", "payload"], read_only=True, destructive=False, idempotent=True, open_world=True),
+        _tool("dispatch_kgg_workflow", "Dispatch one canonical KGG workflow only when explicitly authorized by the trusted host allowlist. This writes a GitHub Actions run. Main, Snapshot PR and Memory apply remain externally gated; actor labels and model approval phrases grant no permission. Accepted dispatch requires read-only run/artifact reconciliation and is not a completed test or release.", {"actor": actor, "operation": {"type": "string", "enum": [name for name, route in _load_kgg_actions_module().KggActions().actions.items() if route["method"] == "POST"]}, "payload": {"type": "object", "additionalProperties": True}}, ["actor", "operation", "payload"], read_only=False, destructive=False, idempotent=False, open_world=True),
+        _tool("get_kgg_resource", "Read a fixed current-Main KGG bootstrap, knowledge pack, resource manifest or source version. Does not certify editor synchronization.", {"actor": actor, "resource": {"type": "string", "enum": ["resource-manifest", "source-version", *[profile + '-' + topic for profile in ["admin", "patient"] for topic in ["bootstrap", "architecture", "operations", "safety", "testing"]]]}}, ["actor", "resource"], read_only=True, destructive=False, idempotent=True, open_world=True),
         _tool("start_ui_session", "Create or replace an in-memory session binding actor, lease, runner, and caller-supplied Fresh-Main SHA; it does not open a browser or write app/repository data.", {"session": session}, ["session"], read_only=False, destructive=False, idempotent=False, open_world=False),
         _tool("set_device_profile", "Change only the in-memory device profile of an active session; no app or repository write occurs.", {"session_id": session_id, "actor": actor, "profile": {"type": "string", "enum": sorted(PROFILES)}}, ["session_id", "actor", "profile"], read_only=False, destructive=False, idempotent=True, open_world=False),
         _tool("run_quick_flow", "Run the bounded synthetic Quick Flow, or allowlisted browser steps when the opt-in real-browser host is enabled; record sanitized evidence and never write the repository.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
@@ -792,7 +845,7 @@ def tool_catalog() -> list[dict[str, Any]]:
         _tool("observe_visual_state", "When the opt-in real-browser host is enabled, observe one screenshot and state from a persistent bounded browser page; store the observation and evidence for the caller's next action.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
         _tool("execute_visual_action", "When the opt-in real-browser host is enabled, execute exactly one bounded caller-supplied action in the same page; it may change app state and returns a second screenshot plus state verification.", {"request": request, "decision": visual_decision}, ["request", "decision"], read_only=False, destructive=True, idempotent=False, open_world=True),
         _tool("compare_visual_reference", "Compare the latest observed real-browser screenshot against an explicitly transferred, approved, or same-fixture reference PNG with exact viewport, mask, threshold, hash, and pixel-diff evidence; never infer a reference from an upload or filesystem.", {"request": request, "reference": visual_reference}, ["request", "reference"], read_only=False, destructive=False, idempotent=False, open_world=True),
-        _tool("run_width_sweep", "Validate a bounded viewport list and return PREVIEW_ONLY in memory; no browser run or screenshot comparison is performed.", {"session_id": session_id, "actor": actor, "viewports": {"type": "array", "maxItems": 10}}, ["session_id", "actor", "viewports"], read_only=True, destructive=False, idempotent=True, open_world=False),
+        _tool("run_width_sweep", "Capture up to ten real viewport screenshots within one bounded opt-in run; without a real-browser host return PREVIEW_ONLY. Capture-only evidence does not certify visual comparison or layout parity.", {"session_id": session_id, "actor": actor, "viewports": {"type": "array", "maxItems": 10}}, ["session_id", "actor", "viewports"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("get_test_evidence", "Read sanitized in-memory evidence for a session; never writes or dispatches.", {"session_id": session_id, "actor": actor}, ["session_id", "actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("get_session_status", "Read sanitized in-memory session status and event count; never writes or dispatches.", {"session_id": session_id, "actor": actor}, ["session_id", "actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("save_flow", "Persist one new user-saved synthetic Flow atomically in its project namespace; published versions are never silently overwritten.", {"flow": flow_document}, ["flow"], read_only=False, destructive=False, idempotent=False, open_world=False),
@@ -805,7 +858,7 @@ def tool_catalog() -> list[dict[str, Any]]:
 
 
 class Runtime:
-    def __init__(self, *, browser_bootstrap: Any | None = None, flow_store_path: str | Path | None = None) -> None:
+    def __init__(self, *, browser_bootstrap: Any | None = None, flow_store_path: str | Path | None = None, kgg_actions: Any | None = None) -> None:
         self.sessions: dict[str, dict[str, Any]] = {}
         self.evidence: dict[str, list[dict[str, Any]]] = {}
         self.visual_sessions: dict[str, Any] = {}
@@ -817,6 +870,20 @@ class Runtime:
         self.flow_store_module = _load_flow_store_module()
         self.flow_store = self.flow_store_module.FlowStore(flow_store_path)
         self.project_status_module = _load_project_status_module()
+        self.kgg_actions_module = _load_kgg_actions_module()
+        allowed_workflows = os.environ.get("KGG_GITHUB_WORKFLOW_OPERATIONS", "")
+        if len(allowed_workflows) > 1024:
+            _fail("kgg_action_write_policy_invalid")
+        allowed_workflows = tuple(value.strip() for value in allowed_workflows.split(",") if value.strip())
+        self.kgg_actions = kgg_actions or (self.kgg_actions_module.KggActions(allowed_workflow_operations=allowed_workflows) if os.environ.get("KGG_GITHUB_READS") == "1" else None)
+
+    def _kgg_call(self, callback: Any) -> Any:
+        if self.kgg_actions is None:
+            _fail("kgg_action_adapter_unavailable")
+        try:
+            return callback()
+        except ValueError as exc:
+            _fail(str(exc))
 
     def _close_visual(self, session_id: str) -> None:
         browser = self.visual_sessions.pop(session_id, None)
@@ -848,7 +915,7 @@ class Runtime:
             "artifact": dict(artifact),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
         }
-        stored_observation = {**public_observation, "image": dict(image)}
+        stored_observation = {**public_observation, "image": dict(image), "viewport": deepcopy(session["viewport"])}
         session["visual_observation"] = stored_observation
         history = session.setdefault("visual_observations", {})
         history[observation_id] = stored_observation
@@ -1002,6 +1069,12 @@ class Runtime:
 
     def current(self, actor: Any) -> dict[str, Any]:
         actor_value = _actor(actor)
+        if self.kgg_actions is not None:
+            result = self._kgg_call(lambda: self.kgg_actions.run("getKggMainCommit", {}))
+            main_sha = result.get("object", {}).get("sha") if isinstance(result, Mapping) else None
+            if not isinstance(main_sha, str) or not SHA_RE.fullmatch(main_sha):
+                _fail("kgg_main_response_invalid")
+            return {"schema": MCP_SCHEMA, "operation": "get_current_state", "actor": actor_value, "status": "ready", "main_sha": main_sha, "source": "github_live"}
         sessions = [s for s in self.sessions.values() if s["active_actor"] == actor_value]
         main_sha = sessions[-1]["app"]["main_sha"] if sessions else "not_bound"
         return {"schema": MCP_SCHEMA, "operation": "get_current_state", "actor": actor_value, "status": "ready", "main_sha": main_sha}
@@ -1010,6 +1083,8 @@ class Runtime:
         actor_value = _actor(actor)
         if not isinstance(ticket_id, str) or not re.fullmatch(r"#?[0-9]{1,6}", ticket_id):
             _fail("ticket_id_invalid")
+        if self.kgg_actions is not None:
+            return {"schema": MCP_SCHEMA, "operation": "get_ticket_state", "actor": actor_value, **self._kgg_call(lambda: self.kgg_actions.ticket(ticket_id))}
         return {"schema": MCP_SCHEMA, "operation": "get_ticket_state", "actor": actor_value, "ticket_id": ticket_id, "status": "synthetic-read-only"}
 
     def set_profile(self, session_id: Any, actor: Any, profile: Any) -> dict[str, Any]:
@@ -1541,7 +1616,9 @@ class Runtime:
             after_state = verified["state"]
             if after_state != decision["expected_state_after"]:
                 _fail("visual_expected_state_not_reached")
-            if after_state == observation["state"]:
+            if decision["operation"] in {"back", "reload"} and action.get("navigation_completed") is not True:
+                _fail("visual_navigation_unconfirmed")
+            if after_state == observation["state"] and decision["operation"] != "reload":
                 _fail("visual_state_unchanged")
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
@@ -1573,6 +1650,8 @@ class Runtime:
         }
         if flow_stale:
             evidence["flow_status"] = "STALE_REQUIRES_REVIEW"
+        if action.get("navigation_completed") is True:
+            evidence["navigation_completed"] = True
         self.evidence.setdefault(session["session_id"], []).append(evidence)
         return {
             "schema": MCP_SCHEMA,
@@ -1610,7 +1689,11 @@ class Runtime:
             _fail("visual_current_image_invalid")
         if current_digest != current_artifact.get("sha256"):
             _fail("visual_current_hash_mismatch")
-        reference = _visual_reference(reference_value, session)
+        raw_reference = _object(reference_value, "reference")
+        source_session = None
+        if raw_reference.get("reference_class") == "approved_golden" and "source_session_id" in raw_reference:
+            source_session = self._session(raw_reference.get("source_session_id"), request.get("actor"), lease=False)
+        reference = _visual_reference(reference_value, session, source_session)
         comparison = _compare_visual_images(current_image, reference)
         session["used_requests"].append(checked["request_id"])
         session["events"].append({"event": "visual_reference_compared", "status": comparison["status"], "at": _now()})
@@ -1659,7 +1742,75 @@ class Runtime:
                 _fail("viewport_invalid")
             if not isinstance(item["device_scale_factor"], (int, float)) or isinstance(item["device_scale_factor"], bool) or not 0.5 <= item["device_scale_factor"] <= 4:
                 _fail("viewport_invalid")
-        return {"schema": MCP_SCHEMA, "operation": "run_width_sweep", "session_id": session_id, "viewports": deepcopy(viewports), "status": "PREVIEW_ONLY"}
+        result = {"schema": MCP_SCHEMA, "operation": "run_width_sweep", "session_id": session_id, "viewports": deepcopy(viewports), "status": "PREVIEW_ONLY", "verification_scope": "capture_only", "visual_comparison": "NOT_RUN"}
+        if not self.browser_bootstrap.enabled:
+            return result
+        if not {"browser", "capture"}.issubset(session["runner"]["capabilities"]):
+            _fail("capability_missing")
+
+        # Each width opens an isolated page via the existing allowlisted bridge.
+        # A shared deadline bounds the entire sweep, rather than ten full waits.
+        real_browser = _load_real_browser_module()
+        started = time.monotonic()
+        deadline = started + min(30.0, session["timeout"]["timeout_ms"] / 1000)
+        session["width_sweep_count"] = session.get("width_sweep_count", 0) + 1
+        run_id = f"{session_id}-sweep-{session['width_sweep_count']}"
+        rows = [{"viewport": deepcopy(viewport), "status": "NOT_RUN"} for viewport in viewports]
+        artifacts = []
+        images = []
+        total_image_bytes = 0
+        error_class = ""
+        session["status"] = "running"
+        for index, row in enumerate(rows):
+            try:
+                self._session(session_id, actor)
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    _fail("width_sweep_timeout")
+                captured = real_browser.run_real_flow(
+                    url=session["app"]["url"], viewport=row["viewport"],
+                    steps=[{"operation": "capture_screenshot", "label": "width-sweep-capture"}],
+                    run_id=f"{run_id}-{index + 1}", timeout_ms=session["timeout"]["timeout_ms"],
+                    bootstrap=self.browser_bootstrap, wait_budget_seconds=remaining,
+                )
+                if captured["status"] != "PASS":
+                    _fail(captured["error_class"] or "width_sweep_capture_failed")
+                if len(captured.get("artifacts", [])) != 1 or len(captured.get("images", [])) != 1:
+                    _fail("width_sweep_screenshot_missing")
+                artifact, image = captured["artifacts"][0], captured["images"][0]
+                try:
+                    raw = base64.b64decode(image["data_base64"], validate=True)
+                    dimensions = struct.unpack(">II", raw[16:24])
+                except (KeyError, TypeError, ValueError, struct.error):
+                    _fail("width_sweep_screenshot_invalid")
+                viewport = row["viewport"]
+                # Chromium rounds positive CSS dimensions to the nearest device
+                # pixel; ceil rejects valid fractional-DPR captures.
+                expected = tuple(math.floor(viewport[key] * viewport["device_scale_factor"] + 0.5) for key in ("width", "height"))
+                if raw[:8] != b"\x89PNG\r\n\x1a\n" or dimensions != expected:
+                    _fail("width_sweep_viewport_mismatch")
+                total_image_bytes += len(raw)
+                if total_image_bytes > 8 * 1024 * 1024:
+                    _fail("width_sweep_artifacts_too_large")
+                row.update(status="PASS", state=captured["final_state"], artifact=artifact, screenshot_size={"width": dimensions[0], "height": dimensions[1]})
+                artifacts.append(artifact)
+                images.append(image)
+            except (real_browser.RealBrowserError, ServerError) as exc:
+                error_class = exc.code
+                row.update(status="FAIL", error_class=error_class)
+                break
+        status = "FAIL" if error_class else "PASS"
+        session["status"] = "failed" if error_class else "completed"
+        evidence = {
+            "schema": "kgg-ui-lab/width-sweep-evidence/v1", "status": status, "surface": "real_browser",
+            "session_id": session_id, "run_id": run_id, "main_sha": session["app"]["main_sha"],
+            "verification_scope": "capture_only", "visual_comparison": "NOT_RUN",
+            "results": deepcopy(rows), "artifacts": deepcopy(artifacts),
+        }
+        self.evidence.setdefault(session_id, []).append(evidence)
+        session["events"].append({"event": "width_sweep_completed", "status": status, "at": _now()})
+        result.update(status=status, error_class=error_class, results=rows, evidence=evidence, runtime_ms=int((time.monotonic() - started) * 1000), _images=images)
+        return result
 
     def evidence_read(self, session_id: Any, actor: Any) -> dict[str, Any]:
         self._session(session_id, actor, lease=False)
@@ -1701,6 +1852,24 @@ class Runtime:
             return self.project_status_checkpoint(args, tool_params or {})
         if name == "get_current_state":
             return self.current(args.get("actor"))
+        if name in {"get_kgg_action_capabilities", "run_kgg_action", "dispatch_kgg_workflow", "get_kgg_resource"}:
+            actor = _actor(args.get("actor"))
+            required = {"actor"} if name == "get_kgg_action_capabilities" else ({"actor", "operation", "payload"} if name in {"run_kgg_action", "dispatch_kgg_workflow"} else {"actor", "resource"})
+            if set(args) != required:
+                _fail("kgg_action_payload_invalid")
+            if name == "get_kgg_action_capabilities":
+                result = self.kgg_actions_module.KggActions().capabilities()
+                if self.kgg_actions is None:
+                    for action in result["actions"]:
+                        if action["status"] == "BOUND_READ":
+                            action["status"] = "NOT_BOUND"
+                result["workflow_dispatch"] = (self.kgg_actions or self.kgg_actions_module.KggActions()).workflow_capabilities()
+                return result
+            if name == "dispatch_kgg_workflow":
+                result = self._kgg_call(lambda: self.kgg_actions.dispatch(args["operation"], args["payload"]))
+                return {"schema": MCP_SCHEMA, "operation": name, "actor": actor, "status": result["status"], "source": "github_live", "reconciliation_required": True, "result": result}
+            result = self._kgg_call(lambda: self.kgg_actions.run(args["operation"], args["payload"])) if name == "run_kgg_action" else self._kgg_call(lambda: self.kgg_actions.resource(args["resource"]))
+            return {"schema": MCP_SCHEMA, "operation": name, "actor": actor, "status": "PASS", "source": "github_live", "result": result}
         if name == "get_ticket_state":
             return self.ticket(args.get("actor"), args.get("ticket_id"))
         if name == "start_ui_session":
@@ -1744,7 +1913,8 @@ def _result_content(value: Mapping[str, Any]) -> dict[str, Any]:
     encoded = json.dumps(public, ensure_ascii=False, separators=(",", ":"))
     content: list[dict[str, Any]] = [{"type": "text", "text": encoded}]
     if isinstance(images, list):
-        for image in images[:2]:
+        image_limit = 10 if public.get("operation") == "run_width_sweep" else 2
+        for image in images[:image_limit]:
             if isinstance(image, Mapping) and image.get("mime_type") == "image/png" and isinstance(image.get("data_base64"), str):
                 content.append({"type": "image", "data": image["data_base64"], "mimeType": "image/png"})
     return {"content": content, "structuredContent": public}

@@ -26,7 +26,7 @@ class KggPluginCandidateGateTests(unittest.TestCase):
         self.assert_gate("skill_missing", skill_names=gate.REQUIRED_SKILLS - {"kgg-safety"})
 
     def test_version_and_hash_drift_is_typed(self) -> None:
-        self.assert_gate("version_hash_drift", expected_version="0.2.0")
+        self.assert_gate("version_hash_drift", expected_version="999.999.999")
         self.assert_gate("version_hash_drift", hash_overrides={"docs/kgg-ui-lab-v1-goal-prompt.md": "0" * 64})
 
     def test_mcp_availability_authorization_and_fresh_main_are_typed(self) -> None:

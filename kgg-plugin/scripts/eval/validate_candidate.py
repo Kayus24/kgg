@@ -16,10 +16,16 @@ REQUIRED_SKILLS = {
     "kgg-testing",
     "kgg-safety",
     "kgg-escalation",
+    "kgg-project-status",
 }
 REQUIRED_TOOLS = (
+    "project_status_checkpoint",
     "get_current_state",
     "get_ticket_state",
+    "get_kgg_action_capabilities",
+    "run_kgg_action",
+    "dispatch_kgg_workflow",
+    "get_kgg_resource",
     "start_ui_session",
     "set_device_profile",
     "run_quick_flow",
@@ -77,14 +83,21 @@ def _installed_package_check(plugin_root: Path) -> dict[str, object]:
     if (
         portable.get("$schema") != "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
         or portable.get("name") != "kgg-plugin"
-        or portable.get("version") != "0.1.0"
+        or portable.get("version") != "0.5.0"
         or not isinstance(portable.get("extensions", {}).get("com.openai", {}).get("interface"), dict)
     ):
         raise RuntimeError("portable plugin manifest invalid")
-    if manifest.get("name") != "kgg-plugin" or not isinstance(manifest.get("version"), str) or manifest["version"].split("+", 1)[0] != "0.1.0":
+    if manifest.get("name") != "kgg-plugin" or not isinstance(manifest.get("version"), str) or manifest["version"].split("+", 1)[0] != "0.5.0":
         raise RuntimeError("installed package version or name invalid")
     if manifest.get("skills") != "./skills/" or manifest.get("mcpServers") != "./.mcp.json":
         raise RuntimeError("installed package manifest wiring invalid")
+    interface = portable["extensions"]["com.openai"]["interface"]
+    for key in ("composerIcon", "logo"):
+        if interface.get(key) != "./assets/kgg-ui-lab.png" or manifest.get("interface", {}).get(key) != interface[key]:
+            raise RuntimeError("installed plugin icon wiring invalid")
+    icon = (plugin_root / "assets" / "kgg-ui-lab.png").read_bytes()
+    if len(icon) > 5 * 1024 * 1024 or not icon.startswith(b"\x89PNG\r\n\x1a\n") or int.from_bytes(icon[16:20], "big") != 512 or int.from_bytes(icon[20:24], "big") != 512:
+        raise RuntimeError("installed plugin icon invalid")
     if source_hashes.get("fresh_main_required") is not True:
         raise RuntimeError("installed source map does not require Fresh Main")
 
@@ -99,6 +112,9 @@ def _installed_package_check(plugin_root: Path) -> dict[str, object]:
             raise RuntimeError(f"installed skill invalid: {skill}")
 
     server_path = plugin_root / "mcp" / "server.py"
+    for dependency in ("browser_navigation.js", "kgg_actions.py", "kgg_action_routes.json"):
+        if not (server_path.parent / dependency).is_file():
+            raise RuntimeError("installed MCP dependency missing: " + dependency)
     server_source = server_path.read_text(encoding="utf-8")
     tree = ast.parse(server_source, filename=str(server_path))
     tool_names = None

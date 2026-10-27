@@ -75,8 +75,12 @@ class KggUiLabMcpServerTests(unittest.TestCase):
             annotations,
             {
                 "project_status_checkpoint": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
-                "get_current_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
-                "get_ticket_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "get_current_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+                "get_ticket_state": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+                "get_kgg_action_capabilities": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+                "run_kgg_action": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+                "dispatch_kgg_workflow": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+                "get_kgg_resource": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
                 "start_ui_session": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
                 "set_device_profile": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
                 "run_quick_flow": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
@@ -105,6 +109,44 @@ class KggUiLabMcpServerTests(unittest.TestCase):
         self.assertIn("PREVIEW_ONLY", catalog["run_width_sweep"]["description"])
         for name in ("start_ui_session", "set_device_profile", "run_quick_flow", "capture_screenshot", "record_screen", "observe_visual_state", "execute_visual_action", "compare_visual_reference"):
             self.assertFalse(catalog[name]["annotations"]["readOnlyHint"])
+
+    def test_workflow_dispatch_is_explicit_and_default_closed(self) -> None:
+        catalog = {item["name"]: item for item in server.tool_catalog()}
+        self.assertIn("dispatch_kgg_workflow", tuple(catalog))
+        self.assertFalse(catalog["dispatch_kgg_workflow"]["annotations"]["readOnlyHint"])
+        self.assertTrue(catalog["run_kgg_action"]["annotations"]["readOnlyHint"])
+        self.assertIn("host", catalog["dispatch_kgg_workflow"]["description"])
+        result = self._call(server.Runtime(), 800, "dispatch_kgg_workflow", {
+            "actor": "custom_gpt", "operation": "submitKggReadOnlyValidation", "payload": {},
+        })
+        self.assertTrue(result["isError"])
+        self.assertIn("kgg_action_adapter_unavailable", str(result))
+
+    def test_dispatch_response_does_not_promote_acceptance_to_workflow_pass(self) -> None:
+        from unittest.mock import Mock
+        actions = Mock()
+        actions.dispatch.return_value = {"status": "dispatch_accepted", "http_status": 204, "reconciliation_required": True}
+        runtime = server.Runtime(kgg_actions=actions)
+        result = runtime.call("dispatch_kgg_workflow", {
+            "actor": "codex", "operation": "submitKggReadOnlyValidation", "payload": {"ref": "main", "inputs": {}},
+        })
+        self.assertEqual(result["status"], "dispatch_accepted")
+        self.assertTrue(result["reconciliation_required"])
+        actions.run.assert_not_called()
+        self.assertEqual(actions.dispatch.call_count, 1)
+
+    def test_only_host_configuration_enables_a_workflow(self) -> None:
+        from unittest.mock import patch
+        with patch.dict(server.os.environ, {"KGG_GITHUB_READS": "1", "KGG_GITHUB_WORKFLOW_OPERATIONS": "submitKggReadOnlyValidation"}):
+            runtime = server.Runtime()
+        result = runtime.call("get_kgg_action_capabilities", {"actor": "custom_gpt"})
+        capabilities = {item["operation"]: item for item in result["workflow_dispatch"]["actions"]}
+        self.assertEqual(capabilities["submitKggReadOnlyValidation"]["status"], "AVAILABLE")
+        self.assertEqual(capabilities["submitKggPreviewAuto"]["status"], "HOST_DISABLED")
+        with self.assertRaisesRegex(server.ServerError, "external_gate_required"):
+            runtime.call("dispatch_kgg_workflow", {"actor": "max", "operation": "submitKggMainGate", "payload": {}})
+        with self.assertRaisesRegex(server.ServerError, "kgg_action_payload_invalid"):
+            runtime.call("dispatch_kgg_workflow", {"actor": "max", "operation": "submitKggReadOnlyValidation", "payload": {}, "allowed_workflow_operations": ["submitKggPreviewAuto"]})
 
     def test_start_session_schema_exposes_bindable_fields(self) -> None:
         tool = next(item for item in server.tool_catalog() if item["name"] == "start_ui_session")

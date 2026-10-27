@@ -286,6 +286,19 @@ KGG_ACTION_OPERATIONALS = (
     ("submitKggAdminEditorSyncSnapshotPr", True),
     ("submitKggPreviewAuto", True),
     ("submitKggMainGate", True),
+    ("submitKggDeviceTest", True),
+    ("listKggDeviceTestRuns", False),
+    ("listKggMainGateRuns", False),
+    ("listKggPreviewAutoRuns", False),
+    ("submitKggPatientPreviewFromAdmin", True),
+    ("listKggPatientPreviewRunsFromAdmin", False),
+    ("submitKggAgentCoordinationEvent", True),
+    ("listKggAgentCoordinationRuns", False),
+    ("submitKggMemoryUpdate", True),
+    ("listKggMemoryUpdateRuns", False),
+    ("getKggMemoryUpdateRun", False),
+    ("getKggMemoryUpdateStatus", False),
+    ("getKggMemoryUpdateArtifacts", False),
 )
 
 
@@ -365,6 +378,24 @@ class KggCompatibilityShim(GenericUiLabCore):
             "schema": "kgg-ui-lab/kgg-action-result/v1",
             "operation": operation,
             "status": "PASS",
+            "result": deepcopy(dict(result)),
+        }
+
+    def dispatch_kgg_workflow(self, operation: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        """Use the trusted adapter's separate write boundary, never the read entry point."""
+        dispatch = getattr(self.action_adapter, "dispatch", None)
+        if not callable(dispatch):
+            _fail("kgg_action_dispatch_unavailable")
+        if not isinstance(operation, str) or not isinstance(payload, Mapping):
+            _fail("kgg_action_payload_invalid")
+        result = dispatch(operation, deepcopy(dict(payload)))
+        if not isinstance(result, Mapping) or result.get("status") != "dispatch_accepted":
+            _fail("kgg_action_result_invalid")
+        return {
+            "schema": "kgg-ui-lab/kgg-workflow-dispatch/v1",
+            "operation": operation,
+            "status": "dispatch_accepted",
+            "reconciliation_required": True,
             "result": deepcopy(dict(result)),
         }
 

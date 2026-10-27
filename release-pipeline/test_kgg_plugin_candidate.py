@@ -20,6 +20,7 @@ EXPECTED_SKILLS = {
     "kgg-testing",
     "kgg-safety",
     "kgg-escalation",
+    "kgg-project-status",
 }
 
 
@@ -41,19 +42,25 @@ class KggPluginCandidateTests(unittest.TestCase):
             "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
         )
         self.assertEqual(portable["name"], "kgg-plugin")
-        self.assertEqual(portable["version"], "0.1.0")
+        self.assertEqual(portable["version"], "0.5.0")
         self.assertEqual(portable["repository"], "https://github.com/Kayus24/kgg")
         interface = portable["extensions"]["com.openai"]["interface"]
         self.assertEqual(interface["displayName"], "KGG Plugin Candidate")
-        self.assertEqual(interface["capabilities"], ["Read"])
+        self.assertEqual(interface["capabilities"], ["Read", "Write"])
         self.assertTrue((PLUGIN / ".codex-plugin" / "plugin.json").is_file())
         self.assertTrue((PLUGIN / ".mcp.json").is_file())
+        self.assertEqual(interface["composerIcon"], "./assets/kgg-ui-lab.png")
+        self.assertEqual(interface["logo"], interface["composerIcon"])
+        icon = (PLUGIN / interface["logo"]).read_bytes()
+        self.assertTrue(icon.startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertEqual(int.from_bytes(icon[16:20], "big"), 512)
+        self.assertEqual(int.from_bytes(icon[20:24], "big"), 512)
 
     def test_manifest_is_candidate_only_and_has_no_placeholder(self) -> None:
         manifest_path = PLUGIN / ".codex-plugin" / "plugin.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["name"], "kgg-plugin")
-        self.assertEqual(manifest["version"].split("+", 1)[0], "0.1.0")
+        self.assertEqual(manifest["version"].split("+", 1)[0], "0.5.0")
         self.assertNotIn("[TODO:", manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertEqual(manifest["mcpServers"], "./.mcp.json")
@@ -122,6 +129,8 @@ class KggPluginCandidateTests(unittest.TestCase):
             self.assertEqual(actual, entry["sha256"], entry["path"])
         for skill_name in EXPECTED_SKILLS:
             contents = (PLUGIN / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+            if skill_name == "kgg-project-status":
+                continue  # This runtime telemetry skill has no historical source snapshot.
             self.assertIn("Candidate snapshot hashes (SHA-256)", contents)
             self.assertGreaterEqual(len(re.findall(r"\b[0-9a-f]{64}\b", contents)), 1)
         self.assertTrue((PLUGIN / "scripts" / "eval" / "README.md").is_file())

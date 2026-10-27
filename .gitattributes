@@ -7,3 +7,6 @@
 *.tsx text eol=lf
 *.css text eol=lf
 *.mjs text eol=lf
+kgg-plugin/mcp/*.js text eol=lf
+release-pipeline/test_kgg_browser_navigation.js text eol=lf
+docs/kgg-custom-gpt-action-api-openapi.yaml text eol=lf
