@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0438",
+  "versionName": "1.0.130-qr-cockpit-background-compact-link",
+  "notes": "Mobile-Inbox r0438: KGG Update v130 QR-Scantext und kompakter Cockpit-Link (d6c0f4cd3869).",
+  "createdAt": "2026-10-27T16:08:24Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0438",
+      "profile": "admin",
+      "versionName": "1.0.130-qr-cockpit-background-compact-link",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html",
+      "sha256": "d6c0f4cd3869a3f91d0ae9e0fea552c939443c3986ae5fc22214783da908da0c",
+      "notes": "Mobile-Inbox r0438: KGG Update v130 QR-Scantext und kompakter Cockpit-Link (d6c0f4cd3869)."
+    },
+    "colleague": {
+      "releaseId": "r0438",
+      "profile": "colleague",
+      "versionName": "1.0.130-qr-cockpit-background-compact-link",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/colleague.html",
+      "sha256": "6edcbc479e4efc0edb89d57cefcedc3c7fe0103316136581a906556f5a1d7cda",
+      "notes": "Mobile-Inbox r0438: KGG Update v130 QR-Scantext und kompakter Cockpit-Link (d6c0f4cd3869)."
+    }
+  }
+}

@@ -2,11 +2,11 @@
   "kind": "kgg_app_update_manifest",
   "version": 1,
   "latestVersion": "r0426",
-  "latestAdminReleaseId": "r0437",
+  "latestAdminReleaseId": "r0438",
   "latestColleagueReleaseId": "r0426",
-  "latestAdminVersion": "1.0.129-cockpit-qr-resume",
+  "latestAdminVersion": "1.0.130-qr-cockpit-background-compact-link",
   "latestColleagueVersion": "1.0.65-source-control-char-guard",
-  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
+  "adminUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html",
   "colleagueUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "latestUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "latestAndroidShellVersion": "v406",
@@ -16,5 +16,5 @@
   "latestColleagueAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "latestAdminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_ADMIN_v406_responsive_drive_debug.apk",
   "latestAdminAndroidApkSha256": "2cd6ec13ae01652c5f5e851f1d1b06747a9208f86d88cfa4ef2c2756a4bb5e93",
-  "releaseNotes": "Admin beta r0437: Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar."
+  "releaseNotes": "Admin beta r0438: Mobile-Inbox r0438: KGG Update v130 QR-Scantext und kompakter Cockpit-Link (d6c0f4cd3869)."
 }
