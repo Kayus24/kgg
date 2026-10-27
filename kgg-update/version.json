@@ -2,6 +2,6 @@
   "versionCode": 129,
   "versionName": "1.0.129-cockpit-qr-resume",
   "indexUrl": "index.html?v=129",
-  "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
+  "sha256": "698d65a44f3e1ca33b34c2a174c7bf42f8be8084e51fe3d60c175e3a3c73dcb7",
   "notes": "v129: Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten."
 }
