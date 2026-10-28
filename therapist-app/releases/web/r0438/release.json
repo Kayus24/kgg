@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0438",
+  "versionName": "1.0.130-plan-card-height-stability",
+  "notes": "Admin-Beta v130: zweizeilig lesbare Übungsnamen, getrennte 44px Bearbeiten-/Löschen-Touchflächen und stabile Plan-Karten im Tablet-Split beim Verschieben der Trennlinie. Kolleg:innen-Kanal unverändert.",
+  "createdAt": "2026-10-28T06:14:57Z",
+  "source": "kgg-update/index.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0438",
+      "profile": "admin",
+      "versionName": "1.0.130-plan-card-height-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html",
+      "sha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
+      "notes": "Admin-Beta v130: zweizeilig lesbare Übungsnamen, getrennte 44px Bearbeiten-/Löschen-Touchflächen und stabile Plan-Karten im Tablet-Split beim Verschieben der Trennlinie. Kolleg:innen-Kanal unverändert."
+    },
+    "colleague": {
+      "releaseId": "r0438",
+      "profile": "colleague",
+      "versionName": "1.0.130-plan-card-height-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/colleague.html",
+      "sha256": "43fe2bbafed7ff01862c8dd70f8a4b496b56cfef8832677f3777bd031f871962",
+      "notes": "Admin-Beta v130: zweizeilig lesbare Übungsnamen, getrennte 44px Bearbeiten-/Löschen-Touchflächen und stabile Plan-Karten im Tablet-Split beim Verschieben der Trennlinie. Kolleg:innen-Kanal unverändert."
+    }
+  }
+}

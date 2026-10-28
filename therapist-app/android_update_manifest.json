@@ -4,15 +4,15 @@
   "schema": 2,
   "channels": {
     "admin": {
-      "releaseId": "r0437",
+      "releaseId": "r0438",
       "profile": "admin",
-      "versionName": "1.0.129-cockpit-qr-resume",
-      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
-      "sha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
-      "notes": "Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar.",
-      "rolloutCode": 437,
-      "previousReleaseId": "r0436",
-      "releasedAt": "2026-10-26T17:05:38Z"
+      "versionName": "1.0.130-plan-card-height-stability",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html",
+      "sha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
+      "notes": "Admin-Beta v130: zweizeilig lesbare Übungsnamen, getrennte 44px Bearbeiten-/Löschen-Touchflächen und stabile Plan-Karten im Tablet-Split beim Verschieben der Trennlinie. Kolleg:innen-Kanal unverändert.",
+      "rolloutCode": 438,
+      "previousReleaseId": "r0437",
+      "releasedAt": "2026-10-28T06:14:57Z"
     },
     "colleague": {
       "releaseId": "r0426",
@@ -30,8 +30,8 @@
   "latestAndroidShellVersion": "v406",
   "colleagueHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html",
   "colleagueSha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
-  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0437/admin.html",
-  "adminSha256": "a3685d915366c8bf53afa21f6bc5087a1b027b42de739530325d65ba3b13cd88",
+  "adminHtmlUrl": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html",
+  "adminSha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
   "sha256": "670c47aee4205bdd80b3305d4d0ac63f0a953751564918cfb3f2d886e67c5fee",
   "androidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",
   "androidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
@@ -39,7 +39,7 @@
   "colleagueAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "adminAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_ADMIN_v406_responsive_drive_debug.apk",
   "adminAndroidApkSha256": "2cd6ec13ae01652c5f5e851f1d1b06747a9208f86d88cfa4ef2c2756a4bb5e93",
-  "notes": "Admin beta r0437: Cockpit-Link automatisch nach Patienten-QR; Plan, letzte Werte und Therapienotizen wiederaufnehmen. Eigene Eingaben haben Vorrang vor neuen QR-Daten; Abschlusslink auch auf anderen Geraeten nutzbar.",
+  "notes": "Admin beta r0438: Admin-Beta v130: zweizeilig lesbare Übungsnamen, getrennte 44px Bearbeiten-/Löschen-Touchflächen und stabile Plan-Karten im Tablet-Split beim Verschieben der Trennlinie. Kolleg:innen-Kanal unverändert.",
   "latestAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",
   "latestAndroidApkSha256": "66c335098310265d85de7f460fe6782ea26cc9db0e2ae2ea981acf51b84ad3d1",
   "latestColleagueAndroidApkUrl": "https://kayus24.github.io/kgg/therapist-app/releases/v406/android/KGG_ANDROID_KOLLEGEN_v406_responsive_drive_debug.apk",
