@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 130,
+  "latestVersionCode": 131,
   "entries": [
+    {
+      "versionCode": 131,
+      "versionName": "1.0.131-plan-card-space",
+      "patchId": "kgg-v131-plan-card-space",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Mehr Platz fuer Uebungskarten",
+      "reason": "Bild-Badge bei sichtbarer Miniatur ausblenden und Handy-Aktionen rechts oben platzsparend mit getrennten Touchzielen positionieren.",
+      "whatChanged": [
+        "Bild-Badge bei sichtbarer Miniatur ausblenden und Handy-Aktionen rechts oben platzsparend mit getrennten Touchzielen positionieren."
+      ],
+      "touchedAreas": [
+        "Handy-Layout",
+        "Cockpit"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Ausdruecklicher Auftrag vom 28.10.2026 mit Geraete-Screenshots; Issue 350"
+    },
     {
       "versionCode": 130,
       "versionName": "1.0.130-plan-card-height-stability",
@@ -451,41 +483,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 116,
-      "versionName": "1.0.116-cockpit-seam-title-wrap",
-      "patchId": "kgg-v116-cockpit-seam-title-wrap",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Trennkante ohne Titelsprung",
-      "reason": "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei.",
-      "whatChanged": [
-        "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.130-plan-card-height-stability",
+  "latestVersionName": "1.0.131-plan-card-space",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -622,6 +622,14 @@
       "entriesSha256": "38f2c4fd94104a6bf1141af3e0f1f34e5b0e7b6faee80392c51f865eb529d921",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v130-plan-card-height-stability"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v131.json",
+      "snapshotVersionCode": 131,
+      "entryCount": 72,
+      "entriesSha256": "c2321bb7486def600806c1768f9761fb53b07edb50f44c303b7e09964000f5ab",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v131-plan-card-space"
     }
   ]
 }

@@ -1,0 +1,2 @@
+</script>
+<!-- END kgg-changelog -->
