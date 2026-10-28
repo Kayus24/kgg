@@ -207,7 +207,7 @@ android {
         admin {
             dimension "profile"
             applicationId "de.kgg.admin"
-            buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "437"
+            buildConfigField "int", "KGG_BUNDLED_WEB_ROLLOUT_CODE", "438"
             manifestPlaceholders = [appLabel: "KGG Admin"]
         }
         preview {
@@ -244,7 +244,7 @@ android {
 }
 
 def stageAdminProfileAsset = tasks.register("stageAdminProfileAsset", Copy) {
-    from("../../therapist-app/releases/web/r0437/admin.html")
+    from("../../therapist-app/releases/web/r0438/admin.html")
     into(layout.buildDirectory.dir("generated/kggAssets/admin"))
 }
 

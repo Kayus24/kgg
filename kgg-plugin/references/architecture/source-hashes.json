@@ -1,6 +1,6 @@
 {
   "schema": "kgg-plugin/source-hashes/v1",
-  "snapshot": "2026-10-26",
+  "snapshot": "2026-10-28",
   "fresh_main_required": true,
   "sources": [
     {
@@ -177,7 +177,7 @@
     },
     {
       "path": "docs/kgg-custom-gpt-resource-manifest.json",
-      "sha256": "4fb47a238e87ce5b2b8fa5408a11792c07f03e392ceb02fc284a411a14852d2e"
+      "sha256": "ad1a60b797926e636f78828d3cffb127cae33d0f775a14f6957ded29d6e4e565"
     },
     {
       "path": "release-pipeline/test_kgg_admin_editor_sync_action_surface.py",
