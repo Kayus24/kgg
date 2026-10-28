@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "releaseId": "r0439",
+  "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+  "notes": "Admin-Beta v131 QR-Cockpit-Links mit erhaltener v130 Tablet-Split-Stabilisierung, noch unveroeffentlicht",
+  "createdAt": "2026-10-28T09:52:57Z",
+  "source": "release-inbox/admin.html",
+  "profiles": {
+    "admin": {
+      "releaseId": "r0439",
+      "profile": "admin",
+      "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0439/admin.html",
+      "sha256": "ee09e8a3bf621fe75c40a982c43c45272fde689dd7da83f1b4a188222d67c39d",
+      "notes": "Admin-Beta v131 QR-Cockpit-Links mit erhaltener v130 Tablet-Split-Stabilisierung, noch unveroeffentlicht"
+    },
+    "colleague": {
+      "releaseId": "r0439",
+      "profile": "colleague",
+      "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+      "url": "https://kayus24.github.io/kgg/therapist-app/releases/web/r0439/colleague.html",
+      "sha256": "46e4768ea277666f397b9d7a802913975f1a2b20e35452c75a2431f87262a751",
+      "notes": "Admin-Beta v131 QR-Cockpit-Links mit erhaltener v130 Tablet-Split-Stabilisierung, noch unveroeffentlicht"
+    }
+  }
+}

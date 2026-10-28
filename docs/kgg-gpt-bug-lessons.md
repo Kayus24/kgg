@@ -179,6 +179,14 @@ Generated from the KGG bug/debug history. Load this before proposing or dispatch
 - Caution: Keep patch scoped to the requested area.
 - Tests: Die unveraenderten Geraeteprofile oeffneten den gedrosselten Scanner mit einem bereits gestarteten grauen Canvas-Stream. Erst nach den UI-Wartebedingungen wurde das QR-Bild eingespeist. Dadurch pruefte jsQR zunaechst graue/cached Frames, waehrend die Geraetefrist bereits lief. Instrumentiert beobachtet: mehrere leere Decoderaufrufe; unter CPU-Drosselung kann
 
+### Patienten-QR: Scantext und Cockpit-Link ohne Auto-Oeffnung
+
+- Source: `docs/bug-debug/2026-10-27-cockpit-qr-link-workflow.md`
+- Areas: debug, modal, phone-layout, qr-patient, scan-camera, sync, tablet-layout
+- Lesson: Ausgang: `main` `96a82f08ca674ec3195c20ec3d16bb45f9965b16`, Admin-Web r0437 / Quelle v129. Bei QR-Scans wird das Cockpit bislang durch `importPatientPlan()` aktiviert und eine separate Cockpit-Link-Ausgabe angezeigt. Der urspruengliche Scantext wird verdeckt. - Scan verarbeitet QR-Daten weiterhin im bisherigen Job/Inbox-Workflow. - `importPatientPlan(payload
+- Caution: Keep patch scoped to the requested area.
+- Tests: Run the risk-matched KGG battery.
+
 ### Debug JSON Seite
 
 - Source: `docs/bug-debug/README.md`

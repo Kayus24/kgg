@@ -42,11 +42,11 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v130 / `1.0.130-plan-card-height-stability`.
-- Source index URL: `index.html?v=130`.
-- Source notes: v130: Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.
-- Live Admin release: `r0438` / `1.0.130-plan-card-height-stability`.
-- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html`.
+- Source web version: v131 / `1.0.131-qr-cockpit-tablet-integrated`.
+- Source index URL: `index.html?v=131`.
+- Source notes: v131: QR scan retains normal flow and appends compact Cockpit link; finished-plan copy contains exercises, sets and optional notes without patient/status headers; carries forward v130 stable tablet split card heights. Android verified App Links remain pending domain root publication and device acceptance.
+- Live Admin release: `r0439` / `1.0.131-qr-cockpit-tablet-integrated`.
+- Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0439/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
 - Live colleague URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0426/colleague.html`.
 - Latest Android shell: `v406`.

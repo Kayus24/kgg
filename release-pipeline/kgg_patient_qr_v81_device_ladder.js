@@ -17,7 +17,9 @@ const OUTPUT_DIR = path.join(ROOT, "tmp", "patient-qr-v81-device-ladder");
 const VERSION = "patient-qr-v81-device-ladder-2-prepared-frame";
 const SCANNER_SOURCE = fs.readFileSync(SCANNER_PATH, "utf8");
 const SCANNER_VERSION = (SCANNER_SOURCE.match(/const VERSION='([^']+)'/) || [])[1] || "unknown";
-const TOTAL_TIMEOUT_MS = Number(process.env.KGG_PATIENT_QR_LADDER_TIMEOUT_MS || 300000);
+// Ten real Chromium device profiles plus fallback/perspective cases share this bounded watchdog.
+// Individual decoder/import deadlines are intentionally unchanged (15s/25s).
+const TOTAL_TIMEOUT_MS = Number(process.env.KGG_PATIENT_QR_LADDER_TIMEOUT_MS || 600000);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -742,7 +744,10 @@ async function main() {
     }));
     for (const definition of diagnosticsToRun) {
       process.stdout.write("RUN " + definition.id + "\n");
-      diagnostics.push(await runScanCase(browser, baseUrl, renderPage, definition));
+      const caseStartedAt = Date.now();
+      const outcome = await runScanCase(browser, baseUrl, renderPage, definition);
+      diagnostics.push(outcome);
+      process.stdout.write("DONE " + definition.id + " status=" + outcome.status + " elapsedMs=" + outcome.elapsedMs + " wallMs=" + (Date.now() - caseStartedAt) + "\n");
     }
     const ladderDefinitions = [
       { id: "oppo-simulation-provisional-7", count: 7, profile: { width: 1280, height: 720, fps: 10, cpu: 1 }, width: 1280, height: 720, fps: 10, cpu: 1, detectorMode: "throw", feedFrame: true, deadlineMs: 15000 },
@@ -753,7 +758,10 @@ async function main() {
     ];
     for (const definition of ladderDefinitions) {
       process.stdout.write("RUN " + definition.id + "\n");
-      profiles.push(await runScanCase(browser, baseUrl, renderPage, definition));
+      const caseStartedAt = Date.now();
+      const outcome = await runScanCase(browser, baseUrl, renderPage, definition);
+      profiles.push(outcome);
+      process.stdout.write("DONE " + definition.id + " status=" + outcome.status + " elapsedMs=" + outcome.elapsedMs + " wallMs=" + (Date.now() - caseStartedAt) + "\n");
     }
     conditions = await runDirectJsQrConditions(renderPage, [7, 20]);
     photoFallback = await runPhotoFallbackCase(browser, baseUrl, renderPage);

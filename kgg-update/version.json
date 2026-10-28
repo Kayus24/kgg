@@ -1,7 +1,7 @@
 {
-  "versionCode": 130,
-  "versionName": "1.0.130-plan-card-height-stability",
-  "indexUrl": "index.html?v=130",
-  "sha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
-  "notes": "v130: Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
+  "versionCode": 131,
+  "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+  "indexUrl": "index.html?v=131",
+  "sha256": "ee09e8a3bf621fe75c40a982c43c45272fde689dd7da83f1b4a188222d67c39d",
+  "notes": "v131: QR scan retains normal flow and appends compact Cockpit link; finished-plan copy contains exercises, sets and optional notes without patient/status headers; carries forward v130 stable tablet split card heights. Android verified App Links remain pending domain root publication and device acceptance."
 }

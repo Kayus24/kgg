@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<!--
-KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
-
-Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
-Before editing this app, any LLM/agent/human should read these blocks:
-1. <script type="application/json" id="kgg-source-truth">
+<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -107,8 +98,8 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "plan-card-height-stability"
   ],
   "currentVersion": {
-    "versionCode": 130,
-    "versionName": "1.0.130-plan-card-height-stability",
+    "versionCode": 131,
+    "versionName": "1.0.131-qr-cockpit-tablet-integrated",
     "lastPatchId": "kgg-v130-plan-card-height-stability",
     "updatedBy": "kgg-module-scaffolder"
   },
@@ -134,4 +125,3 @@ Before editing this app, any LLM/agent/human should read these blocks:
   }
 }
 </script>
-<!-- END kgg-source-truth -->

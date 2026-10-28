@@ -647,6 +647,9 @@ def derive_colleague(candidate: str) -> str:
             fail(f"Colleague build still contains Admin-only token: {forbidden}")
     if 'class="colleagueMode"' not in html or "KGG_ROLLOUT_PROFILE='colleague'" not in html:
         fail("Colleague build is missing its profile identity")
+    # Replacements can leave whitespace-only lines. Keep generated release artifacts
+    # diff-clean without changing functional markup or any existing release.
+    html = re.sub(r"(?m)^[ \t]+$", "", html)
     return html
 
 

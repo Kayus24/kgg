@@ -84,6 +84,8 @@ def check_manifest() -> None:
             "android.intent.category.DEFAULT",
             "android.intent.category.BROWSABLE",
         }.issubset(categories):
+            if intent_filter.get(ANDROID_NS + "autoVerify") != "true":
+                fail("cockpit HTTPS App Links must enable Android domain auto verification")
             view_filter = data_nodes
             break
     if not view_filter or len(view_filter) != 1:
