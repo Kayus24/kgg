@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v130 / `1.0.130-plan-card-height-stability`.
-- Source index URL: `index.html?v=130`.
-- Source notes: v130: Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.
+- Source web version: v131 / `1.0.131-plan-card-space`.
+- Source index URL: `index.html?v=131`.
+- Source notes: v131: Bild-Badge bei sichtbarer Miniatur ausblenden und Handy-Aktionen rechts oben platzsparend mit getrennten Touchzielen positionieren.
 - Live Admin release: `r0438` / `1.0.130-plan-card-height-stability`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0438/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

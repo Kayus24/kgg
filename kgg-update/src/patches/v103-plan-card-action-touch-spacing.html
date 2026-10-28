@@ -3,9 +3,6 @@
 <style id="kgg-v103-plan-card-action-touch-spacing-style">
   /* Original desktop action clearance; keep untouched outside narrow layouts. */
   #currentPlanBlock #planList .planCardActions{padding-right:50px!important;gap:4px!important;min-height:44px!important;}
-  /* A real plan thumbnail already indicates an image; preserve badges without thumbnail. */
-  #currentPlanBlock #planList .planCard:has(.planThumb img) .planBadge.media{display:none!important;}
-  #currentPlanBlock #planList .planCard:has(.planThumb img) .planBadges:has(> .planBadge.media:only-child){display:none!important;}
   @media (max-width:759px){
     /* Side-by-side 44px actions: avoid increasing the 2-slot Cockpit card height. */
     #currentPlanBlock #planList .planCard{
@@ -50,6 +47,7 @@
       grid-column:2!important;grid-row:2!important;min-width:0!important;
     }
     #currentPlanBlock #planList .planCard .planBadges:empty{display:none!important;}
+    #currentPlanBlock #planList .planCard:has(.planThumb img) .planBadge.media{display:none!important;}
     #currentPlanBlock #planList .planCard .planMetaLine{
       display:-webkit-box!important;-webkit-box-orient:vertical!important;
       -webkit-line-clamp:2!important;line-clamp:2;
@@ -74,20 +72,6 @@
       position:static!important;inset:auto!important;
     }
   }
-  @media (min-width:360px) and (max-width:759px){
-    /* Keep the full 44px hit targets apart while placing the delete X in the corner. */
-    #currentPlanBlock #planList .planCard{position:relative!important;}
-    #currentPlanBlock #planList .planCard .planCardActions{position:static!important;}
-    #currentPlanBlock #planList .planCard .planCardActions>[data-planedit]{
-      position:absolute!important;top:50%!important;right:48px!important;
-      left:auto!important;bottom:auto!important;
-      transform:translateY(-50%)!important;z-index:2!important;
-    }
-    #currentPlanBlock #planList .planCard .planCardActions>[data-del]{
-      position:absolute!important;top:0!important;right:0!important;
-      left:auto!important;bottom:auto!important;transform:none!important;z-index:2!important;
-    }
-  }
   @media (max-width:359px){
     /* Only truly narrow panes get a second action row, including the 820px split. */
     #currentPlanBlock #planList .planCard{
@@ -109,7 +93,7 @@
   "use strict";
   var PATCH_ID="kgg-v103-plan-card-action-touch-spacing";
   window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true,version:4,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"Narrow plan cards show two-line names; only under 360px pane width actions use a second row; keep 44px edit/delete and existing handlers"};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:3,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"Narrow plan cards show two-line names; only under 360px pane width actions use a second row; keep 44px edit/delete and existing handlers"};
 })();
 </script>
 <!-- KGG PATCH END kgg-v103-plan-card-action-touch-spacing -->

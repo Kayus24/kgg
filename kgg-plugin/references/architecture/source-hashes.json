@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "c0316418f1c80e2447fc0ef9fd1a0184be24f0cf4e13814908e9cad7896c9421"
+      "sha256": "049b5dd93c6d719f394877aeec16e033033f239ae8a6329e4104ad9cdb9295b9"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",

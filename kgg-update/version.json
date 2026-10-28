@@ -1,7 +1,7 @@
 {
-  "versionCode": 130,
-  "versionName": "1.0.130-plan-card-height-stability",
-  "indexUrl": "index.html?v=130",
-  "sha256": "6f417139893fa59f7388b2201b95515cb4e801b05ba280fe9c539945a3797b2c",
-  "notes": "v130: Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
+  "versionCode": 131,
+  "versionName": "1.0.131-plan-card-space",
+  "indexUrl": "index.html?v=131",
+  "sha256": "52af65c3dbaf4edf8d518c255d2d88f13f3f6baa36873518a8c3d72ca6872075",
+  "notes": "v131: Bild-Badge bei sichtbarer Miniatur ausblenden und Handy-Aktionen rechts oben platzsparend mit getrennten Touchzielen positionieren."
 }

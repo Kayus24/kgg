@@ -1202,6 +1202,13 @@ TEST_REGISTRY = [
         "run": lambda: run_ui_stability("regression", "gestures"),
     },
     {
+        "id": "plan-card-space-responsive-regression",
+        "level": "regression",
+        "suite": "ui-stability",
+        "reason": "Real thumbnail suppresses only redundant media badge at tablet width; 390/430px phone corner delete and edit retain separate tappable 44px targets.",
+        "run": lambda: run_playwright_script("kgg_plan_card_space_v131_smoke.js"),
+    },
+    {
         "id": "ticket-015-progressions-browser-regression",
         "level": "regression",
         "suite": "ui-stability",

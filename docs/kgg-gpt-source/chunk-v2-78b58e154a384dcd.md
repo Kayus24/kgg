@@ -76,7 +76,8 @@
     "kgg-v125-exercise-image-names-gemini",
     "kgg-v125-library-image-names",
     "kgg-v129-cockpit-qr-resume",
-    "kgg-v130-plan-card-height-stability"
+    "kgg-v130-plan-card-height-stability",
+    "kgg-v131-plan-card-space"
   ],
   "parts": [
     "base-head.html",
@@ -170,6 +171,7 @@
     "patches/v125-library-image-names.html",
     "patches/v129-cockpit-qr-resume.html",
     "patches/v130-plan-card-height-stability.html",
+    "patches/v131-plan-card-space.html",
     "footer.html"
   ]
 }
