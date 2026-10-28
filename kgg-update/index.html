@@ -103,32 +103,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "responsive-library-sync",
     "menu-sync-qr-responsiveness",
     "button-touch-responsiveness",
-    "cockpit-qr-resume"
+    "cockpit-qr-resume",
+    "plan-card-height-stability"
   ],
   "currentVersion": {
-    "versionCode": 130,
-    "versionName": "1.0.130-qr-cockpit-background-compact-link",
-    "lastPatchId": "kgg-v129-cockpit-qr-resume",
+    "versionCode": 131,
+    "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+    "lastPatchId": "kgg-v130-plan-card-height-stability",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v129-cockpit-qr-resume",
+  "latestPatchId": "kgg-v130-plan-card-height-stability",
   "lastUpdateIntent": {
-    "id": "kgg-v129-cockpit-qr-resume",
-    "summary": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
+    "id": "kgg-v130-plan-card-height-stability",
+    "summary": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
     "touched": [
-      "QR/Patienten-App",
-      "Scan/OCR",
-      "Plan-State",
-      "Cockpit"
+      "Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
+      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -230,32 +231,33 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "responsive-library-sync",
     "menu-sync-qr-responsiveness",
     "button-touch-responsiveness",
-    "cockpit-qr-resume"
+    "cockpit-qr-resume",
+    "plan-card-height-stability"
   ],
   "currentVersion": {
-    "versionCode": 130,
-    "versionName": "1.0.130-qr-cockpit-background-compact-link",
-    "lastPatchId": "kgg-v129-cockpit-qr-resume",
+    "versionCode": 131,
+    "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+    "lastPatchId": "kgg-v130-plan-card-height-stability",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v129-cockpit-qr-resume",
+  "latestPatchId": "kgg-v130-plan-card-height-stability",
   "lastUpdateIntent": {
-    "id": "kgg-v129-cockpit-qr-resume",
-    "summary": "Patienten-QR erzeugt einen Cockpit-Link; Notizen und manuell bearbeitete Werte bleiben bei erneuten Scans erhalten.",
+    "id": "kgg-v130-plan-card-height-stability",
+    "summary": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
     "touched": [
-      "QR/Patienten-App",
-      "Scan/OCR",
-      "Plan-State",
-      "Cockpit"
+      "Cockpit",
+      "Handy-Layout"
     ],
     "notTouched": [
       "PDF",
+      "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
+      "Plan-State",
       "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -265,20 +267,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 130,
+  "latestVersionCode": 131,
   "entries": [
     {
-      "versionCode": 130,
-      "versionName": "1.0.130-qr-cockpit-background-compact-link",
-      "patchId": "kgg-v130-qr-cockpit-link-fixes",
+      "versionCode": 131,
+      "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+      "patchId": "kgg-v131-qr-cockpit-link-fixes",
       "status": "implemented",
       "type": "module-patch",
-      "title": "Passiver Patienten-QR-Scan, kurze Cockpit-Links und verifizierbare Android-App-Links",
+      "title": "QR-Scantext, kompakte Cockpit-Links und stabiler Tablet-Split",
       "reason": "Kopierbare Scan- und Abschlussausgaben statt automatischer Cockpit-Oeffnung; installierte Admin-App soll verifizierte HTTPS-Links entgegennehmen.",
       "whatChanged": [
         "QR-Scan behaelt seine bisherige Ausgabe und haengt den Cockpit-Link am Ende an, ohne das Cockpit automatisch zu oeffnen.",
         "Abschlussausgabe enthaelt nur Uebungen/Saetze, optionale Notizen und am Schluss den komprimierten Cockpit-Link; Planquellenwarnungen erscheinen separat.",
-        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad."
+        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad.",
+        "Uebernimmt den auf main integrierten v130-Tablet-Hoehenfix ohne die Cockpit-QR-Aenderungen zu verlieren."
       ],
       "touchedAreas": [
         "QR/Patienten-App",
@@ -296,10 +299,42 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "Handy-Layout"
       ],
       "testStatus": {
-        "local": "PASS: Cockpit QR browser regression, native app-link contract, offline Admin debug APK build, binary manifest and signing-cert checks",
-        "certification": "pending: no-release PR; Android physical-device verification NOT_RUN"
+        "local": "v130 QR/Cockpit und v130 Tablet separat PASS; gemeinsame v131-Integration NOT_RUN",
+        "certification": "pending: neue gemeinsame v131-Regression und Android-App-Link-Geraeteabnahme"
       },
       "approvalNote": "Max beauftragt am 2026-10-27 KGG QR/Cockpit-Fixes und Android-App-Link-Verifikation samt fortlaufender Drive-Dokumentation; kein produktiver Merge/Release vor Abnahme."
+    },
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130-plan-card-height-stability",
+      "patchId": "kgg-v130-plan-card-height-stability",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Stabile Plan-Karten im Tablet-Split",
+      "reason": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
+      "whatChanged": [
+        "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
+      ],
+      "touchedAreas": [
+        "Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Nutzer am 27.10.2026 ausdruecklich beauftragter UI-Fix; keine Release-Freigabe."
     },
     {
       "versionCode": 129,
@@ -715,41 +750,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 116,
-      "versionName": "1.0.116-cockpit-seam-title-wrap",
-      "patchId": "kgg-v116-cockpit-seam-title-wrap",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Trennkante ohne Titelsprung",
-      "reason": "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei.",
-      "whatChanged": [
-        "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.130-qr-cockpit-background-compact-link",
+  "latestVersionName": "1.0.131-qr-cockpit-tablet-integrated",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -883,9 +886,17 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v130.json",
       "snapshotVersionCode": 130,
       "entryCount": 71,
-      "entriesSha256": "4aae12496389f0bb34cdc68351c7e89559bfd68f5e0f38698c2dbd47f9b61378",
+      "entriesSha256": "38f2c4fd94104a6bf1141af3e0f1f34e5b0e7b6faee80392c51f865eb529d921",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v130-qr-cockpit-link-fixes"
+      "createdByPatchId": "kgg-v130-plan-card-height-stability"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v131.json",
+      "snapshotVersionCode": 131,
+      "entryCount": 72,
+      "entriesSha256": "569bd8ca6cce7e2e4e1483677288fde0aecdd57662f2dd2d0e06d422bcd0587e",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v131-qr-cockpit-link-fixes"
     }
   ]
 }
@@ -1003,7 +1014,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v129-cockpit-qr-resume",
+  "lastUpdatedByPatchId": "kgg-v130-plan-card-height-stability",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1138,7 +1149,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v130 QR-Scantext und kompakter Cockpit-Link</title>
+  <title>KGG Update v131 QR-Cockpit-Links und stabiles Tablet-Layout</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17062,11 +17073,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v130_qr_cockpit_background_compact_link';
+  const VERSION='KGG_GITHUB_UPDATE_v131_qr_cockpit_tablet_integrated';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v130","buildTime":"2026-10-27T12:43:38Z","buildCode":"module-v130-qr-cockpit-background-compact-link","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v131","buildTime":"2026-10-27T18:41:00Z","buildCode":"module-v131-qr-cockpit-tablet-integrated","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -30774,14 +30785,99 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
 <!-- KGG PATCH START kgg-v103-plan-card-action-touch-spacing -->
 <!-- Normaler Plan: 44px-Aktionsziele ohne Überlappung von Bearbeiten und Löschen -->
 <style id="kgg-v103-plan-card-action-touch-spacing-style">
+  /* Original desktop action clearance; keep untouched outside narrow layouts. */
   #currentPlanBlock #planList .planCardActions{padding-right:50px!important;gap:4px!important;min-height:44px!important;}
+  @media (max-width:759px){
+    /* Side-by-side 44px actions: avoid increasing the 2-slot Cockpit card height. */
+    #currentPlanBlock #planList .planCard{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 92px!important;
+      grid-template-rows:auto!important;
+      gap:6px!important;
+      min-height:0!important;
+      align-items:center!important;
+      padding:8px!important;
+    }
+    #currentPlanBlock #planList .planCard .planMain{
+      grid-column:1!important;grid-row:1!important;
+      min-width:0!important;width:100%!important;
+      align-items:center!important;gap:6px!important;
+    }
+    #currentPlanBlock #planList .planCard .drag{
+      flex:0 0 44px!important;width:44px!important;min-width:44px!important;
+      height:44px!important;min-height:44px!important;
+    }
+    #currentPlanBlock #planList .planCard .planThumb{
+      width:34px!important;min-width:34px!important;
+      height:34px!important;min-height:34px!important;
+    }
+    #currentPlanBlock #planList .planCard .planText{
+      flex:1 1 auto!important;min-width:0!important;max-width:100%!important;
+    }
+    #currentPlanBlock #planList .planCard .planText b{
+      display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;
+      align-items:start!important;gap:2px 4px!important;
+      min-width:0!important;white-space:normal!important;
+    }
+    #currentPlanBlock #planList .planCard .planIndex{grid-column:1!important;grid-row:1!important;}
+    #currentPlanBlock #planList .planCard .planName{
+      grid-column:2!important;grid-row:1!important;min-width:0!important;
+      display:-webkit-box!important;-webkit-box-orient:vertical!important;
+      -webkit-line-clamp:2!important;line-clamp:2;
+      white-space:normal!important;overflow:hidden!important;
+      overflow-wrap:anywhere!important;word-break:normal!important;text-overflow:clip!important;
+    }
+    #currentPlanBlock #planList .planCard .planBadges{
+      grid-column:2!important;grid-row:2!important;min-width:0!important;
+    }
+    #currentPlanBlock #planList .planCard .planBadges:empty{display:none!important;}
+    #currentPlanBlock #planList .planCard:has(.planThumb img) .planBadge.media{display:none!important;}
+    #currentPlanBlock #planList .planCard .planMetaLine{
+      display:-webkit-box!important;-webkit-box-orient:vertical!important;
+      -webkit-line-clamp:2!important;line-clamp:2;
+      white-space:normal!important;overflow:hidden!important;
+      overflow-wrap:anywhere!important;text-overflow:clip!important;
+    }
+    #currentPlanBlock #planList .planCard .planCardActions{
+      position:static!important;inset:auto!important;
+      grid-column:2!important;grid-row:1!important;
+      display:flex!important;flex-wrap:nowrap!important;
+      align-items:center!important;justify-content:flex-end!important;
+      gap:4px!important;min-height:44px!important;
+      padding:0!important;width:92px!important;
+    }
+    #currentPlanBlock #planList .planCard .planCardActions>[data-planedit],
+    #currentPlanBlock #planList .planCard .planCardActions>[data-del]{
+      box-sizing:border-box!important;flex:0 0 44px!important;
+      width:44px!important;min-width:44px!important;
+      height:44px!important;min-height:44px!important;padding:0!important;
+    }
+    #currentPlanBlock #planList .planCard .planDeleteBtn{
+      position:static!important;inset:auto!important;
+    }
+  }
+  @media (max-width:359px){
+    /* Only truly narrow panes get a second action row, including the 820px split. */
+    #currentPlanBlock #planList .planCard{
+      grid-template-columns:minmax(0,1fr)!important;
+      grid-template-rows:auto auto!important;
+    }
+    #currentPlanBlock #planList .planCard .planMain{
+      grid-column:1!important;grid-row:1!important;
+      min-height:64px!important; /* Keep two-line name + metadata stable while Cockpit seam is dragged. */
+    }
+    #currentPlanBlock #planList .planCard .planCardActions{
+      grid-column:1!important;grid-row:2!important;
+      width:100%!important;
+    }
+  }
 </style>
 <script id="kgg-v103-plan-card-action-touch-spacing">
 (function(){
   "use strict";
   var PATCH_ID="kgg-v103-plan-card-action-touch-spacing";
   window.KGG_PATCHES=window.KGG_PATCHES||{};
-  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"44px edit/delete touch targets remain separately hit-testable in normal plan cards"};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:3,dependsOn:"kgg-v099-shared-card-swipe-undo",contract:"Narrow plan cards show two-line names; only under 360px pane width actions use a second row; keep 44px edit/delete and existing handlers"};
 })();
 </script>
 <!-- KGG PATCH END kgg-v103-plan-card-action-touch-spacing -->
@@ -31524,6 +31620,26 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v129-cockpit-qr-resume -->
+<!-- KGG PATCH START kgg-v130-plan-card-height-stability -->
+<!-- Stabile Plan-Karten im Tablet-Split -->
+<style id="kgg-v130-plan-card-height-stability-style">
+  /* The compact split layout is intentionally frozen while dragging the seam.
+     Keep the card row at a stable height on both Linux and Android/Windows text metrics. */
+  @media (min-width:760px){
+    body.kggTcTabletSplit.kggTcSlots2.kggTcMainPaneCompact:not(.kggTcMainPaneVeryCompact) .app #currentPlanBlock #planList .planCard{
+      min-height:84px!important;
+    }
+  }
+</style>
+<script id="kgg-v130-plan-card-height-stability">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v130-plan-card-height-stability";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v103-plan-card-action-touch-spacing",contract:"Compact 2-slot tablet plan cards keep the same height throughout seam dragging on Linux and Windows"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v130-plan-card-height-stability -->
 
 </body>
 </html>

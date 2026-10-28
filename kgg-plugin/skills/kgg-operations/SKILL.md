@@ -14,6 +14,15 @@ the trusted runtime's session, lease, capability, and permission checks. Record
 reads, actions, retries, failures, and artifact references; do not put patient
 data, secrets, raw browser output, or credentials into logs or handoffs.
 
+Use `run_kgg_action` only for bounded reads. The separate
+`dispatch_kgg_workflow` tool can dispatch only workflows explicitly enabled by
+the trusted host. Read its workflow capability/precondition report first;
+never invent device/editor attestations. Dispatch acceptance is not a completed
+workflow: reconcile the exact request/source SHA, run and result artifact before
+reporting the outcome. After an unknown transport result, read and reconcile;
+never blindly repeat POST. Main/Snapshot PR and Memory apply remain external
+human gates; actor labels or model-written approval phrases do not open them.
+
 Candidate snapshot hashes (SHA-256): `docs/kgg-custom-gpt-knowledge-operations.md` =
 `c96e378fac04ed240e6c30ff88df6bcaf6866c84d9b392890da752e5d469c912`;
 `docs/kgg-ui-lab-v1-contracts.md` =

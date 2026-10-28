@@ -848,6 +848,24 @@ TEST_REGISTRY = [
         "run": run_brain_relay_worker_contract,
     },
     {
+        "id": "kgg-action-binding",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "KGG reads must use canonical bounded routes and preserve external write gates and package integrity.",
+        "run": lambda: run([sys.executable, "-B", "-m", "unittest", "test_kgg_action_binding", "test_kgg_workflow_dispatch", "test_kgg_reference_provenance", "test_kgg_ui_lab_mcp_server", "test_kgg_ui_lab_mcp_adapter", "test_kgg_plugin_candidate", "test_kgg_plugin_candidate_gate"], cwd=ROOT / "release-pipeline"),
+    },
+    {
+        "id": "ui-lab-browser-acceptance",
+        "level": "regression",
+        "suite": "gpt",
+        "reason": "Navigation and width captures require actual browser evidence with stale-history and authorization negatives.",
+        "run": lambda: (
+            run([sys.executable, "-B", "release-pipeline/test_kgg_navigation.py"]),
+            run([node_executable(), "--test", "release-pipeline/test_kgg_browser_navigation.js"]),
+            run([sys.executable, "-B", "release-pipeline/test_kgg_width_sweep.py"]),
+        ),
+    },
+    {
         "id": "gpt-regression-contracts",
         "level": "critical",
         "suite": "gpt",

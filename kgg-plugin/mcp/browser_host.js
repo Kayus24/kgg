@@ -11,6 +11,7 @@
 const readline = require("readline");
 const crypto = require("crypto");
 const { chromium } = require("playwright");
+const { navigate } = require("./browser_navigation");
 
 const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -222,11 +223,11 @@ async function performStep(page, step, runId, screenshotNumber, policy) {
     return { expected: step.label, actual: "swipe completed", status: "pass", artifacts: [], state: await stateValue(page, policy) };
   }
   if (operation === "reload") {
-    await page.reload({ waitUntil: "domcontentloaded", timeout: 5000 });
+    await navigate(page, operation, url => allowedPageUrl(url, policy), fail);
     return { expected: step.label, actual: "reload completed", status: "pass", artifacts: [], state: await stateValue(page, policy) };
   }
   if (operation === "back") {
-    await page.goBack({ waitUntil: "domcontentloaded", timeout: 5000 });
+    await navigate(page, operation, url => allowedPageUrl(url, policy), fail);
     return { expected: step.label, actual: "back completed", status: "pass", artifacts: [], state: await stateValue(page, policy) };
   }
   if (operation === "wait") {
@@ -249,6 +250,14 @@ async function run(request) {
   const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.deviceScaleFactor });
   const page = await context.newPage();
   let originViolation = false;
+  await page.route("**/*", route => {
+    const request = route.request();
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame() && !allowedPageUrl(request.url(), policy)) {
+      originViolation = true;
+      return route.abort();
+    }
+    return route.continue();
+  });
   page.on("framenavigated", frame => {
     if (frame === page.mainFrame() && !allowedPageUrl(frame.url(), policy)) originViolation = true;
   });

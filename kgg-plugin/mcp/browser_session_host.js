@@ -11,6 +11,7 @@
 const readline = require("readline");
 const crypto = require("crypto");
 const { chromium } = require("playwright");
+const { navigate } = require("./browser_navigation");
 
 const MAX_TEXT = 200;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -117,7 +118,7 @@ function safeSwipePoint(value, label, viewport) {
 
 function safeStep(step, viewport) {
   if (!step || typeof step !== "object" || typeof step.operation !== "string") fail("step_invalid");
-  if (!["click", "tap", "type", "scroll", "wait", "swipe"].includes(step.operation)) fail("step_operation_invalid");
+  if (!["click", "tap", "type", "scroll", "wait", "swipe", "back", "reload"].includes(step.operation)) fail("step_operation_invalid");
   const result = { operation: step.operation, label: safeText(step.label || step.operation, "step_label") };
   result.coordinates = safeCoordinates(step.coordinates);
   if (step.operation === "type") {
@@ -192,6 +193,7 @@ async function locateAction(page, label, policy) {
 
 async function performAction(page, step, policy) {
   const before = await stateValue(page, policy);
+  let navigationCompleted = false;
   if (step.operation === "click" || step.operation === "tap") {
     if (step.coordinates) {
       await page.mouse.click(step.coordinates.x, step.coordinates.y, { timeout: 5000 });
@@ -222,10 +224,14 @@ async function performAction(page, step, policy) {
     } finally {
       await page.mouse.up().catch(() => {});
     }
+  } else if (step.operation === "reload" || step.operation === "back") {
+    navigationCompleted = await navigate(page, step.operation, url => allowedPageUrl(url, policy), fail);
   } else {
     fail("step_operation_invalid");
   }
-  return { expected: step.label, actual: "action completed", status: "pass", before_state: before, after_state: await stateValue(page, policy) };
+  const result = { expected: step.label, actual: navigationCompleted ? `${step.operation} completed` : "action completed", status: "pass", before_state: before, after_state: await stateValue(page, policy) };
+  if (navigationCompleted) result.navigation_completed = true;
+  return result;
 }
 
 async function screenshot(page, runId, sequence, policy) {
@@ -254,6 +260,14 @@ async function handle(request) {
     session.originViolation = false;
     session.policy = policy;
     session.viewport = viewport;
+    await session.page.route("**/*", route => {
+      const request = route.request();
+      if (request.isNavigationRequest() && request.frame() === session.page.mainFrame() && !allowedPageUrl(request.url(), policy)) {
+        session.originViolation = true;
+        return route.abort();
+      }
+      return route.continue();
+    });
     session.page.on("framenavigated", frame => {
       if (frame === session.page.mainFrame() && !allowedPageUrl(frame.url(), session.policy)) session.originViolation = true;
     });

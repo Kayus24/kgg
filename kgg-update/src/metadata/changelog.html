@@ -3,20 +3,21 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 130,
+  "latestVersionCode": 131,
   "entries": [
     {
-      "versionCode": 130,
-      "versionName": "1.0.130-qr-cockpit-background-compact-link",
-      "patchId": "kgg-v130-qr-cockpit-link-fixes",
+      "versionCode": 131,
+      "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+      "patchId": "kgg-v131-qr-cockpit-link-fixes",
       "status": "implemented",
       "type": "module-patch",
-      "title": "Passiver Patienten-QR-Scan, kurze Cockpit-Links und verifizierbare Android-App-Links",
+      "title": "QR-Scantext, kompakte Cockpit-Links und stabiler Tablet-Split",
       "reason": "Kopierbare Scan- und Abschlussausgaben statt automatischer Cockpit-Oeffnung; installierte Admin-App soll verifizierte HTTPS-Links entgegennehmen.",
       "whatChanged": [
         "QR-Scan behaelt seine bisherige Ausgabe und haengt den Cockpit-Link am Ende an, ohne das Cockpit automatisch zu oeffnen.",
         "Abschlussausgabe enthaelt nur Uebungen/Saetze, optionale Notizen und am Schluss den komprimierten Cockpit-Link; Planquellenwarnungen erscheinen separat.",
-        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad."
+        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad.",
+        "Uebernimmt den auf main integrierten v130-Tablet-Hoehenfix ohne die Cockpit-QR-Aenderungen zu verlieren."
       ],
       "touchedAreas": [
         "QR/Patienten-App",
@@ -34,10 +35,42 @@
         "Handy-Layout"
       ],
       "testStatus": {
-        "local": "PASS: Cockpit QR browser regression, native app-link contract, offline Admin debug APK build, binary manifest and signing-cert checks",
-        "certification": "pending: no-release PR; Android physical-device verification NOT_RUN"
+        "local": "v130 QR/Cockpit und v130 Tablet separat PASS; gemeinsame v131-Integration NOT_RUN",
+        "certification": "pending: neue gemeinsame v131-Regression und Android-App-Link-Geraeteabnahme"
       },
       "approvalNote": "Max beauftragt am 2026-10-27 KGG QR/Cockpit-Fixes und Android-App-Link-Verifikation samt fortlaufender Drive-Dokumentation; kein produktiver Merge/Release vor Abnahme."
+    },
+    {
+      "versionCode": 130,
+      "versionName": "1.0.130-plan-card-height-stability",
+      "patchId": "kgg-v130-plan-card-height-stability",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Stabile Plan-Karten im Tablet-Split",
+      "reason": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
+      "whatChanged": [
+        "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
+      ],
+      "touchedAreas": [
+        "Cockpit",
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Vom Nutzer am 27.10.2026 ausdruecklich beauftragter UI-Fix; keine Release-Freigabe."
     },
     {
       "versionCode": 129,
@@ -453,41 +486,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 116,
-      "versionName": "1.0.116-cockpit-seam-title-wrap",
-      "patchId": "kgg-v116-cockpit-seam-title-wrap",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Trennkante ohne Titelsprung",
-      "reason": "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei.",
-      "whatChanged": [
-        "Der Titel der schmalen Haupt-App behaelt beim Ziehen der Trennkante seine Ausgangsbreite; Abbruch und Loslassen geben die responsive Breite wieder frei."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Review des von Max angeforderten Trennkanten-Fixes zeigt einen reproduzierten 22px Titelsprung; bestehende Archivierung wird fortgesetzt."
     }
   ],
-  "latestVersionName": "1.0.130-qr-cockpit-background-compact-link",
+  "latestVersionName": "1.0.131-qr-cockpit-tablet-integrated",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -621,9 +622,17 @@
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v130.json",
       "snapshotVersionCode": 130,
       "entryCount": 71,
-      "entriesSha256": "4aae12496389f0bb34cdc68351c7e89559bfd68f5e0f38698c2dbd47f9b61378",
+      "entriesSha256": "38f2c4fd94104a6bf1141af3e0f1f34e5b0e7b6faee80392c51f865eb529d921",
       "retainedEntryCountAtCompaction": 15,
-      "createdByPatchId": "kgg-v130-qr-cockpit-link-fixes"
+      "createdByPatchId": "kgg-v130-plan-card-height-stability"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v131.json",
+      "snapshotVersionCode": 131,
+      "entryCount": 72,
+      "entriesSha256": "569bd8ca6cce7e2e4e1483677288fde0aecdd57662f2dd2d0e06d422bcd0587e",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v131-qr-cockpit-link-fixes"
     }
   ]
 }

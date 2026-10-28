@@ -13,6 +13,7 @@ import base64
 from dataclasses import dataclass, field
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import queue
@@ -316,6 +317,7 @@ def run_real_flow(
     run_id: str,
     timeout_ms: int,
     bootstrap: BrowserBootstrap | None = None,
+    wait_budget_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Run one real browser flow; never substitutes synthetic evidence."""
 
@@ -325,6 +327,13 @@ def run_real_flow(
     if not isinstance(run_id, str) or not run_id or len(run_id) > 128:
         raise RealBrowserError("real_browser_run_id_invalid")
     if not isinstance(timeout_ms, int) or not 1000 <= timeout_ms <= 1_800_000:
+        raise RealBrowserError("real_browser_timeout_invalid")
+    if wait_budget_seconds is not None and (
+        isinstance(wait_budget_seconds, bool)
+        or not isinstance(wait_budget_seconds, (int, float))
+        or not math.isfinite(wait_budget_seconds)
+        or not 0 < wait_budget_seconds <= MAX_FOREGROUND_WAIT_SECONDS
+    ):
         raise RealBrowserError("real_browser_timeout_invalid")
     request = {
         "command": "run",
@@ -350,7 +359,7 @@ def run_real_flow(
         )
         stdout, _stderr = process.communicate(
             input=json.dumps(request, ensure_ascii=False, separators=(",", ":")) + "\n",
-            timeout=_foreground_wait_seconds(timeout_ms),
+            timeout=min(_foreground_wait_seconds(timeout_ms), wait_budget_seconds) if wait_budget_seconds is not None else _foreground_wait_seconds(timeout_ms),
         )
     except subprocess.TimeoutExpired as exc:
         if "process" in locals():
@@ -406,6 +415,10 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
             "before_state": str(action["before_state"])[:200],
             "after_state": str(action["after_state"])[:200],
         }
+        if "navigation_completed" in action:
+            if action["navigation_completed"] is not True:
+                raise RealBrowserError("real_browser_action_invalid")
+            result["action"]["navigation_completed"] = True
     return result
 
 

@@ -79,6 +79,10 @@ function readChangelogArchive() {
 function staticGestureGuardSuite() {
   const html = readHtml();
 
+  assertIncludes(html, "kgg-v103-plan-card-action-touch-spacing", "mobile plan-card layout patch");
+  assertIncludes(html, "-webkit-line-clamp:2!important", "two-line exercise name in narrow plan cards");
+  assertIncludes(html, ".planCard:has(.planThumb img) .planBadge.media", "hide redundant image badge when thumbnail exists");
+  assertIncludes(html, "@media (max-width:359px)", "stack action row only in very narrow panes");
   assertIncludes(html, "function startPlanCardSwipeDelete", "plan-card swipe handler");
   assertIncludes(html, "function resetPlanCardSwipe", "plan-card swipe cleanup");
   assertIncludes(html, "card.style.setProperty('--kgg-plan-swipe-x'", "swipe CSS variable update");
@@ -567,6 +571,51 @@ async function tabletSyncQrImageContract(page, context) {
   }
 }
 
+async function assertResponsivePlanCardTargets(page) {
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.waitForTimeout(60);
+    await page.locator("#planList .planCard[data-plan-id]").first().scrollIntoViewIfNeeded();
+    const data = await page.evaluate(() => {
+      const card=document.querySelector("#planList .planCard[data-plan-id]");
+      const name=card?.querySelector(".planName");
+      const edit=card?.querySelector("[data-planedit]");
+      const del=card?.querySelector("[data-del]");
+      const drag=card?.querySelector(".drag");
+      if(!card||!name||!edit||!del||!drag)return {missing:true};
+      const original=name.textContent;
+      name.textContent="Statisches Seitheben links/rechts mit kontrollierter Schulterblattstabilisierung";
+      const rect=el=>el.getBoundingClientRect();
+      const n=rect(name),e=rect(edit),d=rect(del),g=rect(drag),c=rect(card);
+      const css=getComputedStyle(name);
+      const overlap=(a,b)=>a.left<b.right-1&&a.right>b.left+1&&a.top<b.bottom-1&&a.bottom>b.top+1;
+      const hit=el=>{const r=rect(el);const found=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return found===el||el.contains(found);};
+      const result={width:innerWidth,whiteSpace:css.whiteSpace,clamp:css.webkitLineClamp,
+        lineHeight:parseFloat(css.lineHeight),nameHeight:n.height,nameWidth:n.width,
+        edit:[e.width,e.height],del:[d.width,d.height],drag:[g.width,g.height],
+        actionOverlap:overlap(e,d),titleOverlap:overlap(n,e)||overlap(n,d),
+        withinCard:e.left>=c.left-1&&e.right<=c.right+1&&d.left>=c.left-1&&d.right<=c.right+1,
+        editHit:hit(edit),deleteHit:hit(del),
+        editTopHit:(document.elementFromPoint(e.left+e.width/2,e.top+e.height/2)?.outerHTML.slice(0,180)||"none"),
+        delTopHit:(document.elementFromPoint(d.left+d.width/2,d.top+d.height/2)?.outerHTML.slice(0,180)||"none"),
+        overflow:card.scrollWidth>card.clientWidth+1,
+        stacked:Math.abs(e.top-d.top)<2&&e.top>n.bottom-1};
+      name.textContent=original;
+      return result;
+    });
+    if(data.missing||data.whiteSpace!=="normal"||data.clamp!=="2"||
+       !(data.lineHeight>0)||data.nameHeight>data.lineHeight*2.2||
+       data.nameWidth<55||data.edit?.some(x=>x<43.5)||
+       data.del?.some(x=>x<43.5)||data.drag?.some(x=>x<43.5)||
+       data.actionOverlap||data.titleOverlap||!data.withinCard||
+       !data.editHit||!data.deleteHit||data.overflow||
+       (width===320&&!data.stacked)||(width>320&&data.stacked)){
+      fail("Plan card responsive title/action contract: "+JSON.stringify(data));
+    }
+  }
+  await page.setViewportSize({width:390,height:844});
+}
+
 async function browserGestureSuite() {
   const { chromium } = requirePlaywright();
   const htmlUrl = pathToFileURL(HTML_PATH).href;
@@ -618,6 +667,8 @@ async function browserGestureSuite() {
 
     const count = await page.locator("#planList .planCard[data-plan-id]").count();
     if (count !== 30) fail(`Expected 30 seeded plan cards, got ${count}`);
+    if (await page.locator("#adminSecretsModal.open").count()) await page.locator("#closeAdminSecrets").tap();
+    await assertResponsivePlanCardTargets(page);
 
     await assertPageCondition(
       page,

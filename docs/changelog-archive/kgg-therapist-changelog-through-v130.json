@@ -5,12 +5,12 @@
     "path": "kgg-update/src/metadata/changelog.html",
     "elementId": "kgg-changelog",
     "versionCode": 130,
-    "versionName": "1.0.130-qr-cockpit-background-compact-link"
+    "versionName": "1.0.130-plan-card-height-stability"
   },
-  "createdByPatchId": "kgg-v130-qr-cockpit-link-fixes",
+  "createdByPatchId": "kgg-v130-plan-card-height-stability",
   "entryOrder": "newest-first",
   "entryCount": 71,
-  "entriesSha256": "4aae12496389f0bb34cdc68351c7e89559bfd68f5e0f38698c2dbd47f9b61378",
+  "entriesSha256": "38f2c4fd94104a6bf1141af3e0f1f34e5b0e7b6faee80392c51f865eb529d921",
   "canonicalization": {
     "scope": "entries",
     "encoding": "utf-8",
@@ -26,37 +26,35 @@
   "entries": [
     {
       "versionCode": 130,
-      "versionName": "1.0.130-qr-cockpit-background-compact-link",
-      "patchId": "kgg-v130-qr-cockpit-link-fixes",
-      "status": "implemented",
+      "versionName": "1.0.130-plan-card-height-stability",
+      "patchId": "kgg-v130-plan-card-height-stability",
+      "status": "scaffolded",
       "type": "module-patch",
-      "title": "Passiver Patienten-QR-Scan, kurze Cockpit-Links und verifizierbare Android-App-Links",
-      "reason": "Kopierbare Scan- und Abschlussausgaben statt automatischer Cockpit-Oeffnung; installierte Admin-App soll verifizierte HTTPS-Links entgegennehmen.",
+      "title": "Stabile Plan-Karten im Tablet-Split",
+      "reason": "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten.",
       "whatChanged": [
-        "QR-Scan behaelt seine bisherige Ausgabe und haengt den Cockpit-Link am Ende an, ohne das Cockpit automatisch zu oeffnen.",
-        "Abschlussausgabe enthaelt nur Uebungen/Saetze, optionale Notizen und am Schluss den komprimierten Cockpit-Link; Planquellenwarnungen erscheinen separat.",
-        "Abwaertskompatibler Deflate-Codec fuer Cockpit-Links; Android-Manifest aktiviert autoVerify fuer exakt den bestehenden Deep-Link-Pfad."
+        "Verhindert hoehenbedingte Ueberlagerungen beim Ziehen der Tablet-Cockpit-Trennlinie; lesbare Namen und getrennte 44px-Aktionen bleiben erhalten."
       ],
       "touchedAreas": [
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Plan-State",
         "Cockpit",
-        "Android/APK"
+        "Handy-Layout"
       ],
       "notTouched": [
         "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
         "Parser",
+        "Plan-State",
         "Medien/Upload",
         "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
+        "Android/APK",
+        "GitHub Manifest"
       ],
       "testStatus": {
-        "local": "PASS: Cockpit QR browser regression, native app-link contract, offline Admin debug APK build, binary manifest and signing-cert checks",
-        "certification": "pending: no-release PR; Android physical-device verification NOT_RUN"
+        "local": "pending",
+        "certification": "pending"
       },
-      "approvalNote": "Max beauftragt am 2026-10-27 KGG QR/Cockpit-Fixes und Android-App-Link-Verifikation samt fortlaufender Drive-Dokumentation; kein produktiver Merge/Release vor Abnahme."
+      "approvalNote": "Vom Nutzer am 27.10.2026 ausdruecklich beauftragter UI-Fix; keine Release-Freigabe."
     },
     {
       "versionCode": 129,

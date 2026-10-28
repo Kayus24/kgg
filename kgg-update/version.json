@@ -1,7 +1,7 @@
 {
-  "versionCode": 130,
-  "versionName": "1.0.130-qr-cockpit-background-compact-link",
-  "indexUrl": "index.html?v=130",
-  "sha256": "d6c0f4cd3869a3f91d0ae9e0fea552c939443c3986ae5fc22214783da908da0c",
-  "notes": "v130: Patienten-QR bleibt im Scanablauf; Abschluss-Dokumentation enthält nur Übungen, optionale Notizen und am Ende den komprimierten Cockpit-Link. Technische Übernahmewarnungen bleiben separat sichtbar. Android-Link-Öffnung erfordert Domain-assetlinks.json."
+  "versionCode": 131,
+  "versionName": "1.0.131-qr-cockpit-tablet-integrated",
+  "indexUrl": "index.html?v=131",
+  "sha256": "ee09e8a3bf621fe75c40a982c43c45272fde689dd7da83f1b4a188222d67c39d",
+  "notes": "v131: QR scan retains normal flow and appends compact Cockpit link; finished-plan copy contains exercises, sets and optional notes without patient/status headers; carries forward v130 stable tablet split card heights. Android verified App Links remain pending domain root publication and device acceptance."
 }
