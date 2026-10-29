@@ -1,7 +1,7 @@
 {
-  "versionCode": 131,
-  "versionName": "1.0.131-qr-cockpit-tablet-integrated",
-  "indexUrl": "index.html?v=131",
-  "sha256": "ee09e8a3bf621fe75c40a982c43c45272fde689dd7da83f1b4a188222d67c39d",
-  "notes": "v131: QR scan retains normal flow and appends compact Cockpit link; finished-plan copy contains exercises, sets and optional notes without patient/status headers; carries forward v130 stable tablet split card heights. Android verified App Links remain pending domain root publication and device acceptance."
+  "versionCode": 132,
+  "versionName": "1.0.132-plan-card-space",
+  "indexUrl": "index.html?v=132",
+  "sha256": "4dbc9e5e9a8c67e4d20c0e6c599bc25f3037ea2b917653df2cc43b85b0290814",
+  "notes": "v132: Bild-Badge bei echter Miniatur ausblenden und Handy-X sowie Zahnrad rechts platzsparend mit getrennten Touchzielen ausrichten."
 }
