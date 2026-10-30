@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 132,
+  "latestVersionCode": 133,
   "entries": [
+    {
+      "versionCode": 133,
+      "versionName": "1.0.133-phone-dock-owner",
+      "patchId": "kgg-v133-phone-dock-owner",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Phone Cockpit Dock Owner",
+      "reason": "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.",
+      "whatChanged": [
+        "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht."
+      ],
+      "touchedAreas": [
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Aktueller KGG-Auftrag: reproduzierter Dock-Fehler #355 muss behoben und getestet werden."
+    },
     {
       "versionCode": 132,
       "versionName": "1.0.132-plan-card-space",
@@ -456,40 +487,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 118,
-      "versionName": "1.0.118-cockpit-scroll-position",
-      "patchId": "kgg-v118-cockpit-scroll-position",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Scrollposition erhalten",
-      "reason": "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten.",
-      "whatChanged": [
-        "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.132-plan-card-space",
+  "latestVersionName": "1.0.133-phone-dock-owner",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -642,6 +642,14 @@
       "entriesSha256": "490eb49a81177df599a1b7fe183511d4a788b20467a76dd16009f8510aa30f32",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v132-plan-card-space"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v133.json",
+      "snapshotVersionCode": 133,
+      "entryCount": 74,
+      "entriesSha256": "0279084f1c970d49f5441663bc273981b5b4b0a1c24c0dcd08c8811471d372be",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v133-phone-dock-owner"
     }
   ]
 }

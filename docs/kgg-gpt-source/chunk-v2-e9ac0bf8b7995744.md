@@ -77,7 +77,8 @@
     "kgg-v125-library-image-names",
     "kgg-v129-cockpit-qr-resume",
     "kgg-v130-plan-card-height-stability",
-    "kgg-v132-plan-card-space"
+    "kgg-v132-plan-card-space",
+    "kgg-v133-phone-dock-owner"
   ],
   "parts": [
     "base-head.html",
@@ -172,6 +173,7 @@
     "patches/v129-cockpit-qr-resume.html",
     "patches/v130-plan-card-height-stability.html",
     "patches/v132-plan-card-space.html",
+    "patches/v133-phone-dock-owner.html",
     "footer.html"
   ]
 }

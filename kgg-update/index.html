@@ -105,20 +105,20 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "button-touch-responsiveness",
     "cockpit-qr-resume",
     "plan-card-height-stability",
-    "plan-card-space"
+    "plan-card-space",
+    "phone-dock-owner"
   ],
   "currentVersion": {
-    "versionCode": 132,
-    "versionName": "1.0.132-plan-card-space",
-    "lastPatchId": "kgg-v132-plan-card-space",
+    "versionCode": 133,
+    "versionName": "1.0.133-phone-dock-owner",
+    "lastPatchId": "kgg-v133-phone-dock-owner",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v132-plan-card-space",
+  "latestPatchId": "kgg-v133-phone-dock-owner",
   "lastUpdateIntent": {
-    "id": "kgg-v132-plan-card-space",
-    "summary": "Bild-Badge bei echter Miniatur ausblenden und Handy-X sowie Zahnrad rechts platzsparend mit getrennten Touchzielen ausrichten.",
+    "id": "kgg-v133-phone-dock-owner",
+    "summary": "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.",
     "touched": [
-      "Cockpit",
       "Handy-Layout"
     ],
     "notTouched": [
@@ -234,20 +234,20 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "button-touch-responsiveness",
     "cockpit-qr-resume",
     "plan-card-height-stability",
-    "plan-card-space"
+    "plan-card-space",
+    "phone-dock-owner"
   ],
   "currentVersion": {
-    "versionCode": 132,
-    "versionName": "1.0.132-plan-card-space",
-    "lastPatchId": "kgg-v132-plan-card-space",
+    "versionCode": 133,
+    "versionName": "1.0.133-phone-dock-owner",
+    "lastPatchId": "kgg-v133-phone-dock-owner",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v132-plan-card-space",
+  "latestPatchId": "kgg-v133-phone-dock-owner",
   "lastUpdateIntent": {
-    "id": "kgg-v132-plan-card-space",
-    "summary": "Bild-Badge bei echter Miniatur ausblenden und Handy-X sowie Zahnrad rechts platzsparend mit getrennten Touchzielen ausrichten.",
+    "id": "kgg-v133-phone-dock-owner",
+    "summary": "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.",
     "touched": [
-      "Cockpit",
       "Handy-Layout"
     ],
     "notTouched": [
@@ -269,8 +269,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 132,
+  "latestVersionCode": 133,
   "entries": [
+    {
+      "versionCode": 133,
+      "versionName": "1.0.133-phone-dock-owner",
+      "patchId": "kgg-v133-phone-dock-owner",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Phone Cockpit Dock Owner",
+      "reason": "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.",
+      "whatChanged": [
+        "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht."
+      ],
+      "touchedAreas": [
+        "Handy-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Aktueller KGG-Auftrag: reproduzierter Dock-Fehler #355 muss behoben und getestet werden."
+    },
     {
       "versionCode": 132,
       "versionName": "1.0.132-plan-card-space",
@@ -722,40 +753,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 118,
-      "versionName": "1.0.118-cockpit-scroll-position",
-      "patchId": "kgg-v118-cockpit-scroll-position",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Scrollposition erhalten",
-      "reason": "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten.",
-      "whatChanged": [
-        "Scrollposition bleibt beim Eingeben pro Cockpit-Plan erhalten."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.132-plan-card-space",
+  "latestVersionName": "1.0.133-phone-dock-owner",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -908,6 +908,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "490eb49a81177df599a1b7fe183511d4a788b20467a76dd16009f8510aa30f32",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v132-plan-card-space"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v133.json",
+      "snapshotVersionCode": 133,
+      "entryCount": 74,
+      "entriesSha256": "0279084f1c970d49f5441663bc273981b5b4b0a1c24c0dcd08c8811471d372be",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v133-phone-dock-owner"
     }
   ]
 }
@@ -1025,7 +1033,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v132-plan-card-space",
+  "lastUpdatedByPatchId": "kgg-v133-phone-dock-owner",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1160,7 +1168,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v132 Mehr Platz fuer Uebungskarten</title>
+  <title>KGG Update v133 Phone Cockpit Dock Owner</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17084,11 +17092,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v132_plan_card_space';
+  const VERSION='KGG_GITHUB_UPDATE_v133_phone_dock_owner';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v132","buildTime":"2026-10-28T20:18:39Z","buildCode":"module-v132-plan-card-space","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v133","buildTime":"2026-10-30T12:15:20Z","buildCode":"module-v133-phone-dock-owner","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -29885,6 +29893,10 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(document.body){
       document.body.classList.toggle("kggPhoneHasCockpit",phone&&hasCockpit);
     }
+    // v102 owns the phone dock position; do not move its button back to scanHub
+    // when v095's delayed resize/orientation callback runs after v102's sync.
+    var dockOwner=window.KGG_PATCHES&&window.KGG_PATCHES["kgg-v102-phone-cockpit-dock-navigation"];
+    if(phone&&hasCockpit&&window.KGGPhoneDockOwnerV133==="v102"&&dockOwner&&dockOwner.installed)return;
     if(phone&&hasCockpit&&hub){
       if(button.parentElement!==hub)hub.appendChild(button);
       button.textContent=planLabel(count);
@@ -31672,6 +31684,19 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v132-plan-card-space -->
+<!-- KGG PATCH START kgg-v133-phone-dock-owner -->
+<!-- Phone Cockpit Dock Owner -->
+<script id="kgg-v133-phone-dock-owner">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v133-phone-dock-owner";
+  // The phone dock owns button placement; v095 keeps its responsive state only.
+  window.KGGPhoneDockOwnerV133="v102";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v102-phone-cockpit-dock-navigation",contract:"Only v102 may relocate the cockpit button while loaded plans are displayed on phones"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v133-phone-dock-owner -->
 
 </body>
 </html>

@@ -677,6 +677,9 @@ async function runPhoneCockpitEntry(browser) {
 
     await entry.click();
     await waitForNormalState(page);
+    // Resize replays the old v095 (80ms) and v102 (30ms) dock sync race.
+    await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+    await page.waitForTimeout(180);
     const firstLayout = await page.evaluate(() => {
       const dock = document.querySelector("#kggPhoneCockpitDock");
       const entry = document.querySelector("#kggTherapyCockpitButton");
@@ -876,6 +879,11 @@ async function runInvalidIdNegative(browser, test) {
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
+  if(process.argv.includes('--case=phone-cockpit-entry-390')){
+    try{console.log(JSON.stringify({status:'PASS',phoneCockpitEntry:await runPhoneCockpitEntry(browser)}));}
+    finally{await browser.close();}
+    return;
+  }
   const visibility = [];
   const flows = [];
   let completeVisibilityMatrix;

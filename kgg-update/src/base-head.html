@@ -105,20 +105,20 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "button-touch-responsiveness",
     "cockpit-qr-resume",
     "plan-card-height-stability",
-    "plan-card-space"
+    "plan-card-space",
+    "phone-dock-owner"
   ],
   "currentVersion": {
-    "versionCode": 132,
-    "versionName": "1.0.132-plan-card-space",
-    "lastPatchId": "kgg-v132-plan-card-space",
+    "versionCode": 133,
+    "versionName": "1.0.133-phone-dock-owner",
+    "lastPatchId": "kgg-v133-phone-dock-owner",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v132-plan-card-space",
+  "latestPatchId": "kgg-v133-phone-dock-owner",
   "lastUpdateIntent": {
-    "id": "kgg-v132-plan-card-space",
-    "summary": "Bild-Badge bei echter Miniatur ausblenden und Handy-X sowie Zahnrad rechts platzsparend mit getrennten Touchzielen ausrichten.",
+    "id": "kgg-v133-phone-dock-owner",
+    "summary": "Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.",
     "touched": [
-      "Cockpit",
       "Handy-Layout"
     ],
     "notTouched": [

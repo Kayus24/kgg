@@ -1,7 +1,7 @@
 {
-  "versionCode": 132,
-  "versionName": "1.0.132-plan-card-space",
-  "indexUrl": "index.html?v=132",
-  "sha256": "4dbc9e5e9a8c67e4d20c0e6c599bc25f3037ea2b917653df2cc43b85b0290814",
-  "notes": "v132: Bild-Badge bei echter Miniatur ausblenden und Handy-X sowie Zahnrad rechts platzsparend mit getrennten Touchzielen ausrichten."
+  "versionCode": 133,
+  "versionName": "1.0.133-phone-dock-owner",
+  "indexUrl": "index.html?v=133",
+  "sha256": "1e60e8bf11478192cc0ebf9886913dc853a9c4bb2dc9cef5f55f2e178089bc07",
+  "notes": "v133: Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht."
 }
