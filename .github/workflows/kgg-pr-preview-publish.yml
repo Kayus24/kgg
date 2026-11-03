@@ -1,0 +1,165 @@
+name: KGG Verified PR Test Preview
+on:
+  push:
+    branches: [fix/verified-pr-preview-20261103]
+    paths:
+      - .github/workflows/kgg-pr-preview-publish.yml
+      - release-pipeline/kgg_existing_main_preview.py
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: read
+concurrency:
+  group: kgg-gpt-preview-publish
+  cancel-in-progress: false
+
+jobs:
+  verify-build-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_SHA: 31bb7acf2ed54a02687b55229995d0ce39fed37b
+      SOURCE_PR: "359"
+      SOURCE_BRANCH: fix/phone-dock-owner-v133-20261030
+      VERIFIED_RUN: "41614544379"
+      REQUEST_ID: kgg-pr359-v133-20261103
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify PR, exact commit, green CI, and bounded changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "Kayus24/kgg"
+          test "$GITHUB_REF_NAME" = "fix/verified-pr-preview-20261103"
+          git merge-base --is-ancestor "$SOURCE_SHA" HEAD
+          test "$(git diff --name-only "$SOURCE_SHA"..HEAD | wc -l)" -eq 2
+          for path in $(git diff --name-only "$SOURCE_SHA"..HEAD); do
+            case "$path" in
+              .github/workflows/kgg-pr-preview-publish.yml|release-pipeline/kgg_existing_main_preview.py) ;;
+              *) echo "Unexpected file changed: $path" >&2; exit 1 ;;
+            esac
+          done
+          git diff --exit-code "$SOURCE_SHA" HEAD -- kgg-update android-wrapper
+          pr="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR")"
+          jq -e --arg sha "$SOURCE_SHA" --arg branch "$SOURCE_BRANCH" --arg repo "$GITHUB_REPOSITORY" '
+            .state == "open" and .draft == true and
+            .head.sha == $sha and .head.ref == $branch and
+            .head.repo.full_name == $repo and
+            .base.ref == "fix/plan-card-space-v132-20261028" and
+            ([.labels[]?.name] | index("kgg-no-release") != null)
+          ' <<<"$pr" >/dev/null
+          run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN")"
+          jq -e --arg sha "$SOURCE_SHA" '
+            .head_sha == $sha and .conclusion == "success" and
+            .event == "pull_request" and
+            .name == "Validate and build KGG admin beta"
+          ' <<<"$run" >/dev/null
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Install PDF verification tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Verify existing Preview publisher and KGG tests
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: "1"
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_existing_main_preview.py --self-test
+          python release-pipeline/build_therapist_source.py --check
+          python release-pipeline/kgg_test_battery.py --level critical
+          python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+      - name: Install targeted browser regression tooling
+        working-directory: release-pipeline
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Verify 390px Cockpit and Fertig dock after resize
+        run: node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
+      - uses: actions/checkout@v4
+        with:
+          ref: gpt-preview
+          path: preview
+          fetch-depth: 1
+      - name: Stage verified PR source into existing test-only Preview channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch_hash="$(printf 'verified-pr|%s|%s|%s' "$SOURCE_PR" "$SOURCE_SHA" "$VERIFIED_RUN" | sha256sum | cut -d ' ' -f1)"
+          python release-pipeline/kgg_existing_main_preview.py \
+            --source-html kgg-update/index.html \
+            --version-json kgg-update/version.json \
+            --preview-root preview \
+            --request-id "$REQUEST_ID" \
+            --source-sha "$SOURCE_SHA" \
+            --patch-hash "$patch_hash" \
+            --source-type verified-pr \
+            --source-pr "$SOURCE_PR" \
+            --verified-run-id "$VERIFIED_RUN"
+          web_version="$(python -c 'import json;print(json.load(open("kgg-update/version.json"))["versionName"])')"
+          python release-pipeline/kgg_preview_context.py \
+            --request-id "$REQUEST_ID" \
+            --patch-hash "$patch_hash" \
+            --base-sha "$SOURCE_SHA" \
+            --commit-sha "$SOURCE_SHA" \
+            --web-version "$web_version" \
+            --required-test critical \
+            --required-test 'ui-stability regression' \
+            --required-test phone-cockpit-entry-390 \
+            --output "$RUNNER_TEMP/kgg-preview-context.json"
+      - name: Build exact pinned Preview APK
+        working-directory: android-wrapper
+        run: gradle -PKGG_PREVIEW_CONTEXT_FILE="$RUNNER_TEMP/kgg-preview-context.json" assemblePreviewDebug
+      - name: Upload APK, HTML, metadata and proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: kgg-pr359-v133-verified-preview
+          if-no-files-found: error
+          path: |
+            android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+            preview/previews/kgg-pr359-v133-20261103/admin.html
+            preview/previews/kgg-pr359-v133-20261103/meta.json
+            ${{ runner.temp }}/kgg-preview-context.json
+      - name: Reverify PR head and publish existing Preview channel only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR" --jq '.head.sha')" = "$SOURCE_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN" --jq '.conclusion')" = success
+          git -C preview config user.name 'github-actions[bot]'
+          git -C preview config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C preview add previews
+          if git -C preview diff --cached --quiet; then
+            echo 'No Preview change: fail closed' >&2
+            exit 1
+          fi
+          git -C preview commit -m "publish verified PR #359 pinned v133 test preview"
+          git -C preview fetch --no-tags origin gpt-preview
+          test "$(git -C preview rev-parse HEAD^)" = "$(git -C preview rev-parse origin/gpt-preview)"
+          git -C preview push origin HEAD:gpt-preview
+          body="$(gh api "repos/$GITHUB_REPOSITORY/contents/previews/$REQUEST_ID/meta.json?ref=gpt-preview" --jq .content | tr -d '\n' | base64 --decode)"
+          jq -e --arg sha "$SOURCE_SHA" --argjson pr "$SOURCE_PR" --argjson run "$VERIFIED_RUN" '
+            .sourceType == "verified-pr" and .sourceSha == $sha and
+            .sourcePr == $pr and .verificationRunId == $run and
+            (has("deviceTestJobUrl") | not)
+          ' <<<"$body" >/dev/null
+          {
+            echo "Verified PR test HTML: https://raw.githubusercontent.com/$GITHUB_REPOSITORY/gpt-preview/previews/$REQUEST_ID/admin.html"
+            echo "Verified PR: https://github.com/$GITHUB_REPOSITORY/pull/$SOURCE_PR"
+            echo "Source commit: $SOURCE_SHA"
+            echo "Main, patient live and physical device tests were not modified."
+          } >> "$GITHUB_STEP_SUMMARY"
