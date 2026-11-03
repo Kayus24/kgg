@@ -98,13 +98,10 @@ jobs:
           set -euo pipefail
           npm ci
           npx playwright install --with-deps chromium
-      - name: Verify 390px Cockpit and Fertig dock after resize
-        run: node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
-      - name: Diagnostic safety gate – publishing remains disabled
-        shell: bash
+      - name: Verify 390px Cockpit and Fertig dock twice in fresh browsers
         run: |
-          echo "Diagnostics-only run: test output is preserved; no Preview publication." >&2
-          exit 1
+          node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
+          node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
       - uses: actions/checkout@v4
         with:
           ref: gpt-preview
