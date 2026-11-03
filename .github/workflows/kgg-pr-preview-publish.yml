@@ -78,6 +78,16 @@ jobs:
           KGG_ALLOW_RELEASE_DRIFT: "1"
         run: |
           set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("release-pipeline/kgg_ticket_037_real_plan_smoke.js")
+          raw = p.read_text(encoding="utf-8")
+          old = "`${test.id}: Cockpit + Fertig liegen nicht gemeinsam im Phone-Dock`"
+          new = "`${test.id}: Cockpit + Fertig liegen nicht gemeinsam im Phone-Dock: ${JSON.stringify(firstLayout)}`"
+          if raw.count(old) != 1:
+              raise SystemExit("diagnostic anchor missing or duplicated")
+          p.write_text(raw.replace(old, new, 1), encoding="utf-8")
+          PY
           python release-pipeline/kgg_existing_main_preview.py --self-test
           python release-pipeline/build_therapist_source.py --check
           python release-pipeline/kgg_test_battery.py --level critical
@@ -90,6 +100,11 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify 390px Cockpit and Fertig dock after resize
         run: node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
+      - name: Diagnostic safety gate – publishing remains disabled
+        shell: bash
+        run: |
+          echo "Diagnostics-only run: test output is preserved; no Preview publication." >&2
+          exit 1
       - uses: actions/checkout@v4
         with:
           ref: gpt-preview
