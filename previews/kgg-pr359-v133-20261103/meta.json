@@ -1,0 +1,21 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "verified-pr",
+  "requestId": "kgg-pr359-v133-20261103",
+  "patchHash": "53db8358fea1d883a5661982fb369264f22d0a24e3d0763c4d94bf7722f463ff",
+  "sourceSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
+  "baseSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
+  "commitSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
+  "baseVersionCode": 133,
+  "rolloutCode": 1793713425,
+  "title": "Verified PR #359 test preview",
+  "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
+  "versionName": "1.0.133-phone-dock-owner",
+  "createdAt": "2026-11-03T13:43:45Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-pr359-v133-20261103/admin.html",
+  "sha256": "1e60e8bf11478192cc0ebf9886913dc853a9c4bb2dc9cef5f55f2e178089bc07",
+  "sourcePr": 359,
+  "sourcePrUrl": "https://github.com/Kayus24/kgg/pull/359",
+  "verificationRunId": 41614544379,
+  "verificationRunUrl": "https://github.com/Kayus24/kgg/actions/runs/41614544379"
+}
