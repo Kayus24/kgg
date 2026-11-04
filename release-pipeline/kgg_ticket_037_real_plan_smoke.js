@@ -646,6 +646,9 @@ async function runPhoneCockpitEntry(browser) {
     const localRoundtripUrl = new URL(HTML_URL);
     localRoundtripUrl.search = new URL(generatedLink).search;
     await page.goto(localRoundtripUrl.toString(), { waitUntil: "domcontentloaded", timeout: 30000 });
+    // The post-navigation Admin secrets dialog legitimately hides the dock.
+    // Close it with the existing visible UI flow before asserting dock layout.
+    await closeAllowedAdminModal(page);
     await waitForCockpitState(page, 1);
 
     const entry = page.locator("#kggTherapyCockpitButton");
