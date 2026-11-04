@@ -1,0 +1,170 @@
+name: KGG Approved PR Test APK (read only)
+on:
+  push:
+    branches: [fix/plugin-verified-pr-test-apk-20261104]
+    paths:
+      - .github/workflows/kgg-approved-pr-test-apk.yml
+      - release-pipeline/test_kgg_approved_pr_test_apk.py
+  workflow_dispatch:
+    inputs:
+      source_pr:
+        description: Approved open draft PR number
+        required: true
+        type: string
+      source_sha:
+        description: Exact immutable PR SHA
+        required: true
+        type: string
+      verification_run_id:
+        description: Exact successful verification run
+        required: true
+        type: string
+      request_id:
+        description: Unique test request identifier
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+concurrency:
+  group: kgg-approved-pr-test-apk-${{ github.ref }}-${{ github.run_id }}
+  cancel-in-progress: false
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify provenance and workflow contract
+        run: |
+          python -m unittest discover -s release-pipeline -p test_kgg_verified_pr_provenance.py -v
+          python -m unittest discover -s release-pipeline -p test_kgg_approved_pr_test_apk.py -v
+  build-test-apk:
+    if: github.event_name == 'workflow_dispatch'
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SOURCE_PR: ${{ inputs.source_pr }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      VERIFIED_RUN: ${{ inputs.verification_run_id }}
+      REQUEST_ID: ${{ inputs.request_id }}
+    steps:
+      - name: Fail closed for untrusted source or malformed inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "Kayus24/kgg"
+          test "$GITHUB_REF_NAME" = "main"
+          [[ "$SOURCE_PR" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$VERIFIED_RUN" =~ ^[1-9][0-9]{0,15}$ ]]
+          [[ "$REQUEST_ID" =~ ^[a-z0-9][a-z0-9-]{5,63}$ ]]
+      - uses: actions/checkout@v4
+        with:
+          path: trusted
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify live GitHub PR and green SHA-bound CI
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR" > "$RUNNER_TEMP/pr.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN" > "$RUNNER_TEMP/run.json"
+          python trusted/release-pipeline/kgg_verified_pr_provenance.py \
+            --pr-file "$RUNNER_TEMP/pr.json" --run-file "$RUNNER_TEMP/run.json" \
+            --pr-number "$SOURCE_PR" --sha "$SOURCE_SHA" \
+            --branch "$(jq -r .head.ref "$RUNNER_TEMP/pr.json")" \
+            --base-branch "$(jq -r .base.ref "$RUNNER_TEMP/pr.json")" \
+            --run-id "$VERIFIED_RUN" > "$RUNNER_TEMP/attestation.json"
+          jq -e '.status=="PASS" and .publishingAuthorized==false' "$RUNNER_TEMP/attestation.json" >/dev/null
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - name: Ensure immutable source checkout
+        run: test "$(git -C source rev-parse HEAD)" = "$SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Install existing PDF test dependencies
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Run KGG critical and UI regressions
+        working-directory: source
+        env:
+          KGG_ALLOW_RELEASE_DRIFT: "1"
+        run: |
+          set -euo pipefail
+          python release-pipeline/build_therapist_source.py --check
+          python release-pipeline/kgg_test_battery.py --level critical
+          python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
+      - name: Prepare existing browser regression tools
+        working-directory: source/release-pipeline
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Verify cockpit phone dock twice in fresh browsers
+        working-directory: source
+        run: |
+          node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
+          node release-pipeline/kgg_ticket_037_real_plan_smoke.js --case=phone-cockpit-entry-390
+      - name: Generate exact test APK context
+        shell: bash
+        run: |
+          set -euo pipefail
+          hash="$(printf 'approved-pr|%s|%s|%s' "$SOURCE_PR" "$SOURCE_SHA" "$VERIFIED_RUN" | sha256sum | cut -d ' ' -f1)"
+          version="$(python -c 'import json;print(json.load(open("source/kgg-update/version.json"))["versionName"])')"
+          python source/release-pipeline/kgg_preview_context.py \
+            --request-id "$REQUEST_ID" --patch-hash "$hash" \
+            --base-sha "$SOURCE_SHA" --commit-sha "$SOURCE_SHA" \
+            --web-version "$version" --required-test critical \
+            --required-test 'ui-stability regression' --required-test phone-cockpit-entry-390 \
+            --output "$RUNNER_TEMP/kgg-preview-context.json"
+      - name: Build Android test APK only
+        working-directory: source/android-wrapper
+        run: gradle -PKGG_PREVIEW_CONTEXT_FILE="$RUNNER_TEMP/kgg-preview-context.json" assemblePreviewDebug
+      - name: Reverify live approval and pinned SHA
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR" > "$RUNNER_TEMP/pr-final.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VERIFIED_RUN" > "$RUNNER_TEMP/run-final.json"
+          python trusted/release-pipeline/kgg_verified_pr_provenance.py \
+            --pr-file "$RUNNER_TEMP/pr-final.json" --run-file "$RUNNER_TEMP/run-final.json" \
+            --pr-number "$SOURCE_PR" --sha "$SOURCE_SHA" \
+            --branch "$(jq -r .head.ref "$RUNNER_TEMP/pr-final.json")" \
+            --base-branch "$(jq -r .base.ref "$RUNNER_TEMP/pr-final.json")" \
+            --run-id "$VERIFIED_RUN" > "$RUNNER_TEMP/attestation-final.json"
+          jq -e '.status=="PASS" and .publishingAuthorized==false' "$RUNNER_TEMP/attestation-final.json" >/dev/null
+      - name: Upload test APK; never write Main or Preview channel
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-pr-${{ inputs.source_pr }}-test-apk
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            source/android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+            source/kgg-update/version.json
+            ${{ runner.temp }}/attestation-final.json
+            ${{ runner.temp }}/kgg-preview-context.json
