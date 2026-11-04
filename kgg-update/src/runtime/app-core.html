@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v133_phone_dock_owner';
+  const VERSION='KGG_GITHUB_UPDATE_v134_cockpit_qr_explicit_import';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v133","buildTime":"2026-10-30T12:15:20Z","buildCode":"module-v133-phone-dock-owner","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v134","buildTime":"2026-11-04T16:30:22Z","buildCode":"module-v134-cockpit-qr-explicit-import","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -2030,6 +2030,8 @@
       '<div class="scanInboxActions">'+
         '<button type="button" class="mutedBtn" onclick="window.KGGScan.copyResult('+index+')">kopieren</button>'+
         '<button type="button" class="primary" onclick="window.KGGScan.applyResult('+index+')">weiter bearbeiten</button>'+
+      (job.result&&job.result.cockpit&&job.result.cockpit.link
+        ?'<button type="button" class="primary scanCockpitImportBtn" onclick="window.KGGScan.importCockpit('+index+')">Ins Cockpit übernehmen</button>':'')+
       '</div></div>';
   }
   function renderScannedPlansInbox(){
@@ -6466,6 +6468,9 @@
           try{job.result.cockpit=window.KGGCockpitQrAccepted(job.result,patientPrimaryNames(parsed.json)||{});}
           catch(error){job.result.cockpitError=error&&error.code||'cockpit_import_failed';job.warnings.push('Cockpit-Link nicht erzeugt ('+job.result.cockpitError+').');}
         }
+        // Ensure the Scan-Inbox is visible after a scan initiated in Cockpit.
+        if(job.result.cockpit&&window.KGGTherapyCockpit&&
+           window.KGGTherapyCockpit.getState().view==='cockpit')window.KGGTherapyCockpit.close();
         return job;
       }catch(err){
         setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));
@@ -6851,6 +6856,23 @@
     }
   }
   window.KGGScan={
+    importCockpit(index){
+      const slotIndex=Number(index);
+      if(scanState.busy||!Number.isInteger(slotIndex)||slotIndex<0||slotIndex>=scanState.jobs.length)return false;
+      const job=scanState.jobs[slotIndex];
+      if(!job||!job.result||!job.result.cockpit||!job.result.cockpit.link)return false;
+      if(typeof window.KGGCockpitQrImport!=='function')return false;
+      try{
+        const result=window.KGGCockpitQrImport(job.result,patientPrimaryNames(job.result.json)||{});
+        if(!result)return false;
+        job.result.cockpit={...job.result.cockpit,slot:result.slot,link:result.link,persisted:result.persisted,pending:false};
+        save();render();setScanStatus('Plan ins Cockpit übernommen.');
+        return true;
+      }catch(error){
+        setScanStatus(error&&error.code==='slots_full'?'Cockpit voll: maximal drei Pläne.':'Cockpit-Übernahme fehlgeschlagen.');
+        return false;
+      }
+    },
     pick(kind){
         const normalized=rememberScanInputKind(kind||lastScanInputKind());
         notifyNativeScanPickerMode(normalized);
