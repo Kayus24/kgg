@@ -8,6 +8,7 @@ const PLAN_LINK_CHOICE_SCRIPT = './patient-plan-link-choice.js?v=plan-link-choic
 const COLLAPSE_SCRIPT = './collapse-cards.js?v=plan-update-label-7-single-card-owner';
 const CARD_PROGRESS_SCRIPT = './patient-card-progress.js?v=card-progress-3-active-units';
 const INSTALL_PROMPT_SCRIPT = './patient-install-prompt.js?v=install-prompt-2-capability-only';
+const INSTALL_TRANSFER_SCRIPT = './patient-install-transfer.js?v=install-transfer-1';
 const PLAN_REPLACE_SLOT_SCRIPT = './patient-plan-replace-slot-fix.js?v=active-slot-1';
 const START_SCAN_SCRIPT = './patient-start-scan.js?v=start-scan-v96-primary-metadata';
 const JSQR_SCRIPT = './vendor/jsqr-1.4.0.js';
@@ -32,7 +33,7 @@ const NUMPAD_CARD_GUARD_SCRIPT = './patient-numpad-card-guard.js?v=numpad-input-
 const SET_COMPACT_VIEW_SCRIPT = './patient-set-compact-view.js?v=set-compact-view-8-stable-pair';
 const I18N_SCRIPT = './patient-i18n.js?v=english-v93';
 const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v63.png','./kgg-icon-512-v63.png'];
-const APP_ASSETS = ['./',I18N_SCRIPT,'./kgg-icon-maskable-512-v63.png',NUMPAD_UI_FIX_SCRIPT,VERSION_LABEL_SCRIPT,PLAN_LINK_CHOICE_SCRIPT,COLLAPSE_SCRIPT,CARD_PROGRESS_SCRIPT,INSTALL_PROMPT_SCRIPT,PLAN_REPLACE_SLOT_SCRIPT,START_SCAN_SCRIPT,JSQR_SCRIPT,FFLATE_SCRIPT,PLAN_FORMAT_SCRIPT,MULTIPLAN_DB_SCRIPT,PLAN_DELETE_SCRIPT,CARD_SETTINGS_SCRIPT,START_VALUES_SCRIPT,DAY_HISTORY_SCRIPT,EXERCISE_MEDIA_SOURCES_SCRIPT,MEDIA_SCRIPT,UI_MICRO_POLISH_SCRIPT,PAIN_VERTICAL_SCRIPT,INSTALL_GUIDE_SCRIPT,NUMPAD_VISIBILITY_SCRIPT,EXTRA_INFO_SCRIPT,LAST_VALUE_HINTS_SCRIPT,SET_SUMMARY_GROUPS_SCRIPT,QR_FULLSCREEN_SCRIPT,NUMPAD_CARD_GUARD_SCRIPT,SET_COMPACT_VIEW_SCRIPT,'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'];
+const APP_ASSETS = ['./',I18N_SCRIPT,'./kgg-icon-maskable-512-v63.png',NUMPAD_UI_FIX_SCRIPT,VERSION_LABEL_SCRIPT,PLAN_LINK_CHOICE_SCRIPT,COLLAPSE_SCRIPT,CARD_PROGRESS_SCRIPT,INSTALL_PROMPT_SCRIPT,INSTALL_TRANSFER_SCRIPT,'./ios-start.html',PLAN_REPLACE_SLOT_SCRIPT,START_SCAN_SCRIPT,JSQR_SCRIPT,FFLATE_SCRIPT,PLAN_FORMAT_SCRIPT,MULTIPLAN_DB_SCRIPT,PLAN_DELETE_SCRIPT,CARD_SETTINGS_SCRIPT,START_VALUES_SCRIPT,DAY_HISTORY_SCRIPT,EXERCISE_MEDIA_SOURCES_SCRIPT,MEDIA_SCRIPT,UI_MICRO_POLISH_SCRIPT,PAIN_VERTICAL_SCRIPT,INSTALL_GUIDE_SCRIPT,NUMPAD_VISIBILITY_SCRIPT,EXTRA_INFO_SCRIPT,LAST_VALUE_HINTS_SCRIPT,SET_SUMMARY_GROUPS_SCRIPT,QR_FULLSCREEN_SCRIPT,NUMPAD_CARD_GUARD_SCRIPT,SET_COMPACT_VIEW_SCRIPT,'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'];
 function isIndexRequest(request){const url=new URL(request.url);if(url.origin!==self.location.origin)return false;return url.pathname.endsWith('/kgg/')||url.pathname.endsWith('/kgg/index.html')}
 function isRecoveryRequest(request){const url=new URL(request.url);if(url.origin!==self.location.origin)return false;return url.pathname.endsWith('/kgg/update-recovery.html')}
 function injectModules(response){return response}

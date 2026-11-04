@@ -38,6 +38,14 @@ async function main(){
   for(let i=0;i<10;i++){
     const card=page.locator("#list .ex").nth(i);await openCard(card);
     await card.locator(".kggMediaBox.ready img").first().waitFor({state:"visible",timeout:30000});
+    // Waiting for the first visible image does NOT mean every sibling has decoded.
+    // All media remain mandatory: a broken/blank image still fails after the bounded wait.
+    await page.waitForFunction(index=>{
+      const card=document.querySelectorAll("#list .ex")[index];
+      const imgs=[...(card?.querySelectorAll(".kggMediaBox.ready img")||[])];
+      return imgs.length>0&&imgs.every(img=>img.complete&&img.naturalWidth>0&&img.naturalHeight>0);
+    },i,{timeout:15000});
+    await card.locator(".kggMediaBox.ready img").evaluateAll(imgs=>Promise.all(imgs.map(img=>img.decode())));
     const result=await card.evaluate(el=>{
       const imgs=[...el.querySelectorAll(".kggMediaBox.ready img")],boxes=[...el.querySelectorAll(".kggMediaBox.ready")];
       const dims=imgs.map(img=>({w:img.naturalWidth,h:img.naturalHeight}));
