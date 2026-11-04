@@ -1,0 +1,20 @@
+<!-- KGG PATCH START kgg-v135-tablet-package-1024-tap -->
+<!-- Tablet-Pakete bei 1024px bedienbar -->
+<style id="kgg-v135-tablet-package-1024-tap-style">
+/* Keep both real touch targets reachable in the two-slot compact tablet pane.
+   The mirrored phone scan dock otherwise covers #packageToggle at 1024x800. */
+@media (min-width:760px) and (max-width:1100px) and (max-height:860px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app > #scanHub{
+    top:min(30dvh,215px)!important;
+    bottom:auto!important;
+  }
+}
+</style>
+<script id="kgg-v135-tablet-package-1024-tap">
+(function(){
+  "use strict";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES["kgg-v135-tablet-package-1024-tap"]={installed:true,version:1,contract:"compact two-slot tablet keeps package and scanner unforced touch targets separately reachable"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v135-tablet-package-1024-tap -->

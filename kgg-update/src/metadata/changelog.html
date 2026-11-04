@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 134,
+  "latestVersionCode": 135,
   "entries": [
+    {
+      "versionCode": 135,
+      "versionName": "1.0.135-tablet-package-1024-tap",
+      "patchId": "kgg-v135-tablet-package-1024-tap",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Pakete bei 1024px bedienbar",
+      "reason": "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar.",
+      "whatChanged": [
+        "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 134,
       "versionName": "1.0.134-cockpit-qr-explicit-import",
@@ -457,40 +488,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max hat die Anzeige vorhandener Bilder im angenommenen Plan ausdruecklich beauftragt; Upload und Datenformate bleiben unveraendert."
-    },
-    {
-      "versionCode": 120,
-      "versionName": "1.0.120-cockpit-keypad-visibility",
-      "patchId": "kgg-v120-cockpit-keypad-visibility",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Tastatur vollstaendig erreichbar",
-      "reason": "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben.",
-      "whatChanged": [
-        "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.134-cockpit-qr-explicit-import",
+  "latestVersionName": "1.0.135-tablet-package-1024-tap",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -659,6 +659,14 @@
       "entriesSha256": "edd025d6b0cf4bf5d24fb54640662f933b5eb1d36ed078c1b9f6e1c25003583c",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v134-cockpit-qr-explicit-import"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v135.json",
+      "snapshotVersionCode": 135,
+      "entryCount": 76,
+      "entriesSha256": "6f128701b3c2b6ec43c33c50145b71191cc2d9fb86e624e982310029c8911c70",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v135-tablet-package-1024-tap"
     }
   ]
 }
