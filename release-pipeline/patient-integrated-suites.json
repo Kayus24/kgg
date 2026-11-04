@@ -27,6 +27,7 @@
     "retained-english-compatibility",
     "retained-transfer",
     "retained-install",
+    "retained-install-transfer",
     "retained-ios-start",
     "retained-update-recovery",
     "report-contracts"
@@ -357,6 +358,16 @@
       "timeoutSeconds": 200,
       "env": {},
       "coverageNote": "Existing regression executed unchanged; not attributed to selected engine unless test itself supports it."
+    },
+    {
+      "id": "retained-install-transfer",
+      "command": [
+        "node",
+        "release-pipeline/kgg_patient_install_transfer_playwright.js"
+      ],
+      "timeoutSeconds": 240,
+      "env": {},
+      "coverageNote": "Install pop-up only with a real install prompt; iPhone transfer bundle imports plans and values once without overwriting."
     },
     {
       "id": "retained-ios-start",

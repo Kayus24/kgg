@@ -35,6 +35,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-i18n.js`
 - `patient-install-guide.js`
 - `patient-install-prompt.js`
+- `patient-install-transfer.js`
 - `patient-ios-large-pad-force.js`
 - `patient-last-value-hints.js`
 - `patient-media-retry-cache_v2.js`

@@ -60,6 +60,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-card-progress.js?v=card-progress-3-active-units",
   "./patient-install-guide.js?v=install-guide-v82-prompt-only",
   "./patient-install-prompt.js?v=install-prompt-2-capability-only",
+  "./patient-install-transfer.js?v=install-transfer-1",
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
   "./patient-start-scan.js?v=start-scan-v96-primary-metadata",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
