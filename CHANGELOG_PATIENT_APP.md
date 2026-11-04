@@ -1,5 +1,12 @@
 # Patient App Changelog
 
+## Unreleased - Installations-Pop-up mit Planübernahme
+
+- Zeigt Patient:innen mit gespeichertem Plan ein Pop-up „KGG als App installieren?“, aber nur, wenn der Browser eine echte Installation anbietet (`beforeinstallprompt`, z. B. Chrome/Samsung Internet auf Android). Ohne echtes Angebot erscheint nichts.
+- Hintergrund: Im Browser-Tab können Plan und Werte gelöscht werden (Safari nach 7 Tagen ohne Besuch, Android bei Speicherdruck oder Gerätewartung). Installierte Apps sind ausgenommen bzw. deutlich besser geschützt.
+- Nach der Installation und beim Start der installierten App wird `navigator.storage.persist()` erneut angefragt; die App bestätigt einmalig, dass der Plan übernommen wurde, oder bittet um einen QR-Scan.
+- iPhone: verlustfreie Übernahme aller Pläne und Werte über `ios-start.html?install=1#kggt=…` vorbereitet (nur fehlende Einträge, einmal pro Bündel). Das iPhone-Pop-up bleibt bis zum Realgerätetest aus und lässt sich mit `?iosinstall=1` testen.
+
 ## v95 - 2026-10-18
 
 - Erhält beim erneuten Aufbau des Planaktionsmenüs den bestehenden FAB-Textknoten, damit ein laufender nativer Klick das Menü weiterhin öffnet.

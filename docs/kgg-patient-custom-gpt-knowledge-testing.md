@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `0ad0153dfb398c5f`.
+Generated retrieval pack. Source digest: `9890b2d27e8b1e45`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -126,6 +126,7 @@ def validate_static_compatibility(manifest:dict,version:str)->None:
   "./patient-card-progress.js?v=card-progress-3-active-units",
   "./patient-install-guide.js?v=install-guide-v82-prompt-only",
   "./patient-install-prompt.js?v=install-prompt-2-capability-only",
+  "./patient-install-transfer.js?v=install-transfer-1",
   "./patient-plan-replace-slot-fix.js?v=active-slot-1",
   "./patient-start-scan.js?v=start-scan-v96-primary-metadata",
   "./patient-multiplan-db.js?v=lossless-media-plans-1",
@@ -1487,6 +1488,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-card-progress.js",
     "patient-install-guide.js",
     "patient-install-prompt.js",
+    "patient-install-transfer.js",
     "patient-plan-replace-slot-fix.js",
     "patient-start-scan.js",
     "patient-multiplan-db.js",

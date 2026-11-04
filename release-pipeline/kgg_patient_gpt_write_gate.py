@@ -80,6 +80,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-card-progress.js",
     "patient-install-guide.js",
     "patient-install-prompt.js",
+    "patient-install-transfer.js",
     "patient-plan-replace-slot-fix.js",
     "patient-start-scan.js",
     "patient-multiplan-db.js",
