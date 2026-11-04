@@ -1,0 +1,19 @@
+<!-- KGG PATCH START kgg-v134-cockpit-qr-explicit-import -->
+<!-- Cockpit QR nur nach bewusster Uebernahme -->
+<script id="kgg-v134-cockpit-qr-explicit-import">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v134-cockpit-qr-explicit-import";
+  // QR scan/preview stays in v129 and app-core; this version certifies their
+  // explicit-import contract without creating a second data or DOM owner.
+  var ready=typeof window.KGGCockpitQrAccepted==="function" &&
+    typeof window.KGGCockpitQrImport==="function" &&
+    typeof window.KGGScan?.importCockpit==="function";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={
+    installed:ready,version:1,dependsOn:"kgg-v129-cockpit-qr-resume",
+    contract:"Scan without slot mutation; explicit scan-inbox button imports; never evict occupied slots"
+  };
+})();
+</script>
+<!-- KGG PATCH END kgg-v134-cockpit-qr-explicit-import -->

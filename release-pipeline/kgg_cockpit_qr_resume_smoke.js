@@ -75,13 +75,17 @@ async function open(page, href = HTML_URL) {
   await page.locator("#closeAdminSecrets").evaluate(button => button.click());
 }
 
-async function scan(page, raw) {
-  return page.evaluate(async value => {
+async function scan(page, raw, activate = true) {
+  const scanned = await page.evaluate(async value => {
     const accepted = await window.KGGScan.handleQrRaw(value, "synthetic-qr-resume-test");
     const jobs = window.scanJobsState || [];
     const latest = jobs[jobs.length - 1];
-    return { accepted, cockpit: latest?.result?.cockpit || null };
+    return { accepted, cockpit: latest?.result?.cockpit || null, index: jobs.length - 1 };
   }, raw);
+  if(!activate || !scanned.cockpit?.link)return scanned;
+  // Click through the real visible action, never call the import helper from a test.
+  await page.locator('.scanInboxCard[data-scan-index="'+scanned.index+'"] .scanCockpitImportBtn').click();
+  return page.evaluate(({accepted,index})=>({accepted,index,cockpit:(window.scanJobsState||[])[index]?.result?.cockpit||null}),scanned);
 }
 
 async function slot(page, index) {
@@ -167,10 +171,12 @@ async function verifyPhoneActivationSelectsScannedPatient(browser) {
   try {
     const { page } = phone;
     await open(page);
-    const first = await scan(page, fullPlan("synthetic-phone-qr-a", "Synthetischer Handy A"));
-    assert.equal(first.cockpit?.slot, 0, "first phone scan must occupy slot zero");
+    const first = await scan(page, fullPlan("synthetic-phone-qr-a", "Synthetischer Handy A"), false);
+    assert.equal(first.cockpit?.pending, true, "phone scan must offer an optional Cockpit import");
+    assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().slotCount), 0, "phone scan must not reserve a Cockpit slot");
     assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().view), "normal", "phone QR scan must not switch into the Cockpit");
     assert.equal(await page.locator("#kggTherapyCockpitOutputModal").isVisible(), false, "phone QR scan must not open a Cockpit modal");
+    await page.locator('.scanInboxCard[data-scan-index="0"] .scanCockpitImportBtn').click();
     await page.evaluate(() => { window.KGGTherapyCockpit.open(); window.KGGTherapyCockpit.selectSlot(0); });
     await page.waitForSelector('.kgg-tce-active-card[data-tc-card="0"]');
     const second = await scan(page, fullPlan("synthetic-phone-qr-b", "Synthetischer Handy B"));
@@ -283,10 +289,11 @@ async function main() {
   try {
     const { page } = original;
     await open(page);
-    const first = await scan(page, fullPlan(PLAN_A));
+    const first = await scan(page, fullPlan(PLAN_A), false);
     assert.equal(first.accepted?.accepted, true, "valid full-plan QR must be accepted by the real scanner");
-    assert.ok(first.cockpit?.link, "successful patient QR scan must attach job.result.cockpit with an activation link");
-    assert.equal(first.cockpit.slot, 0, "first scanned plan must occupy the first slot");
+    assert.ok(first.cockpit?.link, "successful patient QR scan must attach a portable but inactive link");
+    assert.equal(first.cockpit.pending, true, "QR preview must not occupy a slot");
+    assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().slotCount), 0, "QR scan must not import, replace or persist any Cockpit slot");
     const activationLink = first.cockpit.link;
     assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().view), "normal", "QR scan must not automatically open the Cockpit");
     assert.equal(await page.locator("#kggTherapyCockpitOutputModal").isVisible(), false, "QR scan must not interrupt the normal scan workflow with a modal");
@@ -314,8 +321,10 @@ async function main() {
     const scanText = await page.locator("#kggScanInboxField0").inputValue();
     assert.equal(scanText.endsWith("Cockpit-Link:\n" + activationLink), true, "normal scan result text must end with the Cockpit link");
     assert.ok(scanText.includes("Abduktion"), "scan result must still contain the usual patient exercise text");
-    assert.equal((await slot(page, 0)).planId, PLAN_A, "scan must retain the QR plan identity");
+    assert.equal(await slot(page, 0), null, "scan-only preview must leave slot zero empty");
     await screenshot(page, "01-scan-activation-link");
+    await page.locator('.scanInboxCard[data-scan-index="0"] .scanCockpitImportBtn').click();
+    assert.equal((await slot(page, 0)).planId, PLAN_A, "only the explicit real tap may import into Cockpit");
 
     phase = "visible therapist edits";
     await open(page, localLink(activationLink));
@@ -382,6 +391,17 @@ async function main() {
     const slotB = await slot(page, 1);
     const slotC = await slot(page, 2);
     await closeOutput(page);
+    // A fourth, different plan must neither occupy a slot on scan nor evict
+    // an existing patient when the user explicitly requests an import.
+    const beforeFourth = await cockpitSnapshot(page);
+    const pendingFourth = await scan(page, fullPlan("synthetic-qr-overflow-fourth", "Synthetischer Vierter"), false);
+    assert.equal(pendingFourth.cockpit?.pending, true, "full Cockpit scan must remain an optional import");
+    assert.deepEqual(await cockpitSnapshot(page), beforeFourth, "scan with three occupied slots must not modify any plan");
+    const fourthButton = page.locator('.scanInboxCard[data-scan-index="' + pendingFourth.index + '"] .scanCockpitImportBtn');
+    assert.equal(await fourthButton.isVisible(), true, "full Cockpit must still offer the explicit import action");
+    await fourthButton.click();
+    assert.deepEqual(await cockpitSnapshot(page), beforeFourth, "fourth plan import must never replace an occupied slot");
+    assert.equal(await page.evaluate(index => window.scanJobsState[index]?.result?.cockpit?.pending, pendingFourth.index), true, "rejected fourth import must remain pending");
     const fullRepeat = await scan(page, returnedPlan(PLAN_A, [["19", "11"], ["20", "12"]]));
     assert.equal(fullRepeat.cockpit?.slot, 0, "same plan must reuse its slot even when all three slots are occupied");
     assert.equal(await page.evaluate(() => window.KGGTherapyCockpit.getState().slotCount), 3, "same-plan refresh must preserve three occupied slots");
