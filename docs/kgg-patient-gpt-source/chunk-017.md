@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 017
 
 - Source file: `patient-install-transfer.js`
-- Characters: 1-13069
-- Full source SHA-256: `e8c6d4a51632b1e39eeedafdc167ad72f151f65ab0f33d9bb96c85a38fb1a6d8`
+- Characters: 1-13504
+- Full source SHA-256: `c98a23c207f437248bff9fa2e27c522acf08bd37620e8a6ebb2a5259f4fd712b`
 
 ```
 (()=>{
@@ -98,7 +98,10 @@
 #kggInstallToast.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}`;
     document.head.appendChild(s);
   }
-  function close(){const b=document.getElementById('kggInstallPopupBackdrop');if(b)b.remove()}
+  // The existing index.html installBox listens to the same beforeinstallprompt.
+  // Keep one active installation dialog; snoozing must dismiss both.
+  function closeLegacyInstallBox(){const legacy=document.getElementById('installBox');if(legacy)legacy.classList.add('hide')}
+  function close(){const b=document.getElementById('kggInstallPopupBackdrop');if(b)b.remove();closeLegacyInstallBox()}
   function snooze(){set(SNOOZE_KEY,String(Date.now()+SNOOZE_MS))}
   function toast(text,warn){
     ensureStyle();const old=document.getElementById('kggInstallToast');if(old)old.remove();
@@ -116,6 +119,9 @@
 
   function showPopup(){
     if(document.getElementById('kggInstallPopupBackdrop'))return;
+    // Prevent the legacy delayed handler from reopening the old dialog.
+    set('kggInstallAsked','1');
+    closeLegacyInstallBox();
     ensureStyle();
     const prompt=window.__kggInstallPrompt&&typeof window.__kggInstallPrompt.prompt==='function'?window.__kggInstallPrompt:null;
     const backdrop=el('div');backdrop.id='kggInstallPopupBackdrop';backdrop.setAttribute('role','presentation');

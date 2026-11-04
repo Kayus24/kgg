@@ -46,7 +46,29 @@ async function open(browser,base,ua,query){
   await page.waitForFunction(()=>!document.getElementById("kggInstallPopup"));
   assert(Number(await page.evaluate(()=>localStorage.getItem("kggInstallPopupSnoozeUntil")))>Date.now(),"dismiss did not snooze");
   await ctx.close();
-  // 4) iPhone Safari: no pop-up by default (no real install prompt exists there).
+  // 4) Existing legacy installBox must not remain visible behind/after Later.
+  ({ctx,page}=await open(browser,base,ANDROID));
+  await page.evaluate(()=>localStorage.removeItem("kggInstallAsked"));
+  await page.evaluate(()=>{
+    const e=new Event("beforeinstallprompt",{cancelable:true});
+    Object.defineProperty(e,"prompt",{value:async()=>{}});
+    Object.defineProperty(e,"userChoice",{value:Promise.resolve({outcome:"dismissed"})});
+    window.dispatchEvent(e);
+  });
+  await page.waitForFunction(()=>document.getElementById("kggInstallPopup"),null,{timeout:7000});
+  assert(await page.evaluate(()=>document.getElementById("installBox").classList.contains("hide")),
+    "legacy installBox visible beneath the new installation prompt");
+  await page.getByRole("button",{name:"Sp\u00e4ter"}).click();
+  const deferred=await page.evaluate(()=>({
+    legacyHidden:document.getElementById("installBox").classList.contains("hide"),
+    newHidden:!document.getElementById("kggInstallPopupBackdrop"),
+    snoozed:Number(localStorage.getItem("kggInstallPopupSnoozeUntil"))>Date.now(),
+    legacyAsked:localStorage.getItem("kggInstallAsked")==="1"
+  }));
+  assert(deferred.legacyHidden&&deferred.newHidden&&deferred.snoozed&&deferred.legacyAsked,
+    "Later must dismiss both installation dialogs and snooze: "+JSON.stringify(deferred));
+  await ctx.close();
+  // 5) iPhone Safari: no pop-up by default (no real install prompt exists there).
   ({ctx,page}=await open(browser,base,IOS));
   await page.waitForTimeout(3500);
   assert(!(await popupVisible(page)),"iPhone pop-up shown although iOS flow is not enabled");
