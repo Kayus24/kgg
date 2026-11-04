@@ -1,7 +1,7 @@
 {
-  "versionCode": 135,
-  "versionName": "1.0.135-tablet-package-1024-tap",
-  "indexUrl": "index.html?v=135",
-  "sha256": "4eefcc6a4c98311de408ad87f7c47e0921b4e66cee738caecd7189eb1a9e574e",
-  "notes": "v135: Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar."
+  "versionCode": 136,
+  "versionName": "1.0.136-tablet-scan-flow-collision",
+  "indexUrl": "index.html?v=136",
+  "sha256": "abe435de2370ab7ffe0bdad053959098f3737edabeb19fa69b5c325b63b7933f",
+  "notes": "v136: Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben."
 }

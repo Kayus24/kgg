@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 135,
+  "latestVersionCode": 136,
   "entries": [
+    {
+      "versionCode": 136,
+      "versionName": "1.0.136-tablet-scan-flow-collision",
+      "patchId": "kgg-v136-tablet-scan-flow-collision",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Scanner kollisionsfrei im Zwei-Slot-Pane",
+      "reason": "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben.",
+      "whatChanged": [
+        "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 135,
       "versionName": "1.0.135-tablet-package-1024-tap",
@@ -456,41 +487,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max hat den einklappbaren Teststations-Einstieg im angenommenen Plan ausdruecklich ausgewaehlt; Preview-Wrapper wird getrennt getestet."
-    },
-    {
-      "versionCode": 121,
-      "versionName": "1.0.121-cockpit-exercise-thumbnails",
-      "patchId": "kgg-v121-cockpit-exercise-thumbnails",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Vorhandene Cockpit Uebungsbilder",
-      "reason": "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien.",
-      "whatChanged": [
-        "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Medien/Upload"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Anzeige vorhandener Bilder im angenommenen Plan ausdruecklich beauftragt; Upload und Datenformate bleiben unveraendert."
     }
   ],
-  "latestVersionName": "1.0.135-tablet-package-1024-tap",
+  "latestVersionName": "1.0.136-tablet-scan-flow-collision",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -667,6 +666,14 @@
       "entriesSha256": "6f128701b3c2b6ec43c33c50145b71191cc2d9fb86e624e982310029c8911c70",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v135-tablet-package-1024-tap"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v136.json",
+      "snapshotVersionCode": 136,
+      "entryCount": 77,
+      "entriesSha256": "ba6102e11376dc4213613aedb56dfdab1bd70e46e80e64fd373ffbd7cd59d227",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v136-tablet-scan-flow-collision"
     }
   ]
 }

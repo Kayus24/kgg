@@ -2,21 +2,27 @@
 const fs=require('fs'),path=require('path');const {chromium}=require('playwright');const {pathToFileURL}=require('url');const root=path.resolve(__dirname,'..');
 const dir=path.join(process.env.KGG_SMOKE_SCREENSHOT_DIR||path.join(root,'tmp/cockpit-layout-canaries'),'main-phone-flow');fs.mkdirSync(dir,{recursive:true});
 (async()=>{const browser=await chromium.launch();const results=[];
- try{for(const width of [1024,820,1280]){
-  const viewport={width,height:width===820?1180:800},context=await browser.newContext({viewport,screen:viewport,isMobile:true,hasTouch:true});await context.route(/^https?:\/\//,r=>r.abort());const page=await context.newPage();page.setDefaultTimeout(4000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ try{for(const [width,height] of [[1024,800],[820,1180],[1280,800],[1024,768]]){
+  const viewport={width,height},context=await browser.newContext({viewport,screen:viewport,isMobile:true,hasTouch:true});await context.route(/^https?:\/\//,r=>r.abort());const page=await context.newPage();page.setDefaultTimeout(4000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>{localStorage.setItem('kgg_pwa_install_prompt_seen_v1','synthetic');localStorage.setItem('kgg_html_app_v2_state',JSON.stringify({planId:'synthetic-main-phone',patient:{name:'Synthetic',date:'2026-10-01'},plan:[{id:'synthetic-ex',localId:'synthetic-ex',name:'Abduktion Maschine',sets:2,side:'BI',loadUnit:'kg',metricUnit:'Wdh',today:[],previous:[],media:[],progressionVariants:[]}]}));});
   await page.goto(pathToFileURL(path.join(root,'kgg-update/index.html')).href);await page.locator('#adminSecretsModal.open').waitFor();await page.locator('#closeAdminSecrets').tap();
   await page.evaluate(()=>{const a=window.KGGTherapyCockpit;for(let i=0;i<2;i++)a.importCode(a.encode({planId:'synthetic-slot-'+i,name:'Synthetic '+i,exercises:a.registry.entries().slice(0,2).map(e=>({id:e.id,sets:2}))}));});
-  const result={width,checks:[]},test=async(name,fn)=>{try{await fn();result.checks.push({name,status:'PASS'});}catch(e){result.checks.push({name,status:'FAIL',error:e.message});await page.screenshot({path:path.join(dir,`main-phone-${width}-${name}.png`)});}};
+  const result={width,height,checks:[]},test=async(name,fn)=>{try{await fn();result.checks.push({name,status:'PASS'});}catch(e){result.checks.push({name,status:'FAIL',error:e.message});await page.screenshot({path:path.join(dir,`main-phone-${width}x${height}-${name}.png`)});}};
   const before=await page.evaluate(()=>{const p=window.KGGDataStore.getCurrentPlan();return JSON.stringify({id:p.id,patient:p.patient,exercises:p.exercises});});
-  if(width===1024)await test('package-and-scanner-hit-targets-1024',async()=>{
-    await page.locator('#packageToggle').scrollIntoViewIfNeeded();
+  await test('plan-package-scanner-unforced-targets',async()=>{
+    await page.locator('#currentPlanToggle').scrollIntoViewIfNeeded();
     const targets=await page.evaluate(()=>{
       const inspect=id=>{const element=document.getElementById(id),rect=element.getBoundingClientRect(),x=rect.left+rect.width/2,y=rect.top+rect.height/2,hit=document.elementFromPoint(x,y);return {rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},hit:hit?.closest('button')?.id||hit?.id||null};};
-      return {packageToggle:inspect('packageToggle'),scanBtn:inspect('scanBtn')};
+      return {currentPlanToggle:inspect('currentPlanToggle'),packageToggle:inspect('packageToggle'),scanBtn:inspect('scanBtn'),baseToggle:inspect('baseToggle'),bankToggle:inspect('bankToggle'),recentToggle:inspect('recentToggle')};
     });
     result.hitTargets=targets;
-    if(targets.packageToggle.hit!=='packageToggle'||targets.scanBtn.hit!=='scanBtn')throw new Error('1024px touch interception: '+JSON.stringify(targets));
+    for(const id of Object.keys(targets))if(targets[id].hit!==id)throw new Error(id+' pointer intercepted: '+JSON.stringify(targets));
+    const current=page.locator('#currentPlanToggle');
+    await current.tap();
+    if(await current.getAttribute('aria-expanded')!=='true')throw new Error('currentPlanToggle did not select current plan');
+    await page.locator('#planList:visible').waitFor();
+    const afterCurrent=await page.evaluate(()=>{const p=window.KGGDataStore.getCurrentPlan();return JSON.stringify({id:p.id,patient:p.patient,exercises:p.exercises});});
+    if(afterCurrent!==before)throw new Error('currentPlanToggle mutated plan state');
     await page.locator('#scanBtn').tap();
   });
   await test('phone-presentation',async()=>{await page.waitForFunction(()=>document.body.classList.contains('kggTcMainPanePhone')&&document.body.classList.contains('kggPhoneHasPlan')&&!document.body.classList.contains('tabletLayoutCustom'));await page.locator('#bankContent.hidden').waitFor({state:'hidden'});});
