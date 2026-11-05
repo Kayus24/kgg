@@ -3,8 +3,101 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 134,
+  "latestVersionCode": 137,
   "entries": [
+    {
+      "versionCode": 137,
+      "versionName": "1.0.137-tablet-two-slot-edge-taps",
+      "patchId": "kgg-v137-tablet-two-slot-edge-taps",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Zwei-Slot Rand-Taps",
+      "reason": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+      "whatChanged": [
+        "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 136,
+      "versionName": "1.0.136-tablet-scan-flow-collision",
+      "patchId": "kgg-v136-tablet-scan-flow-collision",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Scanner kollisionsfrei im Zwei-Slot-Pane",
+      "reason": "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben.",
+      "whatChanged": [
+        "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 135,
+      "versionName": "1.0.135-tablet-package-1024-tap",
+      "patchId": "kgg-v135-tablet-package-1024-tap",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Pakete bei 1024px bedienbar",
+      "reason": "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar.",
+      "whatChanged": [
+        "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 134,
       "versionName": "1.0.134-cockpit-qr-explicit-import",
@@ -393,104 +486,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 122,
-      "versionName": "1.0.122-teststation-collapsible-entry",
-      "patchId": "kgg-v122-teststation-collapsible-entry",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Einklappbare Teststation",
-      "reason": "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen.",
-      "whatChanged": [
-        "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den einklappbaren Teststations-Einstieg im angenommenen Plan ausdruecklich ausgewaehlt; Preview-Wrapper wird getrennt getestet."
-    },
-    {
-      "versionCode": 121,
-      "versionName": "1.0.121-cockpit-exercise-thumbnails",
-      "patchId": "kgg-v121-cockpit-exercise-thumbnails",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Vorhandene Cockpit Uebungsbilder",
-      "reason": "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien.",
-      "whatChanged": [
-        "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Medien/Upload"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Anzeige vorhandener Bilder im angenommenen Plan ausdruecklich beauftragt; Upload und Datenformate bleiben unveraendert."
-    },
-    {
-      "versionCode": 120,
-      "versionName": "1.0.120-cockpit-keypad-visibility",
-      "patchId": "kgg-v120-cockpit-keypad-visibility",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Tastatur vollstaendig erreichbar",
-      "reason": "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben.",
-      "whatChanged": [
-        "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.134-cockpit-qr-explicit-import",
+  "latestVersionName": "1.0.137-tablet-two-slot-edge-taps",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -659,6 +657,30 @@
       "entriesSha256": "edd025d6b0cf4bf5d24fb54640662f933b5eb1d36ed078c1b9f6e1c25003583c",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v134-cockpit-qr-explicit-import"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v135.json",
+      "snapshotVersionCode": 135,
+      "entryCount": 76,
+      "entriesSha256": "6f128701b3c2b6ec43c33c50145b71191cc2d9fb86e624e982310029c8911c70",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v135-tablet-package-1024-tap"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v136.json",
+      "snapshotVersionCode": 136,
+      "entryCount": 77,
+      "entriesSha256": "ba6102e11376dc4213613aedb56dfdab1bd70e46e80e64fd373ffbd7cd59d227",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v136-tablet-scan-flow-collision"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v137.json",
+      "snapshotVersionCode": 137,
+      "entryCount": 78,
+      "entriesSha256": "2d3ee7be122f4ae6074c0787cf58827bbdb509e187e9f9d439d4cc930fc9b277",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v137-tablet-two-slot-edge-taps"
     }
   ]
 }
