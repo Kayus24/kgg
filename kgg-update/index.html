@@ -110,20 +110,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-qr-explicit-import",
     "tablet-package-1024-tap",
     "tablet-scan-flow-collision",
-    "tablet-two-slot-edge-taps"
+    "tablet-two-slot-edge-taps",
+    "admin-qr-minimum-zoom"
   ],
   "currentVersion": {
-    "versionCode": 137,
-    "versionName": "1.0.137-tablet-two-slot-edge-taps",
-    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+    "versionCode": 138,
+    "versionName": "1.0.138-admin-qr-minimum-zoom",
+    "lastPatchId": "kgg-v138-admin-qr-minimum-zoom",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+  "latestPatchId": "kgg-v138-admin-qr-minimum-zoom",
   "lastUpdateIntent": {
-    "id": "kgg-v137-tablet-two-slot-edge-taps",
-    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+    "id": "kgg-v138-admin-qr-minimum-zoom",
+    "summary": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
     "touched": [
-      "Tablet-Layout"
+      "admin-camera-qr"
     ],
     "notTouched": [
       "PDF",
@@ -244,20 +245,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-qr-explicit-import",
     "tablet-package-1024-tap",
     "tablet-scan-flow-collision",
-    "tablet-two-slot-edge-taps"
+    "tablet-two-slot-edge-taps",
+    "admin-qr-minimum-zoom"
   ],
   "currentVersion": {
-    "versionCode": 137,
-    "versionName": "1.0.137-tablet-two-slot-edge-taps",
-    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+    "versionCode": 138,
+    "versionName": "1.0.138-admin-qr-minimum-zoom",
+    "lastPatchId": "kgg-v138-admin-qr-minimum-zoom",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+  "latestPatchId": "kgg-v138-admin-qr-minimum-zoom",
   "lastUpdateIntent": {
-    "id": "kgg-v137-tablet-two-slot-edge-taps",
-    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+    "id": "kgg-v138-admin-qr-minimum-zoom",
+    "summary": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
     "touched": [
-      "Tablet-Layout"
+      "admin-camera-qr"
     ],
     "notTouched": [
       "PDF",
@@ -279,8 +281,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 137,
+  "latestVersionCode": 138,
   "entries": [
+    {
+      "versionCode": 138,
+      "versionName": "1.0.138-admin-qr-minimum-zoom",
+      "patchId": "kgg-v138-admin-qr-minimum-zoom",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Admin QR minimum zoom",
+      "reason": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
+      "whatChanged": [
+        "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback"
+      ],
+      "touchedAreas": [
+        "admin-camera-qr"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 137,
       "versionName": "1.0.137-tablet-two-slot-edge-taps",
@@ -731,40 +764,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Nutzerauftrag 20.10.2026: lokale Integration und Tests, keine Release-Freigabe."
-    },
-    {
-      "versionCode": 123,
-      "versionName": "1.0.123-cockpit-previous-value-action",
-      "patchId": "kgg-v123-cockpit-previous-value-action",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Vorwerte im Cockpit uebernehmen",
-      "reason": "Wie in der Patienten-App kann das Vorwert-Paar eines Satzes bewusst in Heute uebernommen werden.",
-      "whatChanged": [
-        "Wie in der Patienten-App kann das Vorwert-Paar eines Satzes bewusst in Heute uebernommen werden."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.137-tablet-two-slot-edge-taps",
+  "latestVersionName": "1.0.138-admin-qr-minimum-zoom",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -957,6 +959,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "2d3ee7be122f4ae6074c0787cf58827bbdb509e187e9f9d439d4cc930fc9b277",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v137-tablet-two-slot-edge-taps"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v138.json",
+      "snapshotVersionCode": 138,
+      "entryCount": 79,
+      "entriesSha256": "69626abb2a24e56932e5ec7844c3c32c2d674771056a84dae852bb31f07ffb61",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v138-admin-qr-minimum-zoom"
     }
   ]
 }
@@ -1074,7 +1084,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+  "lastUpdatedByPatchId": "kgg-v138-admin-qr-minimum-zoom",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1209,7 +1219,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v137 Tablet-Zwei-Slot Rand-Taps</title>
+  <title>KGG Update v138 Admin QR minimum zoom</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17133,11 +17143,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v137_tablet_two_slot_edge_taps';
+  const VERSION='KGG_GITHUB_UPDATE_v138_admin_qr_minimum_zoom';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v137","buildTime":"2026-11-05T10:41:22Z","buildCode":"module-v137-tablet-two-slot-edge-taps","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v138","buildTime":"2026-11-05T17:08:55Z","buildCode":"module-v138-admin-qr-minimum-zoom","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -27885,6 +27895,21 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     const caps=nativeCapabilities();
     return !caps||caps.platform!=='android'||(caps.webVideoCapture===true&&Number(caps.webVideoCaptureVersion)>=1);
   }
+  async function preferMinimumCameraZoom(stream){
+    const track=stream&&typeof stream.getVideoTracks==='function'?stream.getVideoTracks()[0]:null;
+    if(!track||typeof track.getCapabilities!=='function'||typeof track.getSettings!=='function'||typeof track.applyConstraints!=='function')return;
+    try{
+      const capabilities=track.getCapabilities();
+      const settings=track.getSettings();
+      const zoom=capabilities&&capabilities.zoom;
+      const minZoom=Number(zoom&&zoom.min);
+      const currentZoom=Number(settings&&settings.zoom);
+      if(!zoom||!Number.isFinite(minZoom)||minZoom<=0||!Number.isFinite(currentZoom)||currentZoom<=minZoom)return;
+      await track.applyConstraints({advanced:[{zoom:minZoom}]});
+    }catch(err){
+      // Unsupported or denied zoom changes must never interrupt QR scanning.
+    }
+  }
   function ensureUi(){
     let root=document.getElementById(PATCH_ID+'-camera');
     if(root)return root;
@@ -28037,6 +28062,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
       session=current;
       video.srcObject=stream;
       await video.play();
+      void preferMinimumCameraZoom(stream);
       current.detector=await createDetector();
       setStatus(current.detector||typeof window.jsQR==='function'?'Suche KGG-Plan-QR ...':'Automatische QR-Erkennung fehlt. Papierfoto ist weiter moeglich.');
       if(current.detector||typeof window.jsQR==='function')scanLoop(current);
@@ -31865,6 +31891,19 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v137-tablet-two-slot-edge-taps -->
+<!-- KGG PATCH START kgg-v138-admin-qr-minimum-zoom -->
+<!-- Admin QR minimum zoom -->
+<script id="kgg-v138-admin-qr-minimum-zoom">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v138-admin-qr-minimum-zoom";
+  // The existing v061 camera owner applies optional minimum track zoom after video playback.
+  // This version marker records that targeted change; no second camera handler is installed.
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v138-admin-qr-minimum-zoom -->
 
 </body>
 </html>
