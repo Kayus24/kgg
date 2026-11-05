@@ -81,7 +81,8 @@
     "kgg-v133-phone-dock-owner",
     "kgg-v134-cockpit-qr-explicit-import",
     "kgg-v135-tablet-package-1024-tap",
-    "kgg-v136-tablet-scan-flow-collision"
+    "kgg-v136-tablet-scan-flow-collision",
+    "kgg-v137-tablet-two-slot-edge-taps"
   ],
   "parts": [
     "base-head.html",
@@ -180,6 +181,7 @@
     "patches/v134-cockpit-qr-explicit-import.html",
     "patches/v135-tablet-package-1024-tap.html",
     "patches/v136-tablet-scan-flow-collision.html",
+    "patches/v137-tablet-two-slot-edge-taps.html",
     "footer.html"
   ]
 }

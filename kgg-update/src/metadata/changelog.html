@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 136,
+  "latestVersionCode": 137,
   "entries": [
+    {
+      "versionCode": 137,
+      "versionName": "1.0.137-tablet-two-slot-edge-taps",
+      "patchId": "kgg-v137-tablet-two-slot-edge-taps",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Zwei-Slot Rand-Taps",
+      "reason": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+      "whatChanged": [
+        "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 136,
       "versionName": "1.0.136-tablet-scan-flow-collision",
@@ -455,41 +486,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 122,
-      "versionName": "1.0.122-teststation-collapsible-entry",
-      "patchId": "kgg-v122-teststation-collapsible-entry",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Einklappbare Teststation",
-      "reason": "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen.",
-      "whatChanged": [
-        "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den einklappbaren Teststations-Einstieg im angenommenen Plan ausdruecklich ausgewaehlt; Preview-Wrapper wird getrennt getestet."
     }
   ],
-  "latestVersionName": "1.0.136-tablet-scan-flow-collision",
+  "latestVersionName": "1.0.137-tablet-two-slot-edge-taps",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -674,6 +673,14 @@
       "entriesSha256": "ba6102e11376dc4213613aedb56dfdab1bd70e46e80e64fd373ffbd7cd59d227",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v136-tablet-scan-flow-collision"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v137.json",
+      "snapshotVersionCode": 137,
+      "entryCount": 78,
+      "entriesSha256": "2d3ee7be122f4ae6074c0787cf58827bbdb509e187e9f9d439d4cc930fc9b277",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v137-tablet-two-slot-edge-taps"
     }
   ]
 }

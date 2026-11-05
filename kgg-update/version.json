@@ -1,7 +1,7 @@
 {
-  "versionCode": 136,
-  "versionName": "1.0.136-tablet-scan-flow-collision",
-  "indexUrl": "index.html?v=136",
-  "sha256": "abe435de2370ab7ffe0bdad053959098f3737edabeb19fa69b5c325b63b7933f",
-  "notes": "v136: Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben."
+  "versionCode": 137,
+  "versionName": "1.0.137-tablet-two-slot-edge-taps",
+  "indexUrl": "index.html?v=137",
+  "sha256": "46a384ce5933d9e4ad002ed8d168465800a88bdf273cbf46fcf7e6176befb122",
+  "notes": "v137: Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern."
 }
