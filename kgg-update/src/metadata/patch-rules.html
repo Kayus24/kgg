@@ -110,7 +110,7 @@
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+  "lastUpdatedByPatchId": "kgg-v138-admin-qr-minimum-zoom",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
