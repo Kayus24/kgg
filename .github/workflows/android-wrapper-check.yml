@@ -8,17 +8,27 @@ on:
       - "patient-start-scan.js"
       - "release-pipeline/kgg_dual_device_*.js"
       - "release-pipeline/test_kgg_dual_device_v404.py"
+      - "release-pipeline/test_kgg_quick_preview_apk.py"
       - "therapist-app/android_update_manifest.json"
       - ".github/workflows/android-wrapper-check.yml"
+  workflow_dispatch:
+    inputs:
+      source_pr:
+        description: "Open same-repository PR number to build as an unapproved Preview Debug APK"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   build-and-separate-profiles:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check Quick Test-APK workflow contract
+        run: python -B -m unittest discover -s release-pipeline -p test_kgg_quick_preview_apk.py -v
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -141,4 +151,103 @@ jobs:
           path: android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
           if-no-files-found: error
           retention-days: 3
+          compression-level: 0
+
+  quick-pr-source:
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+      pull-requests: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.pin.outputs.sha }}
+    steps:
+      - name: Resolve open same-repository PR and pin its exact SHA
+        id: pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.source_pr }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "Kayus24/kgg"
+          test "$GITHUB_REF_NAME" = "main"
+          [[ "$PR_NUMBER" =~ ^[1-9][0-9]{0,8}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" > "$RUNNER_TEMP/quick-pr.json"
+          jq -e --arg repo "$GITHUB_REPOSITORY" '.state == "open" and .head.repo.full_name == $repo and .base.repo.full_name == $repo and (.head.sha | test("^[0-9a-f]{40}$"))' "$RUNNER_TEMP/quick-pr.json" >/dev/null
+          sha="$(jq -r .head.sha "$RUNNER_TEMP/quick-pr.json")"
+          printf 'sha=%s\n' "$sha" >> "$GITHUB_OUTPUT"
+
+  quick-preview-debug:
+    if: github.event_name == 'workflow_dispatch'
+    needs: quick-pr-source
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SOURCE_SHA: ${{ needs.quick-pr-source.outputs.sha }}
+      SOURCE_PR: ${{ inputs.source_pr }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.quick-pr-source.outputs.sha }}
+          persist-credentials: false
+      - name: Confirm immutable PR source checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+          cache-disabled: true
+      - name: Build Preview Debug only (never Beta or Release)
+        working-directory: android-wrapper
+        run: gradle --no-daemon assemblePreviewDebug
+      - name: Verify debug APK package, signature and embedded source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          test -f "$APK"
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -type f -name aapt2 | sort -V | tail -n 1)"
+          SIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$AAPT2"
+          test -x "$SIGNER"
+          test "$("$AAPT2" dump packagename "$APK")" = de.kgg.preview
+          "$SIGNER" verify --verbose "$APK"
+          python - "$APK" "$SOURCE_SHA" <<'PY'
+          import json
+          import sys
+          import zipfile
+          with zipfile.ZipFile(sys.argv[1]) as archive:
+              infos = [entry for entry in archive.infolist() if entry.filename == "assets/android/kgg_preview_context.js"]
+              assert len(infos) == 1 and 0 < infos[0].file_size <= 65536
+              raw = archive.read(infos[0])
+          prefix = b"window.KGGPreviewContext=Object.freeze("
+          suffix = b");\n"
+          assert raw.startswith(prefix) and raw.endswith(suffix)
+          context = json.loads(raw[len(prefix):-len(suffix)])
+          assert context["kind"] == "kgg_preview_context" and context["schemaVersion"] == 2
+          assert context["commitSha"] == sys.argv[2]
+          PY
+          sha256sum "$APK"
+          echo "### UNAPPROVED QUICK TEST APK – PR #$SOURCE_PR" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source SHA: \`$SOURCE_SHA\`. Debug-only. No beta, release or device approval." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload short-lived UNAPPROVED quick-test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: unapproved-quick-pr-${{ inputs.source_pr }}-${{ needs.quick-pr-source.outputs.sha }}-${{ github.run_id }}
+          path: android-wrapper/app/build/outputs/apk/preview/debug/app-preview-debug.apk
+          if-no-files-found: error
+          retention-days: 7
           compression-level: 0
