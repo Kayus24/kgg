@@ -2,7 +2,7 @@
 
 Generated production knowledge for modular payloads, Actions, Preview/Test-App and Admin-Beta operations.
 
-Source digest: `4276f8e8f5cb0f65`
+Source digest: `7d92c20f5822e666`
 
 ## Usage Rules
 
@@ -1175,6 +1175,25 @@ If `critical` fails with `Missing tool pdftoppm`, `Missing tool pdfinfo`, `poppl
 - The final workflow state also comments on the persistent `KGG Preview Status` issue and mentions Max for GitHub Mobile push delivery.
 - Status JSON never contains the patch payload, patient data or secrets.
 - These notifications remove the need for an "Und?" message; they do not weaken final artifact verification or Max' Main gate.
+
+## Verifizierter PR-HTML-Stand ohne APK-Neubau
+
+Für offene interne KGG-PRs mit Label `kgg-no-release`, die ein konsistentes
+`kgg-update/index.html` und `kgg-update/version.json` enthalten, publiziert
+`kgg-verified-pr-auto-preview.yml` nach erfolgreicher
+`Validate and build KGG admin beta`-CI automatisch die exakten PR-HTML-Bytes
+in den **bestehenden** `gpt-preview`-Hot-Update-Kanal. Keine Rückfrage und
+kein Produkt-/Beta-Merge nötig. Ein einmaliger Catch-up für ältere bereits
+grüne PRs ist als `workflow_dispatch` mit PR- und CI-Run-ID möglich.
+
+Der Workflow verifiziert PR/CI/SHA/Repo/Label, liest PR-Dateien nur als Daten,
+verwendet die vorhandene vertrauenswürdige
+`kgg_existing_main_preview.py`-Funktion und veröffentlicht nur monotone
+Preview-Stände. Keine untrusted PR-Skripte mit Schreibtoken ausführen; kein
+APK-Build, kein Patient-Live oder Admin-Beta-Publish. Bei roter CI, Drift
+oder fehlendem Label wird **nicht** publiziert. Die physische Geräteabnahme
+bleibt separat. Custom-GPT-Patch-Payloads nutzen weiter den oben
+beschriebenen separaten `submitKggPreviewAuto`-Ablauf.
 
 ---
 
