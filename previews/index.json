@@ -4,6 +4,30 @@
   "previews": [
     {
       "kind": "kgg_gpt_preview",
+      "sourceType": "local-tested-candidate",
+      "requestId": "kgg-v138-integrated-20261109-fe246b58",
+      "patchHash": "698bb27ed19a69fd0f41241de5694fa460c611306e00cd797088864579eb1c48",
+      "sourceSha": "fe246b58505468d6085cb0b3a082fc67a23a1766",
+      "baseSha": "3ba3015251a9214d46fbdea9f2b0a12094cd300b",
+      "commitSha": "fe246b58505468d6085cb0b3a082fc67a23a1766",
+      "baseVersionCode": 138,
+      "rolloutCode": 1794262460,
+      "title": "Exact tested HTML candidate",
+      "summary": "Unchanged locally tested candidate HTML; preview only.",
+      "versionName": "1.0.138-admin-qr-minimum-zoom",
+      "createdAt": "2026-11-09T22:14:20Z",
+      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v138-integrated-20261109-fe246b58/admin.html",
+      "sha256": "781bdc7724734f0a90d94e0da10eb12d4c0edf702d2462878227e0a7a9638c52",
+      "candidateTreeSha256": "698bb27ed19a69fd0f41241de5694fa460c611306e00cd797088864579eb1c48",
+      "tests": [
+        "critical",
+        "ui-stability-regression",
+        "cockpit-browser"
+      ],
+      "syntheticOnly": true
+    },
+    {
+      "kind": "kgg_gpt_preview",
       "sourceType": "verified-pr",
       "requestId": "kgg-pr359-v133-20261103",
       "patchHash": "53db8358fea1d883a5661982fb369264f22d0a24e3d0763c4d94bf7722f463ff",
@@ -551,43 +575,30 @@
       "createdAt": "2026-08-04T11:35:53Z",
       "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-body-panel/admin.html",
       "sha256": "7e6c2e1cb6d99186c2891e469b917f41f905aa8f254e475d828e19e76bbb66ed"
-    },
-    {
-      "kind": "kgg_gpt_preview",
-      "requestId": "kgg-v062-tablet-recent-side-panel",
-      "patchHash": "5e07e1fd47fc07403b2a14a498ce77d58652d664b1d7b1165cefe4b08f3b7d8f",
-      "baseSha": "8c7689833e4e0247a1acdab297352357e09219d7",
-      "baseVersionCode": 62,
-      "rolloutCode": 1785842437,
-      "title": "Tablet-Historie wie bungspakete ffnen",
-      "summary": "Die bungshistorie verwendet im Tablet denselben Seitenmen- und Panelzustand wie die bungspakete. Der bestehende Historieninhalt bleibt unverndert; alte Popover-Positionierung wird nur fr diesen Tablet-ffnungsweg bereinig",
-      "patchId": "kgg-v062-tablet-recent-side-panel",
-      "patchFile": "patches/v062-tablet-recent-side-panel.html",
-      "versionName": "1.0.62-tablet-recent-side-panel",
-      "createdAt": "2026-08-04T11:20:37Z",
-      "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v062-tablet-recent-side-panel/admin.html",
-      "sha256": "3eede40ee1d030836b2fa695af0efb589fbdcdcc2992613985f3b7814bafc286"
     }
   ],
   "latest": {
     "kind": "kgg_gpt_preview",
-    "sourceType": "verified-pr",
-    "requestId": "kgg-pr359-v133-20261103",
-    "patchHash": "53db8358fea1d883a5661982fb369264f22d0a24e3d0763c4d94bf7722f463ff",
-    "sourceSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
-    "baseSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
-    "commitSha": "31bb7acf2ed54a02687b55229995d0ce39fed37b",
-    "baseVersionCode": 133,
-    "rolloutCode": 1793713425,
-    "title": "Verified PR #359 test preview",
-    "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
-    "versionName": "1.0.133-phone-dock-owner",
-    "createdAt": "2026-11-03T13:43:45Z",
-    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-pr359-v133-20261103/admin.html",
-    "sha256": "1e60e8bf11478192cc0ebf9886913dc853a9c4bb2dc9cef5f55f2e178089bc07",
-    "sourcePr": 359,
-    "sourcePrUrl": "https://github.com/Kayus24/kgg/pull/359",
-    "verificationRunId": 41614544379,
-    "verificationRunUrl": "https://github.com/Kayus24/kgg/actions/runs/41614544379"
+    "sourceType": "local-tested-candidate",
+    "requestId": "kgg-v138-integrated-20261109-fe246b58",
+    "patchHash": "698bb27ed19a69fd0f41241de5694fa460c611306e00cd797088864579eb1c48",
+    "sourceSha": "fe246b58505468d6085cb0b3a082fc67a23a1766",
+    "baseSha": "3ba3015251a9214d46fbdea9f2b0a12094cd300b",
+    "commitSha": "fe246b58505468d6085cb0b3a082fc67a23a1766",
+    "baseVersionCode": 138,
+    "rolloutCode": 1794262460,
+    "title": "Exact tested HTML candidate",
+    "summary": "Unchanged locally tested candidate HTML; preview only.",
+    "versionName": "1.0.138-admin-qr-minimum-zoom",
+    "createdAt": "2026-11-09T22:14:20Z",
+    "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/kgg-v138-integrated-20261109-fe246b58/admin.html",
+    "sha256": "781bdc7724734f0a90d94e0da10eb12d4c0edf702d2462878227e0a7a9638c52",
+    "candidateTreeSha256": "698bb27ed19a69fd0f41241de5694fa460c611306e00cd797088864579eb1c48",
+    "tests": [
+      "critical",
+      "ui-stability-regression",
+      "cockpit-browser"
+    ],
+    "syntheticOnly": true
   }
 }
