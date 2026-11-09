@@ -677,6 +677,14 @@ async function runPhoneCockpitEntry(browser) {
 
     await entry.click();
     await waitForNormalState(page);
+    // The phone dock re-parents Finish via a delayed 30 ms sync; normal view
+    // state alone does not prove the dock has finished updating the DOM.
+    await page.waitForFunction(() => {
+      const dock = document.getElementById("kggPhoneCockpitDock");
+      const entry = document.getElementById("kggTherapyCockpitButton");
+      const finish = document.getElementById("finishBtn");
+      return !!dock && entry?.parentElement === dock && finish?.parentElement === dock;
+    }, null, { timeout: 5000 });
     const firstLayout = await page.evaluate(() => {
       const dock = document.querySelector("#kggPhoneCockpitDock");
       const entry = document.querySelector("#kggTherapyCockpitButton");
