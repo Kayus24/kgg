@@ -1,0 +1,192 @@
+name: KGG Verified PR Auto Preview (HTML only)
+on:
+  workflow_run:
+    workflows: ["Validate and build KGG admin beta"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      source_pr:
+        description: "Existing same-repository PR for one-time catch-up (e.g. 366)"
+        required: true
+        type: string
+      verified_run_id:
+        description: "Successful PR validation workflow run ID"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: kgg-gpt-preview-publish
+  cancel-in-progress: false
+
+jobs:
+  publish-verified-html:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: gpt-preview
+          path: preview
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve and independently verify exact PR and successful CI
+        id: source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_SHA: ${{ github.event.workflow_run.head_sha }}
+          UPSTREAM_RUN: ${{ github.event.workflow_run.id }}
+          INPUT_PR: ${{ inputs.source_pr }}
+          INPUT_RUN: ${{ inputs.verified_run_id }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "Kayus24/kgg"
+          test "$GITHUB_REF_NAME" = main
+          if [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
+            sha="$UPSTREAM_SHA"
+            run_id="$UPSTREAM_RUN"
+            [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            prs="$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls")"
+            pr_number="$(jq -er --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '[.[] | select(.state == "open" and .head.sha == $sha and .head.repo.full_name == $repo and .base.repo.full_name == $repo and ([.labels[]?.name] | index("kgg-no-release") != null))] | if length == 1 then .[0].number else empty end' <<<"$prs")"
+          else
+            pr_number="$INPUT_PR"
+            run_id="$INPUT_RUN"
+          fi
+          [[ "$pr_number" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$run_id" =~ ^[1-9][0-9]{0,16}$ ]]
+          pr="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number")"
+          sha="$(jq -r .head.sha <<<"$pr")"
+          jq -e --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '.state == "open" and .head.sha == $sha and .head.repo.full_name == $repo and .base.repo.full_name == $repo and ([.labels[]?.name] | index("kgg-no-release") != null)' <<<"$pr" >/dev/null
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          if [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
+            test "$sha" = "$UPSTREAM_SHA"
+          fi
+          verified="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
+          jq -e --arg sha "$sha" '.head_sha == $sha and .conclusion == "success" and .event == "pull_request" and .name == "Validate and build KGG admin beta" and .path == ".github/workflows/release-pr.yml"' <<<"$verified" >/dev/null
+          printf 'sha=%s\npr=%s\nrun=%s\n' "$sha" "$pr_number" "$run_id" >> "$GITHUB_OUTPUT"
+          echo "Verified PR #$pr_number commit $sha and CI run $run_id"
+      - name: Fetch HTML and version only as inert Git blob data
+        id: candidate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          SOURCE_RUN: ${{ steps.source.outputs.run }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/kgg-pinned"
+          tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$SOURCE_SHA" --jq .tree.sha)"
+          [[ "$tree" =~ ^[0-9a-f]{40}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/git/trees/${tree}?recursive=1" > "$RUNNER_TEMP/kgg-pinned/tree.json"
+          jq -e '.truncated == false' "$RUNNER_TEMP/kgg-pinned/tree.json" >/dev/null
+          for path in kgg-update/index.html kgg-update/version.json; do
+            entry="$(jq -ec --arg name "$path" '[.tree[] | select(.path == $name and .type == "blob" and .mode == "100644")] | if length == 1 then .[0] else empty end' "$RUNNER_TEMP/kgg-pinned/tree.json")"
+            blob="$(jq -r .sha <<<"$entry")"
+            size="$(jq -r .size <<<"$entry")"
+            [[ "$blob" =~ ^[0-9a-f]{40}$ ]]
+            [[ "$size" =~ ^[1-9][0-9]{0,6}$ ]]
+            test "$size" -le 8000000
+            gh api "repos/$GITHUB_REPOSITORY/git/blobs/$blob" --jq .content | base64 -d > "$RUNNER_TEMP/kgg-pinned/${path##*/}"
+            test "$(wc -c < "$RUNNER_TEMP/kgg-pinned/${path##*/}")" -eq "$size"
+          done
+          python - "$RUNNER_TEMP/kgg-pinned/index.html" "$RUNNER_TEMP/kgg-pinned/version.json" <<'PY'
+          import hashlib, json, pathlib, sys
+          html = pathlib.Path(sys.argv[1]).read_bytes()
+          version = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+          assert 10000 < len(html) < 8000000
+          assert html.lower().startswith(b"<!doctype html>")
+          assert b"KGGDataStore" in html and b"currentPlan" in html
+          assert version["sha256"] == hashlib.sha256(html).hexdigest()
+          assert type(version["versionCode"]) is int and version["versionCode"] > 0
+          assert str(version["versionName"]).startswith("1.0." + str(version["versionCode"]))
+          for needle in (b"AIza", b"-----BEGIN PRIVATE KEY", b"api_key", b"apiKey"):
+              assert needle not in html
+          PY
+          current_version="$(jq -r '.latest.baseVersionCode // 0' preview/previews/index.json)"
+          current_sha="$(jq -r '.latest.sourceSha // ""' preview/previews/index.json)"
+          current_run="$(jq -r '.latest.verificationRunId // 0' preview/previews/index.json)"
+          new_version="$(python -c 'import json,sys;print(json.load(open(sys.argv[1]))["versionCode"])' "$RUNNER_TEMP/kgg-pinned/version.json")"
+          if (( new_version < current_version )) ||
+             [[ "$SOURCE_SHA" == "$current_sha" ]] ||
+             { (( new_version == current_version )) && (( SOURCE_RUN <= current_run )); }; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No newer validated HTML than current Preview latest" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Stage pinned verified PR HTML with existing Preview publisher
+        if: steps.candidate.outputs.skip != 'true'
+        id: stage
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          SOURCE_PR: ${{ steps.source.outputs.pr }}
+          SOURCE_RUN: ${{ steps.source.outputs.run }}
+        run: |
+          set -euo pipefail
+          python trusted/release-pipeline/kgg_existing_main_preview.py --self-test
+          request_id="pr${SOURCE_PR}-${SOURCE_SHA:0:12}-ci${SOURCE_RUN}"
+          test ! -e "preview/previews/$request_id"
+          patch_hash="$(printf 'verified-pr|%s|%s|%s' "$SOURCE_PR" "$SOURCE_SHA" "$SOURCE_RUN" | sha256sum | cut -d' ' -f1)"
+          python trusted/release-pipeline/kgg_existing_main_preview.py \
+            --source-html "$RUNNER_TEMP/kgg-pinned/index.html" \
+            --version-json "$RUNNER_TEMP/kgg-pinned/version.json" \
+            --preview-root preview \
+            --request-id "$request_id" \
+            --source-sha "$SOURCE_SHA" \
+            --patch-hash "$patch_hash" \
+            --source-type verified-pr \
+            --source-pr "$SOURCE_PR" \
+            --verified-run-id "$SOURCE_RUN"
+          echo "request_id=$request_id" >> "$GITHUB_OUTPUT"
+
+      - name: Reverify commit and CI, publish only gpt-preview, verify HTTP
+        if: steps.candidate.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          SOURCE_PR: ${{ steps.source.outputs.pr }}
+          SOURCE_RUN: ${{ steps.source.outputs.run }}
+          REQUEST_ID: ${{ steps.stage.outputs.request_id }}
+        run: |
+          set -euo pipefail
+          pr="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR")"
+          jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.state == "open" and .head.sha == $sha and .head.repo.full_name == $repo and .base.repo.full_name == $repo and ([.labels[]?.name] | index("kgg-no-release") != null)' <<<"$pr" >/dev/null
+          ci="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN")"
+          jq -e --arg sha "$SOURCE_SHA" '.head_sha == $sha and .conclusion == "success" and .event == "pull_request" and .name == "Validate and build KGG admin beta" and .path == ".github/workflows/release-pr.yml"' <<<"$ci" >/dev/null
+          git -C preview fetch --no-tags origin gpt-preview
+          test "$(git -C preview rev-parse HEAD)" = "$(git -C preview rev-parse FETCH_HEAD)"
+          test "$(jq -r .latest.sourceSha preview/previews/index.json)" = "$SOURCE_SHA"
+          git -C preview config user.name 'github-actions[bot]'
+          git -C preview config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C preview add previews
+          git -C preview commit -m "preview verified PR #$SOURCE_PR $SOURCE_SHA"
+          git -C preview push origin HEAD:gpt-preview
+          expected_sha="$(jq -r .latest.sha256 preview/previews/index.json)"
+          expected_url="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/gpt-preview/previews/$REQUEST_ID/admin.html"
+          for n in 1 2 3 4 5 6 7 8; do
+            if curl -fsSL --max-time 15 -H 'Cache-Control: no-cache' "${expected_url}?run=$GITHUB_RUN_ID-$n" -o "$RUNNER_TEMP/kgg-verified-published.html"; then
+              actual_sha="$(sha256sum "$RUNNER_TEMP/kgg-verified-published.html" | cut -d' ' -f1)"
+              if [[ "$actual_sha" == "$expected_sha" ]]; then
+                echo "Verified PR #$SOURCE_PR HTML published: $expected_url" >> "$GITHUB_STEP_SUMMARY"
+                echo "Source SHA: $SOURCE_SHA (CI run $SOURCE_RUN)" >> "$GITHUB_STEP_SUMMARY"
+                echo "This is Preview-only. No APK, Beta, Main or Patient-Live publication." >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              fi
+            fi
+            sleep 4
+          done
+          echo "Preview push succeeded but HTTP hash verification did not converge" >&2
+          exit 1
