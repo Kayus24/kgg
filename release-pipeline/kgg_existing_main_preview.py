@@ -88,6 +88,9 @@ def stage_preview(
     patch_hash: str,
     rollout_code: int | None = None,
     created_at: str | None = None,
+    source_type: str = "existing-main",
+    source_pr: int | None = None,
+    verified_run_id: int | None = None,
 ) -> dict[str, Any]:
     if not REQUEST_ID_RE.fullmatch(request_id):
         fail("request_id contains unsupported characters")
@@ -95,6 +98,15 @@ def stage_preview(
         fail("source_sha must be a full lowercase commit SHA")
     if not HASH_RE.fullmatch(patch_hash):
         fail("patch_hash must be a lowercase SHA-256 hex digest")
+    if source_type not in {"existing-main", "verified-pr"}:
+        fail("source_type is not supported")
+    if source_type == "verified-pr":
+        if type(source_pr) is not int or source_pr < 1:
+            fail("verified-pr requires a positive source_pr")
+        if type(verified_run_id) is not int or verified_run_id < 1:
+            fail("verified-pr requires a positive verified_run_id")
+    elif source_pr is not None or verified_run_id is not None:
+        fail("existing-main cannot claim PR verification")
 
     html = source_html.read_bytes()
     if not html.lower().startswith(b"<!doctype html>"):
@@ -149,6 +161,17 @@ def stage_preview(
         "sha256": html_sha,
         "deviceTestJobUrl": f"{DEVICE_JOB_BASE_URL}/{request_id}/job.json",
     }
+    if source_type == "verified-pr":
+        meta.update({
+            "sourceType": "verified-pr",
+            "sourcePr": source_pr,
+            "sourcePrUrl": f"https://github.com/Kayus24/kgg/pull/{source_pr}",
+            "verificationRunId": verified_run_id,
+            "verificationRunUrl": f"https://github.com/Kayus24/kgg/actions/runs/{verified_run_id}",
+            "title": f"Verified PR #{source_pr} test preview",
+            "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
+        })
+        meta.pop("deviceTestJobUrl", None)
     write_json(meta_path, meta)
 
     previews = [
@@ -164,7 +187,7 @@ def stage_preview(
         fail("staged Preview HTML differs from pinned source bytes")
     if read_json(meta_path).get("sourceSha") != source_sha:
         fail("staged Preview metadata lost the exact source_sha")
-    if meta.get("deviceTestJobUrl") != f"{DEVICE_JOB_BASE_URL}/{request_id}/job.json":
+    if source_type == "existing-main" and meta.get("deviceTestJobUrl") != f"{DEVICE_JOB_BASE_URL}/{request_id}/job.json":
         fail("staged Preview metadata lost deterministic device-test job URL")
     return meta
 
@@ -259,6 +282,47 @@ def self_test() -> None:
         if [item.get("requestId") for item in index["previews"]].count("existing-main-self-test") != 1:
             fail("Existing-Main Preview duplicated the request in Preview index")
 
+        pr_meta = stage_preview(
+            source_html=source / "index.html",
+            version_json=source / "version.json",
+            preview_root=preview,
+            request_id="verified-pr-self-test",
+            source_sha=source_sha,
+            patch_hash=patch_hash,
+            source_type="verified-pr",
+            source_pr=359,
+            verified_run_id=123456,
+            rollout_code=101,
+            created_at="2026-08-26T00:00:00Z",
+        )
+        if (pr_meta.get("sourceType") != "verified-pr" or
+            pr_meta.get("sourcePr") != 359 or
+            pr_meta.get("verificationRunId") != 123456 or
+            pr_meta.get("sourceSha") != source_sha or
+            "deviceTestJobUrl" in pr_meta or "patchFile" in pr_meta):
+            fail("Verified PR Preview provenance or device-test separation failed")
+        for bad in [
+            {"source_type": "verified-pr", "source_pr": None, "verified_run_id": 123456},
+            {"source_type": "verified-pr", "source_pr": 359, "verified_run_id": None},
+            {"source_type": "existing-main", "source_pr": 359, "verified_run_id": 123456},
+            {"source_type": "other"},
+        ]:
+            try:
+                stage_preview(
+                    source_html=source / "index.html",
+                    version_json=source / "version.json",
+                    preview_root=preview,
+                    request_id="verified-pr-negative-test",
+                    source_sha=source_sha,
+                    patch_hash=patch_hash,
+                    **bad,
+                )
+            except PreviewError:
+                pass
+            else:
+                fail("Invalid Preview source provenance was accepted")
+
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -268,6 +332,9 @@ def main() -> int:
     parser.add_argument("--request-id")
     parser.add_argument("--source-sha")
     parser.add_argument("--patch-hash")
+    parser.add_argument("--source-type", choices=["existing-main", "verified-pr"], default="existing-main")
+    parser.add_argument("--source-pr", type=int)
+    parser.add_argument("--verified-run-id", type=int)
     parser.add_argument("--github-output")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
@@ -294,6 +361,9 @@ def main() -> int:
             request_id=args.request_id,
             source_sha=args.source_sha,
             patch_hash=args.patch_hash,
+            source_type=args.source_type,
+            source_pr=args.source_pr,
+            verified_run_id=args.verified_run_id,
         )
         write_github_output(args.github_output, meta)
         print(json.dumps(meta, ensure_ascii=False, sort_keys=True))
