@@ -1,0 +1,21 @@
+<!-- KGG PATCH START kgg-v132-plan-card-space -->
+<!-- Mehr Platz fuer Uebungskarten -->
+<style id="kgg-v132-plan-card-space-style">
+/* Thumbnail itself indicates image presence: do not waste tablet title width. */
+#currentPlanBlock #planList .planCard:has(.planThumb img) .planBadge.media{display:none!important;}
+#currentPlanBlock #planList .planCard:has(.planThumb img) .planBadges:has(> .planBadge.media:only-child){display:none!important;}
+@media (min-width:360px) and (max-width:759px){
+ #currentPlanBlock #planList .planCard{position:relative!important;}
+ #currentPlanBlock #planList .planCard .planCardActions>[data-planedit]{position:absolute!important;top:50%!important;right:48px!important;left:auto!important;bottom:auto!important;transform:translateY(-50%)!important;z-index:2!important;}
+ #currentPlanBlock #planList .planCard .planCardActions>[data-del]{position:absolute!important;top:0!important;right:0!important;left:auto!important;bottom:auto!important;transform:none!important;z-index:2!important;place-items:start end!important;padding:5px 7px!important;line-height:1!important;}
+}
+</style>
+<script id="kgg-v132-plan-card-space">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v132-plan-card-space";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,dependsOn:"kgg-v130-plan-card-height-stability",contract:"Hide Bild badge on loaded thumbnail at every width; phone edit/delete keep separated 44px targets at right corner"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v132-plan-card-space -->

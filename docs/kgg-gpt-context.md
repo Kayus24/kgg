@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v131 / `1.0.131-qr-cockpit-tablet-integrated`.
-- Source index URL: `index.html?v=131`.
-- Source notes: v131: QR scan retains normal flow and appends compact Cockpit link; finished-plan copy contains exercises, sets and optional notes without patient/status headers; carries forward v130 stable tablet split card heights. Android verified App Links remain pending domain root publication and device acceptance.
+- Source web version: v133 / `1.0.133-phone-dock-owner`.
+- Source index URL: `index.html?v=133`.
+- Source notes: v133: Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht.
 - Live Admin release: `r0439` / `1.0.131-qr-cockpit-tablet-integrated`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0439/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.
