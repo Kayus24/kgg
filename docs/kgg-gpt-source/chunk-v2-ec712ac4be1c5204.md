@@ -79,7 +79,10 @@
     "kgg-v130-plan-card-height-stability",
     "kgg-v132-plan-card-space",
     "kgg-v133-phone-dock-owner",
-    "kgg-v134-cockpit-qr-explicit-import"
+    "kgg-v134-cockpit-qr-explicit-import",
+    "kgg-v135-tablet-package-1024-tap",
+    "kgg-v136-tablet-scan-flow-collision",
+    "kgg-v137-tablet-two-slot-edge-taps"
   ],
   "parts": [
     "base-head.html",
@@ -176,6 +179,9 @@
     "patches/v132-plan-card-space.html",
     "patches/v133-phone-dock-owner.html",
     "patches/v134-cockpit-qr-explicit-import.html",
+    "patches/v135-tablet-package-1024-tap.html",
+    "patches/v136-tablet-scan-flow-collision.html",
+    "patches/v137-tablet-two-slot-edge-taps.html",
     "footer.html"
   ]
 }
