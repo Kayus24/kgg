@@ -190,6 +190,23 @@
     }
   }
   window.KGGScan={
+    importCockpit(index){
+      const slotIndex=Number(index);
+      if(scanState.busy||!Number.isInteger(slotIndex)||slotIndex<0||slotIndex>=scanState.jobs.length)return false;
+      const job=scanState.jobs[slotIndex];
+      if(!job||!job.result||!job.result.cockpit||!job.result.cockpit.link)return false;
+      if(typeof window.KGGCockpitQrImport!=='function')return false;
+      try{
+        const result=window.KGGCockpitQrImport(job.result,patientPrimaryNames(job.result.json)||{});
+        if(!result)return false;
+        job.result.cockpit={...job.result.cockpit,slot:result.slot,link:result.link,persisted:result.persisted,pending:false};
+        save();render();setScanStatus('Plan ins Cockpit übernommen.');
+        return true;
+      }catch(error){
+        setScanStatus(error&&error.code==='slots_full'?'Cockpit voll: maximal drei Pläne.':'Cockpit-Übernahme fehlgeschlagen.');
+        return false;
+      }
+    },
     pick(kind){
         const normalized=rememberScanInputKind(kind||lastScanInputKind());
         notifyNativeScanPickerMode(normalized);
