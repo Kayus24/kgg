@@ -16,86 +16,86 @@
   "kind": "kgg_gpt_source_index",
   "sources": [
     {
-      "bytes": 8052,
+      "bytes": 8137,
       "chunks": [
         {
-          "name": "chunk-v2-ec712ac4be1c5204.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-ec712ac4be1c5204.md",
-          "payloadBytes": 8052,
-          "payloadLines": 187,
-          "payloadSha256": "ec712ac4be1c52049ef2f60165ccd80cac6b68d2af231f590407f6f17d0a3d2b"
+          "name": "chunk-v2-84dba2cdc63ca5df.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-84dba2cdc63ca5df.md",
+          "payloadBytes": 8137,
+          "payloadLines": 189,
+          "payloadSha256": "84dba2cdc63ca5df79d7c9e162c54b26cd3540ec197c76f161257e896c81b085"
         }
       ],
-      "lines": 187,
+      "lines": 189,
       "path": "kgg-update/src/parts.json",
-      "sha256": "ec712ac4be1c52049ef2f60165ccd80cac6b68d2af231f590407f6f17d0a3d2b"
+      "sha256": "84dba2cdc63ca5df79d7c9e162c54b26cd3540ec197c76f161257e896c81b085"
     },
     {
-      "bytes": 4416,
+      "bytes": 4411,
       "chunks": [
         {
-          "name": "chunk-v2-f7a586948a47f049.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-f7a586948a47f049.md",
-          "payloadBytes": 4416,
-          "payloadLines": 143,
-          "payloadSha256": "f7a586948a47f04976ce162d804950ce2eb4ac4686d239146506a9aa77a989bc"
+          "name": "chunk-v2-409ec81c9acb4b81.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-409ec81c9acb4b81.md",
+          "payloadBytes": 4411,
+          "payloadLines": 144,
+          "payloadSha256": "409ec81c9acb4b81650311bad91696157ee7a51a0f84989111ec46bcaeba01ce"
         }
       ],
-      "lines": 143,
+      "lines": 144,
       "path": "kgg-update/src/base-head.html",
-      "sha256": "f7a586948a47f04976ce162d804950ce2eb4ac4686d239146506a9aa77a989bc"
+      "sha256": "409ec81c9acb4b81650311bad91696157ee7a51a0f84989111ec46bcaeba01ce"
     },
     {
-      "bytes": 4102,
+      "bytes": 4097,
       "chunks": [
         {
-          "name": "chunk-v2-caa590f64214c5b7.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-caa590f64214c5b7.md",
-          "payloadBytes": 4102,
-          "payloadLines": 133,
-          "payloadSha256": "caa590f64214c5b738a67562ff0690f2445157fe9f1e816a60c7629669e51dff"
+          "name": "chunk-v2-93158d962fca8108.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-93158d962fca8108.md",
+          "payloadBytes": 4097,
+          "payloadLines": 134,
+          "payloadSha256": "93158d962fca8108c43a76c3381f31a93af3fa8d227dc352380a0d1bb53f710b"
         }
       ],
-      "lines": 133,
+      "lines": 134,
       "path": "kgg-update/src/metadata/source-truth.html",
-      "sha256": "caa590f64214c5b738a67562ff0690f2445157fe9f1e816a60c7629669e51dff"
+      "sha256": "93158d962fca8108c43a76c3381f31a93af3fa8d227dc352380a0d1bb53f710b"
     },
     {
-      "bytes": 27196,
+      "bytes": 27534,
       "chunks": [
         {
-          "name": "chunk-v2-8ae68b0167df6cb2.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-8ae68b0167df6cb2.md",
-          "payloadBytes": 13478,
-          "payloadLines": 359,
-          "payloadSha256": "8ae68b0167df6cb2e8ab521e57c64ab6b0d22ec81c6f5739bcfbbb80696d0381"
+          "name": "chunk-v2-0c6d0541f8b5e1b5.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-0c6d0541f8b5e1b5.md",
+          "payloadBytes": 14384,
+          "payloadLines": 390,
+          "payloadSha256": "0c6d0541f8b5e1b514be4999989fff37cf3fdf5db75b3bf9fd8386697c7c192d"
         },
         {
-          "name": "chunk-v2-144735ee7e870667.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-144735ee7e870667.md",
-          "payloadBytes": 13718,
-          "payloadLines": 329,
-          "payloadSha256": "144735ee7e87066742f22616252b29ecb2935d1d47f336cd65dc08ebd2503163"
+          "name": "chunk-v2-14f199bfb754911c.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-14f199bfb754911c.md",
+          "payloadBytes": 13150,
+          "payloadLines": 306,
+          "payloadSha256": "14f199bfb754911caa271187b7669e4b36e4acf28e26b427c1be77e00ec72cb8"
         }
       ],
-      "lines": 688,
+      "lines": 696,
       "path": "kgg-update/src/metadata/changelog.html",
-      "sha256": "888101958322de7b5cbe640748413cf2c8b0639beeb29ebb557b3ce574df36db"
+      "sha256": "4dd9223769862f415040b9b46cf80728296a8baa592dc1d5d5fee2aae8984d68"
     },
     {
-      "bytes": 5092,
+      "bytes": 5088,
       "chunks": [
         {
-          "name": "chunk-v2-8da2347bc6bfe63e.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-8da2347bc6bfe63e.md",
-          "payloadBytes": 5092,
+          "name": "chunk-v2-a2cff5731b444a25.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-a2cff5731b444a25.md",
+          "payloadBytes": 5088,
           "payloadLines": 134,
-          "payloadSha256": "8da2347bc6bfe63e7a5f84800768f3a1a850bf16de5d5f5ad44daa1d86012c60"
+          "payloadSha256": "a2cff5731b444a25496b3b64cebf0770602837b644eda1068cc8b2da17fb3dc7"
         }
       ],
       "lines": 134,
       "path": "kgg-update/src/metadata/patch-rules.html",
-      "sha256": "8da2347bc6bfe63e7a5f84800768f3a1a850bf16de5d5f5ad44daa1d86012c60"
+      "sha256": "a2cff5731b444a25496b3b64cebf0770602837b644eda1068cc8b2da17fb3dc7"
     },
     {
       "bytes": 2606,
@@ -113,14 +113,14 @@
       "sha256": "e5ef3a953188bd6e8d156c0a9205c8afed80a1ac1f050be989e96da1f84a3a2f"
     },
     {
-      "bytes": 203160,
+      "bytes": 203155,
       "chunks": [
         {
-          "name": "chunk-v2-2c04c479a1d83c5f.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-2c04c479a1d83c5f.md",
-          "payloadBytes": 24464,
+          "name": "chunk-v2-830142c250300581.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-830142c250300581.md",
+          "payloadBytes": 24459,
           "payloadLines": 89,
-          "payloadSha256": "2c04c479a1d83c5f2874fca3d7a8050bb3afc12f554d26a14c581f6ba663f65e"
+          "payloadSha256": "830142c250300581bf86ea635b3f9bc5eace981a6d3b9ed6ff3d75d3a6d2d84a"
         },
         {
           "name": "chunk-v2-d821b6f3bbb08593.md",
@@ -174,7 +174,7 @@
       ],
       "lines": 4522,
       "path": "kgg-update/src/document/head-ui.html",
-      "sha256": "56d552f7b748d035e1e28657f8e8f083e6d99fab087b6f32546ea55af655747c"
+      "sha256": "0c5b8720d922377d322627270d2a2c693686b18f942718e29ed2da2d20676509"
     },
     {
       "bytes": 14520,
@@ -403,14 +403,14 @@
       "sha256": "149070a0516344a401737a5993b4742fe214a4ed87cf410e6c96e0bdca59429e"
     },
     {
-      "bytes": 468210,
+      "bytes": 468202,
       "chunks": [
         {
-          "name": "chunk-v2-1623bcdbbab96498.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-1623bcdbbab96498.md",
-          "payloadBytes": 20863,
+          "name": "chunk-v2-248052c990ccba20.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-248052c990ccba20.md",
+          "payloadBytes": 20855,
           "payloadLines": 366,
-          "payloadSha256": "1623bcdbbab964985ce7f9b2527f904a4d30b957efb89e0a8201b9ae8978a2b3"
+          "payloadSha256": "248052c990ccba20371328d7c1f9119bf326b70a5161ed5ea3d2b631ab97f862"
         },
         {
           "name": "chunk-v2-c399a91bc1a42a84.md",
@@ -527,7 +527,7 @@
       ],
       "lines": 8116,
       "path": "kgg-update/src/runtime/app-core.html",
-      "sha256": "debd49cc7fca249816c0c1b0649f285aba555b29ef31145450225bec61c4e95f"
+      "sha256": "abf7a6281fd30696b5be40e51bdc8667ab9eaaa306fc97e5db36307ccf8ff8ef"
     },
     {
       "bytes": 5039,
@@ -755,19 +755,19 @@
       "sha256": "083438afd92460f25be024e99d15763aecf1acee4a31a4c2a7cc1ba39e5d384e"
     },
     {
-      "bytes": 11342,
+      "bytes": 12220,
       "chunks": [
         {
-          "name": "chunk-v2-d3cb2b3eb0e8e619.md",
-          "path": "docs/kgg-gpt-source/chunk-v2-d3cb2b3eb0e8e619.md",
-          "payloadBytes": 11342,
-          "payloadLines": 206,
-          "payloadSha256": "d3cb2b3eb0e8e619279169648d2ba4b62604e4c918163ca63926d98b22b66b13"
+          "name": "chunk-v2-1af68ff5a323a7ae.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-1af68ff5a323a7ae.md",
+          "payloadBytes": 12220,
+          "payloadLines": 222,
+          "payloadSha256": "1af68ff5a323a7ae577433235ad3f00e96de3883c4a2e9f43216dc2501c2ab6d"
         }
       ],
-      "lines": 206,
+      "lines": 222,
       "path": "kgg-update/src/patches/v061-cross-app-live-qr-camera.html",
-      "sha256": "d3cb2b3eb0e8e619279169648d2ba4b62604e4c918163ca63926d98b22b66b13"
+      "sha256": "1af68ff5a323a7ae577433235ad3f00e96de3883c4a2e9f43216dc2501c2ab6d"
     },
     {
       "bytes": 11644,
@@ -1778,6 +1778,21 @@
       "lines": 35,
       "path": "kgg-update/src/patches/v137-tablet-two-slot-edge-taps.html",
       "sha256": "b2c9fe3a69f06930188452da1f0cbbd67e974d84e5024753bacd4673dd472af5"
+    },
+    {
+      "bytes": 564,
+      "chunks": [
+        {
+          "name": "chunk-v2-51ae2672e51145ec.md",
+          "path": "docs/kgg-gpt-source/chunk-v2-51ae2672e51145ec.md",
+          "payloadBytes": 564,
+          "payloadLines": 13,
+          "payloadSha256": "51ae2672e51145ec3d82dba61216a72688d7824862812419314a9dc751f9270b"
+        }
+      ],
+      "lines": 13,
+      "path": "kgg-update/src/patches/v138-admin-qr-minimum-zoom.html",
+      "sha256": "51ae2672e51145ec3d82dba61216a72688d7824862812419314a9dc751f9270b"
     },
     {
       "bytes": 17,

@@ -26,6 +26,21 @@
     const caps=nativeCapabilities();
     return !caps||caps.platform!=='android'||(caps.webVideoCapture===true&&Number(caps.webVideoCaptureVersion)>=1);
   }
+  async function preferMinimumCameraZoom(stream){
+    const track=stream&&typeof stream.getVideoTracks==='function'?stream.getVideoTracks()[0]:null;
+    if(!track||typeof track.getCapabilities!=='function'||typeof track.getSettings!=='function'||typeof track.applyConstraints!=='function')return;
+    try{
+      const capabilities=track.getCapabilities();
+      const settings=track.getSettings();
+      const zoom=capabilities&&capabilities.zoom;
+      const minZoom=Number(zoom&&zoom.min);
+      const currentZoom=Number(settings&&settings.zoom);
+      if(!zoom||!Number.isFinite(minZoom)||minZoom<=0||!Number.isFinite(currentZoom)||currentZoom<=minZoom)return;
+      await track.applyConstraints({advanced:[{zoom:minZoom}]});
+    }catch(err){
+      // Unsupported or denied zoom changes must never interrupt QR scanning.
+    }
+  }
   function ensureUi(){
     let root=document.getElementById(PATCH_ID+'-camera');
     if(root)return root;
@@ -178,6 +193,7 @@
       session=current;
       video.srcObject=stream;
       await video.play();
+      void preferMinimumCameraZoom(stream);
       current.detector=await createDetector();
       setStatus(current.detector||typeof window.jsQR==='function'?'Suche KGG-Plan-QR ...':'Automatische QR-Erkennung fehlt. Papierfoto ist weiter moeglich.');
       if(current.detector||typeof window.jsQR==='function')scanLoop(current);
