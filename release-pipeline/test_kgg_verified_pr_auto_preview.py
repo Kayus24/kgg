@@ -50,6 +50,12 @@ class VerifiedPrAutoPreviewContracts(unittest.TestCase):
         self.assertIn('gh api "repos/$GITHUB_REPOSITORY/pulls/$SOURCE_PR"', self.workflow)
         self.assertIn('sha256sum "$RUNNER_TEMP/kgg-verified-published.html"', self.workflow)
 
+    def test_checkout_actions_are_valid_and_separated(self):
+        self.assertEqual(self.workflow.count('uses: actions/checkout@v4'), 2)
+        self.assertNotIn('actions/checkout$v4', self.workflow)
+        self.assertIn('ref: main\n          path: trusted\n          persist-credentials: false', self.workflow)
+        self.assertIn('ref: gpt-preview\n          path: preview', self.workflow)
+
     def test_only_test_channel_has_write_permissions(self):
         self.assertIn('group: kgg-gpt-preview-publish', self.workflow)
         self.assertIn('contents: write', self.workflow)
