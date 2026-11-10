@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "c0316418f1c80e2447fc0ef9fd1a0184be24f0cf4e13814908e9cad7896c9421"
+      "sha256": "0204b41dacbb50a44c8ac67364bc524d1c9a49598ecd8ff2a8d6469c050135b8"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -177,7 +177,7 @@
     },
     {
       "path": "docs/kgg-custom-gpt-resource-manifest.json",
-      "sha256": "5d426ea95c3ccbbaf9d6026255ab7b37e559a00f968e1394bb0d198c171b1a98"
+      "sha256": "2f8ab2764769ee49510cdc7e377b82a9486431addec9e71965253065977f6056"
     },
     {
       "path": "release-pipeline/test_kgg_admin_editor_sync_action_surface.py",
