@@ -203,6 +203,9 @@
           try{job.result.cockpit=window.KGGCockpitQrAccepted(job.result,patientPrimaryNames(parsed.json)||{});}
           catch(error){job.result.cockpitError=error&&error.code||'cockpit_import_failed';job.warnings.push('Cockpit-Link nicht erzeugt ('+job.result.cockpitError+').');}
         }
+        // Ensure the Scan-Inbox is visible after a scan initiated in Cockpit.
+        if(job.result.cockpit&&window.KGGTherapyCockpit&&
+           window.KGGTherapyCockpit.getState().view==='cockpit')window.KGGTherapyCockpit.close();
         return job;
       }catch(err){
         setScanStatus('QR erkannt, aber Format nicht lesbar: '+(err&&err.message||err));

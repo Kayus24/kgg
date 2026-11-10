@@ -3,8 +3,40 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 133,
+  "latestVersionCode": 134,
   "entries": [
+    {
+      "versionCode": 134,
+      "versionName": "1.0.134-cockpit-qr-explicit-import",
+      "patchId": "kgg-v134-cockpit-qr-explicit-import",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit QR nur nach bewusster Uebernahme",
+      "reason": "QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion.",
+      "whatChanged": [
+        "QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion."
+      ],
+      "touchedAreas": [
+        "Cockpit",
+        "Scan/OCR"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "Nutzerauftrag 29.10. und Fortsetzung 04.11.2026; kein automatischer Import"
+    },
     {
       "versionCode": 133,
       "versionName": "1.0.133-phone-dock-owner",
@@ -456,40 +488,9 @@
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 119,
-      "versionName": "1.0.119-cockpit-main-plan-width",
-      "patchId": "kgg-v119-cockpit-main-plan-width",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Breiter Plan neben Galerie",
-      "reason": "Bei einem Cockpit-Plan bekommt die Planliste mehr Platz und Einstellungen links neben dem Namen.",
-      "whatChanged": [
-        "Bei einem Cockpit-Plan bekommt die Planliste mehr Platz und Einstellungen links neben dem Namen."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.133-phone-dock-owner",
+  "latestVersionName": "1.0.134-cockpit-qr-explicit-import",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -650,6 +651,14 @@
       "entriesSha256": "0279084f1c970d49f5441663bc273981b5b4b0a1c24c0dcd08c8811471d372be",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v133-phone-dock-owner"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v134.json",
+      "snapshotVersionCode": 134,
+      "entryCount": 75,
+      "entriesSha256": "edd025d6b0cf4bf5d24fb54640662f933b5eb1d36ed078c1b9f6e1c25003583c",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v134-cockpit-qr-explicit-import"
     }
   ]
 }

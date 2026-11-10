@@ -1,3 +1,9 @@
+      list[idx]={...list[idx],...entry,autoDownload:autoDownloadDefault?true:list[idx].autoDownload!==false,pairedAt:list[idx].pairedAt||now,lastSeenAt:now};
+    }else{
+      list.push(entry);
+    }
+    config.followedTherapists=list;
+    if(entry.roomId&&!config.syncRoomId)config.syncRoomId=entry.roomId;
     if(!config.therapistId)config.therapistId=syncPairDeviceId();
     writeNativeSyncFollowConfig(config);
     return idx>=0?list[idx]:entry;

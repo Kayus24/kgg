@@ -60,7 +60,15 @@
     output.value=["KGG Therapie-Cockpit",slot.name,"Aktivierungslink:",imported.link].join("\n");
     outputLink(imported.link);modal.hidden=false;
   }
-  window.KGGCockpitQrAccepted=function(result,primaryNames){var payload=scanPayload(result,primaryNames);if(!payload)return null;var imported=api.importPatientPlan(payload,{background:true});return imported;};
+  // QR preview creates a link; only an explicit user action imports a slot.
+  window.KGGCockpitQrAccepted=function(result,primaryNames){
+    var payload=scanPayload(result,primaryNames);
+    return payload?{planId:payload.planId,link:api.makeLink(payload),pending:true}:null;
+  };
+  window.KGGCockpitQrImport=function(result,primaryNames){
+    var payload=scanPayload(result,primaryNames);
+    return payload?api.importPatientPlan(payload):null;
+  };
   window.KGGCockpitSetOutputLink=outputLink;
   window.KGG_PATCHES=window.KGG_PATCHES||{};
   window.KGG_PATCHES[PATCH_ID]={installed:true,version:1,contract:"patient QR activation, durable notes and per-cell therapist priority"};

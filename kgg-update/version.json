@@ -1,7 +1,7 @@
 {
-  "versionCode": 133,
-  "versionName": "1.0.133-phone-dock-owner",
-  "indexUrl": "index.html?v=133",
-  "sha256": "1e60e8bf11478192cc0ebf9886913dc853a9c4bb2dc9cef5f55f2e178089bc07",
-  "notes": "v133: Phone-Button bleibt nach Resize und Cockpit-Wechsel im zentralen Dock und ueberdeckt Fertig nicht."
+  "versionCode": 134,
+  "versionName": "1.0.134-cockpit-qr-explicit-import",
+  "indexUrl": "index.html?v=134",
+  "sha256": "097210cd38d7d25c8859b90c33c9c490ece2e82c5881b2dba03eab407953c84c",
+  "notes": "v134: QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion."
 }
