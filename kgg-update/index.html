@@ -107,25 +107,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "plan-card-height-stability",
     "plan-card-space",
     "phone-dock-owner",
-    "cockpit-qr-explicit-import"
+    "cockpit-qr-explicit-import",
+    "tablet-package-1024-tap",
+    "tablet-scan-flow-collision",
+    "tablet-two-slot-edge-taps"
   ],
   "currentVersion": {
-    "versionCode": 134,
-    "versionName": "1.0.134-cockpit-qr-explicit-import",
-    "lastPatchId": "kgg-v134-cockpit-qr-explicit-import",
+    "versionCode": 137,
+    "versionName": "1.0.137-tablet-two-slot-edge-taps",
+    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v134-cockpit-qr-explicit-import",
+  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
   "lastUpdateIntent": {
-    "id": "kgg-v134-cockpit-qr-explicit-import",
-    "summary": "QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion.",
+    "id": "kgg-v137-tablet-two-slot-edge-taps",
+    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
     "touched": [
-      "Cockpit",
-      "Scan/OCR"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
@@ -238,25 +241,28 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "plan-card-height-stability",
     "plan-card-space",
     "phone-dock-owner",
-    "cockpit-qr-explicit-import"
+    "cockpit-qr-explicit-import",
+    "tablet-package-1024-tap",
+    "tablet-scan-flow-collision",
+    "tablet-two-slot-edge-taps"
   ],
   "currentVersion": {
-    "versionCode": 134,
-    "versionName": "1.0.134-cockpit-qr-explicit-import",
-    "lastPatchId": "kgg-v134-cockpit-qr-explicit-import",
+    "versionCode": 137,
+    "versionName": "1.0.137-tablet-two-slot-edge-taps",
+    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v134-cockpit-qr-explicit-import",
+  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
   "lastUpdateIntent": {
-    "id": "kgg-v134-cockpit-qr-explicit-import",
-    "summary": "QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion.",
+    "id": "kgg-v137-tablet-two-slot-edge-taps",
+    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
     "touched": [
-      "Cockpit",
-      "Scan/OCR"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
@@ -273,8 +279,101 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 134,
+  "latestVersionCode": 137,
   "entries": [
+    {
+      "versionCode": 137,
+      "versionName": "1.0.137-tablet-two-slot-edge-taps",
+      "patchId": "kgg-v137-tablet-two-slot-edge-taps",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Zwei-Slot Rand-Taps",
+      "reason": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+      "whatChanged": [
+        "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern."
+      ],
+      "touchedAreas": [
+        "Tablet-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 136,
+      "versionName": "1.0.136-tablet-scan-flow-collision",
+      "patchId": "kgg-v136-tablet-scan-flow-collision",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Scanner kollisionsfrei im Zwei-Slot-Pane",
+      "reason": "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben.",
+      "whatChanged": [
+        "Scanner im kompakten Tablet-Zwei-Slot-Pane vor dem Plan im Layoutfluss platzieren, damit Plan-, Paket- und Scanner-Taps frei bleiben."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
+    {
+      "versionCode": 135,
+      "versionName": "1.0.135-tablet-package-1024-tap",
+      "patchId": "kgg-v135-tablet-package-1024-tap",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Tablet-Pakete bei 1024px bedienbar",
+      "reason": "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar.",
+      "whatChanged": [
+        "Tablet-Zwei-Slot-Scanbereich verdeckt den Pakete-Tap nicht mehr; Scanner bleibt bedienbar."
+      ],
+      "touchedAreas": [
+        "Tablet-Cockpit-Layout"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 134,
       "versionName": "1.0.134-cockpit-qr-explicit-import",
@@ -663,104 +762,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "local": "pending",
         "certification": "pending"
       }
-    },
-    {
-      "versionCode": 122,
-      "versionName": "1.0.122-teststation-collapsible-entry",
-      "patchId": "kgg-v122-teststation-collapsible-entry",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Einklappbare Teststation",
-      "reason": "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen.",
-      "whatChanged": [
-        "Die Teststation erhaelt einen kleinen einklappbaren Einstieg und bleibt bei App-Dialogen verborgen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat den einklappbaren Teststations-Einstieg im angenommenen Plan ausdruecklich ausgewaehlt; Preview-Wrapper wird getrennt getestet."
-    },
-    {
-      "versionCode": 121,
-      "versionName": "1.0.121-cockpit-exercise-thumbnails",
-      "patchId": "kgg-v121-cockpit-exercise-thumbnails",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Vorhandene Cockpit Uebungsbilder",
-      "reason": "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien.",
-      "whatChanged": [
-        "Cockpit zeigt vorhandene lokale entschluesselte Bilder oder Bild-URLs und einen klaren Platzhalter bei fehlenden Medien."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Medien/Upload"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max hat die Anzeige vorhandener Bilder im angenommenen Plan ausdruecklich beauftragt; Upload und Datenformate bleiben unveraendert."
-    },
-    {
-      "versionCode": 120,
-      "versionName": "1.0.120-cockpit-keypad-visibility",
-      "patchId": "kgg-v120-cockpit-keypad-visibility",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit Tastatur vollstaendig erreichbar",
-      "reason": "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben.",
-      "whatChanged": [
-        "Die Tastatur und der aktive Wert bleiben auch bei geringer Bildschirmhoehe erreichbar; Feldwechsel erhaelt Eingaben."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      }
     }
   ],
-  "latestVersionName": "1.0.134-cockpit-qr-explicit-import",
+  "latestVersionName": "1.0.137-tablet-two-slot-edge-taps",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -929,6 +933,30 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "edd025d6b0cf4bf5d24fb54640662f933b5eb1d36ed078c1b9f6e1c25003583c",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v134-cockpit-qr-explicit-import"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v135.json",
+      "snapshotVersionCode": 135,
+      "entryCount": 76,
+      "entriesSha256": "6f128701b3c2b6ec43c33c50145b71191cc2d9fb86e624e982310029c8911c70",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v135-tablet-package-1024-tap"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v136.json",
+      "snapshotVersionCode": 136,
+      "entryCount": 77,
+      "entriesSha256": "ba6102e11376dc4213613aedb56dfdab1bd70e46e80e64fd373ffbd7cd59d227",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v136-tablet-scan-flow-collision"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v137.json",
+      "snapshotVersionCode": 137,
+      "entryCount": 78,
+      "entriesSha256": "2d3ee7be122f4ae6074c0787cf58827bbdb509e187e9f9d439d4cc930fc9b277",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v137-tablet-two-slot-edge-taps"
     }
   ]
 }
@@ -1046,7 +1074,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v134-cockpit-qr-explicit-import",
+  "lastUpdatedByPatchId": "kgg-v137-tablet-two-slot-edge-taps",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1181,7 +1209,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v134 Cockpit QR nur nach bewusster Uebernahme</title>
+  <title>KGG Update v137 Tablet-Zwei-Slot Rand-Taps</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17105,11 +17133,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v134_cockpit_qr_explicit_import';
+  const VERSION='KGG_GITHUB_UPDATE_v137_tablet_two_slot_edge_taps';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v134","buildTime":"2026-11-04T16:30:22Z","buildCode":"module-v134-cockpit-qr-explicit-import","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v137","buildTime":"2026-11-05T10:41:22Z","buildCode":"module-v137-tablet-two-slot-edge-taps","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -31759,6 +31787,84 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v134-cockpit-qr-explicit-import -->
+<!-- KGG PATCH START kgg-v135-tablet-package-1024-tap -->
+<!-- Tablet-Pakete bei 1024px bedienbar -->
+<style id="kgg-v135-tablet-package-1024-tap-style">
+/* Keep both real touch targets reachable in the two-slot compact tablet pane.
+   The mirrored phone scan dock otherwise covers #packageToggle at 1024x800. */
+@media (min-width:760px) and (max-width:1100px) and (max-height:860px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app > #scanHub{
+    top:min(30dvh,215px)!important;
+    bottom:auto!important;
+  }
+}
+</style>
+<script id="kgg-v135-tablet-package-1024-tap">
+(function(){
+  "use strict";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES["kgg-v135-tablet-package-1024-tap"]={installed:true,version:1,contract:"compact two-slot tablet keeps package and scanner unforced touch targets separately reachable"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v135-tablet-package-1024-tap -->
+<!-- KGG PATCH START kgg-v136-tablet-scan-flow-collision -->
+<!-- Tablet-Scanner kollisionsfrei im Zwei-Slot-Pane -->
+<style id="kgg-v136-tablet-scan-flow-style">
+/* In the compact two-slot tablet pane keep the scanner in normal scroll flow
+   before the panel, rather than fixed over the plan/package touch targets. */
+@media (min-width:760px) and (max-width:1100px) and (max-height:860px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app > #scanHub{
+    position:static!important;
+    top:auto!important;
+    bottom:auto!important;
+    order:-1!important;
+    max-height:60px!important;
+  }
+}
+</style>
+<script id="kgg-v136-tablet-scan-flow-collision">
+(function(){
+  "use strict";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES["kgg-v136-tablet-scan-flow-collision"]={installed:true,version:1,contract:"two-slot tablet scan dock flows above panel; current-plan, packages and scanner remain directly tappable"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v136-tablet-scan-flow-collision -->
+<!-- KGG PATCH START kgg-v137-tablet-two-slot-edge-taps -->
+<!-- Tablet-Zwei-Slot Rand-Taps -->
+<style id="kgg-v137-tablet-two-slot-edge-taps-style">
+/* v136 owns the compact two-slot scanner; extend it only outside that viewport. */
+@media (min-width:1101px), (min-width:760px) and (min-height:861px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app > #scanHub{
+    position:static!important;
+    top:auto!important;
+    bottom:auto!important;
+    order:-1!important;
+    max-height:60px!important;
+  }
+}
+/* Fixed phone-style Finish and a shrinking plan header can cover tablet controls. */
+@media (min-width:760px){
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app #createPanel.planMode #finishBtn:not(.hidden){
+    position:static!important;
+    inset:auto!important;
+    z-index:auto!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  body.kggTherapyCockpitOpen.kggTcTabletSplit.kggTcSlots2.kggTcMainPanePhone .app.app.app #createPanel.planMode .planHeader{
+    flex-shrink:0!important;
+  }
+}
+</style>
+<script id="kgg-v137-tablet-two-slot-edge-taps">
+(function(){
+  "use strict";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES["kgg-v137-tablet-two-slot-edge-taps"]={installed:true,version:1,contract:"two-slot tablet package, scanner and finish edges remain tappable without fixed overlap"};
+})();
+</script>
+<!-- KGG PATCH END kgg-v137-tablet-two-slot-edge-taps -->
 
 </body>
 </html>

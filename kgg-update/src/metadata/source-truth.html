@@ -98,25 +98,28 @@
     "plan-card-height-stability",
     "plan-card-space",
     "phone-dock-owner",
-    "cockpit-qr-explicit-import"
+    "cockpit-qr-explicit-import",
+    "tablet-package-1024-tap",
+    "tablet-scan-flow-collision",
+    "tablet-two-slot-edge-taps"
   ],
   "currentVersion": {
-    "versionCode": 134,
-    "versionName": "1.0.134-cockpit-qr-explicit-import",
-    "lastPatchId": "kgg-v134-cockpit-qr-explicit-import",
+    "versionCode": 137,
+    "versionName": "1.0.137-tablet-two-slot-edge-taps",
+    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v134-cockpit-qr-explicit-import",
+  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
   "lastUpdateIntent": {
-    "id": "kgg-v134-cockpit-qr-explicit-import",
-    "summary": "QR Scan darf Cockpit Slots nicht automatisch belegen; sichtbarer Import Button ist die einzige Uebernahmeaktion.",
+    "id": "kgg-v137-tablet-two-slot-edge-taps",
+    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
     "touched": [
-      "Cockpit",
-      "Scan/OCR"
+      "Tablet-Layout"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
+      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
