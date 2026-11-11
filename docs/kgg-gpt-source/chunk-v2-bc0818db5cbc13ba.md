@@ -186,7 +186,18 @@
     try{
       const stream=await navigator.mediaDevices.getUserMedia({
         audio:false,
-        video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:10,max:15}}
+        video:{
+          facingMode:{ideal:'environment'},
+          width:{ideal:1920},
+          height:{ideal:1080},
+          frameRate:{ideal:10,max:15},
+          advanced:[{
+            width:{min:960},
+            height:{min:720},
+            aspectRatio:{min:1.3,max:1.4},
+            resizeMode:'none'
+          }]
+        }
       });
       const video=root.querySelector('video');
       const current={active:true,busy:false,stream:stream,video:video,detector:null,variant:0,startedAt:Date.now(),timer:0};

@@ -64,41 +64,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max Handoff COMPLETENESS_PUSH_20261022 generation1 revision1: existing drafts plus narrowly authorized R2 metadata and isolated native sync; no live release."
-    },
-    {
-      "versionCode": 124,
-      "versionName": "1.0.124-cockpit-main-integration",
-      "patchId": "kgg-v124-cockpit-main-integration",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Cockpit und englische Uebungsnamen integriert",
-      "reason": "Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release.",
-      "whatChanged": [
-        "Gesichertes Cockpit v096-v123 mit Main-Englischfunktion zusammengefuehrt; beide v096-Historien bleiben getrennte Evidenz, kein Beta- oder Alpha-Release."
-      ],
-      "touchedAreas": [
-        "UI"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "Medien/Upload",
-        "API-Key-Logik",
-        "Android/APK",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Nutzerauftrag 20.10.2026: lokale Integration und Tests, keine Release-Freigabe."
     }
   ],
-  "latestVersionName": "1.0.138-admin-qr-minimum-zoom",
+  "latestVersionName": "1.0.139-admin-qr-full-frame",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -299,6 +267,14 @@
       "entriesSha256": "69626abb2a24e56932e5ec7844c3c32c2d674771056a84dae852bb31f07ffb61",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v138-admin-qr-minimum-zoom"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v139.json",
+      "snapshotVersionCode": 139,
+      "entryCount": 80,
+      "entriesSha256": "0fa3755f8f6f4ae295ff02f821470953c9d276a08f6346e8e3882cace2451844",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v139-admin-qr-full-frame"
     }
   ]
 }

@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<!--
-KGG INTERNAL SOURCE TRUTH — READ THIS FIRST
-
-Machine-readable app state, patch rules, and changelog are embedded near the top of this HTML.
-Before editing this app, any LLM/agent/human should read these blocks:
-1. <script type="application/json" id="kgg-source-truth">
+<script type="application/json" id="kgg-source-truth">
 {
   "schema": 1,
   "app": "KGG Plan",
@@ -111,25 +102,25 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-package-1024-tap",
     "tablet-scan-flow-collision",
     "tablet-two-slot-edge-taps",
-    "admin-qr-minimum-zoom"
+    "admin-qr-minimum-zoom",
+    "admin-qr-full-frame"
   ],
   "currentVersion": {
-    "versionCode": 138,
-    "versionName": "1.0.138-admin-qr-minimum-zoom",
-    "lastPatchId": "kgg-v138-admin-qr-minimum-zoom",
+    "versionCode": 139,
+    "versionName": "1.0.139-admin-qr-full-frame",
+    "lastPatchId": "kgg-v139-admin-qr-full-frame",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v138-admin-qr-minimum-zoom",
+  "latestPatchId": "kgg-v139-admin-qr-full-frame",
   "lastUpdateIntent": {
-    "id": "kgg-v138-admin-qr-minimum-zoom",
-    "summary": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
+    "id": "kgg-v139-admin-qr-full-frame",
+    "summary": "Beim Admin-QR-Scan ein natives 4:3-Rückkamerabild ohne zusätzlichen WebView-Zuschnitt bevorzugen. Den Teststations-Startknopf kompakt anzeigen und Kameratasten freihalten.",
     "touched": [
-      "admin-camera-qr"
+      "Scan/OCR"
     ],
     "notTouched": [
       "PDF",
       "QR/Patienten-App",
-      "Scan/OCR",
       "Parser",
       "Plan-State",
       "Medien/Upload",
@@ -141,4 +132,3 @@ Before editing this app, any LLM/agent/human should read these blocks:
   }
 }
 </script>
-<!-- END kgg-source-truth -->
