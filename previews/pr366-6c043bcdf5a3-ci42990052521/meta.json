@@ -1,0 +1,21 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "verified-pr",
+  "requestId": "pr366-6c043bcdf5a3-ci42990052521",
+  "patchHash": "3822661616dc9728ab27dc6f364cc3b12e9d84a793223a575701ba14cb90d27a",
+  "sourceSha": "6c043bcdf5a31f503d5f5960f310d23bb8bcb358",
+  "baseSha": "6c043bcdf5a31f503d5f5960f310d23bb8bcb358",
+  "commitSha": "6c043bcdf5a31f503d5f5960f310d23bb8bcb358",
+  "baseVersionCode": 138,
+  "rolloutCode": 1794386980,
+  "title": "Verified PR #366 test preview",
+  "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
+  "versionName": "1.0.138-admin-qr-minimum-zoom",
+  "createdAt": "2026-11-11T08:49:40Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/pr366-6c043bcdf5a3-ci42990052521/admin.html",
+  "sha256": "781bdc7724734f0a90d94e0da10eb12d4c0edf702d2462878227e0a7a9638c52",
+  "sourcePr": 366,
+  "sourcePrUrl": "https://github.com/Kayus24/kgg/pull/366",
+  "verificationRunId": 42990052521,
+  "verificationRunUrl": "https://github.com/Kayus24/kgg/actions/runs/42990052521"
+}
