@@ -114,25 +114,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "admin-qr-minimum-zoom",
     "admin-qr-full-frame",
     "cockpit-drive-read-fallback",
-    "cockpit-v2-verified-preview"
+    "cockpit-v2-verified-preview",
+    "kgg-v141-preview-version-status"
   ],
   "currentVersion": {
-    "versionCode": 140,
-    "versionName": "1.0.140-cockpit-v2-verified-preview",
-    "lastPatchId": "kgg-v140-cockpit-v2-verified-preview",
+    "versionCode": 141,
+    "versionName": "1.0.141-preview-version-status",
+    "lastPatchId": "kgg-v141-preview-version-status",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v140-cockpit-v2-verified-preview",
+  "latestPatchId": "kgg-v141-preview-version-status",
   "lastUpdateIntent": {
-    "id": "kgg-v140-cockpit-v2-verified-preview",
-    "summary": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
+    "id": "kgg-v141-preview-version-status",
+    "summary": "Preview: tatsächliche HTML- und APK-Version getrennt anzeigen, fehlleitende Update-Zentrale ersetzen und native HTML-Update-Prüfung sicher anfordern.",
     "touched": [
-      "QR/Patienten-App",
-      "Plan-State",
-      "Medien/Upload"
+      "Therapeuten-UI",
+      "HTML-Preview"
     ],
     "notTouched": [
       "PDF",
+      "Plan-State",
+      "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
       "GitHub Manifest"
@@ -248,25 +250,27 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "admin-qr-minimum-zoom",
     "admin-qr-full-frame",
     "cockpit-drive-read-fallback",
-    "cockpit-v2-verified-preview"
+    "cockpit-v2-verified-preview",
+    "kgg-v141-preview-version-status"
   ],
   "currentVersion": {
-    "versionCode": 140,
-    "versionName": "1.0.140-cockpit-v2-verified-preview",
-    "lastPatchId": "kgg-v140-cockpit-v2-verified-preview",
+    "versionCode": 141,
+    "versionName": "1.0.141-preview-version-status",
+    "lastPatchId": "kgg-v141-preview-version-status",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v140-cockpit-v2-verified-preview",
+  "latestPatchId": "kgg-v141-preview-version-status",
   "lastUpdateIntent": {
-    "id": "kgg-v140-cockpit-v2-verified-preview",
-    "summary": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
+    "id": "kgg-v141-preview-version-status",
+    "summary": "Preview: tatsächliche HTML- und APK-Version getrennt anzeigen, fehlleitende Update-Zentrale ersetzen und native HTML-Update-Prüfung sicher anfordern.",
     "touched": [
-      "QR/Patienten-App",
-      "Plan-State",
-      "Medien/Upload"
+      "Therapeuten-UI",
+      "HTML-Preview"
     ],
     "notTouched": [
       "PDF",
+      "Plan-State",
+      "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
       "GitHub Manifest"
@@ -279,8 +283,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 140,
+  "latestVersionCode": 141,
   "entries": [
+    {
+      "versionCode": 141,
+      "versionName": "1.0.141-preview-version-status",
+      "patchId": "kgg-v141-preview-version-status",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Preview-Version und Android-HTML-Status sichtbar",
+      "reason": "Preview: tatsächliche HTML- und APK-Version getrennt anzeigen, fehlleitende Update-Zentrale ersetzen und native HTML-Update-Prüfung sicher anfordern.",
+      "whatChanged": [
+        "Preview-Menü zeigt Preview-Version statt uninitialisierter Admin-Update-Zentrale",
+        "Direkt aus der geladenen HTML-Quelle Version und aus dem nativen Bridge-Status APK, Release-ID, Rollout-Code und Quelle anzeigen",
+        "Nur HTML-Updateprüfung anfordern, nicht deren Erfolg behaupten; kein neuer Android-Build"
+      ],
+      "touchedAreas": [
+        "Therapeuten-UI",
+        "HTML-Preview"
+      ],
+      "notTouched": [
+        "PDF",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "HTML-only Preview; kein APK/Main/Beta-Release."
+    },
     {
       "versionCode": 140,
       "versionName": "1.0.140-cockpit-v2-verified-preview",
@@ -726,44 +761,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max 23.10.2026: KGG-Arbeit fortsetzen und offene Performancebefunde abschliessen. Nur Sync-QR-Bilddarstellung und Menueeingabe; kein QR-Datenformat-/Layout-/Patienten-/Native-/Releasewechsel."
-    },
-    {
-      "versionCode": 126,
-      "versionName": "1.0.126-responsive-library-sync",
-      "patchId": "kgg-v126-responsive-library-sync",
-      "status": "implemented",
-      "type": "module-patch",
-      "title": "Reaktionsfaehiger Bibliothekssync",
-      "reason": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
-      "whatChanged": [
-        "Native Datei-/Providerarbeit laeuft ueber eine begrenzte serielle Queue; Promise-Ergebnisse bestaetigen den Abschluss statt nur die Annahme.",
-        "Status-/Partneranzeigen nutzen kleine Snapshots mit Generation und ehrlicher Frische; alte Shell-Vertraege und isolierter Preview bleiben beruecksichtigt.",
-        "Reines Oeffnen loest keinen Voll-Export unveraenderter Uebungen/Bilder aus.",
-        "Base64-Bildbytes werden nach unveraenderter Validierung mit einem direkten Byte-Loop uebernommen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Medien/Upload",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "Gezielte Bootstrap-/Core-/JVM-Pruefungen PASS; finale Integration und Geraeteabnahme siehe Aufgabenbericht.",
-        "certification": "pending"
-      },
-      "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
     }
   ],
-  "latestVersionName": "1.0.140-cockpit-v2-verified-preview",
+  "latestVersionName": "1.0.141-preview-version-status",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -980,6 +980,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "83e807f94f6d91b7065a0fa0c43e9c4a8a1f9672992c67dc81152967c0e4fd5f",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v140-cockpit-v2-verified-preview"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v141.json",
+      "snapshotVersionCode": 141,
+      "entryCount": 82,
+      "entriesSha256": "855f79925175c15ef44aeb5a86a5b6ac0c1b0a3f39b3d72582105f088190f4bf",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v141-preview-version-status"
     }
   ]
 }
@@ -1097,7 +1105,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v140-cockpit-v2-verified-preview",
+  "lastUpdatedByPatchId": "kgg-v141-preview-version-status",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1232,7 +1240,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v140 Cockpit V2 + Admin QR</title>
+  <title>KGG Update v141 Preview-Version</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17156,11 +17164,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v140_cockpit_v2_verified_preview';
+  const VERSION='KGG_GITHUB_UPDATE_v141_preview_version_status';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v140","buildTime":"2026-11-11T09:13:39Z","buildCode":"module-v140-cockpit-v2-verified-preview","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v141","buildTime":"2026-11-11T09:13:39Z","buildCode":"module-v141-preview-version-status","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -25968,7 +25976,23 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   function byId(id){ return document.getElementById(id); }
   function q(sel){ try { return document.querySelector(sel); } catch(err){ return null; } }
 
+  function isNativePreview(){
+    try{
+      var bridge=window.KGGAndroidApp;
+      if(!bridge||typeof bridge.updateStatus!=="function")return false;
+      var status=JSON.parse(String(bridge.updateStatus()||""));
+      return !!(status&&status.previewChannel===true);
+    }catch(err){return false;}
+  }
   function releaseOpen(){
+    if(isNativePreview()){
+      if(window.KGGPreviewStatus && typeof window.KGGPreviewStatus.open==="function"){
+        window.KGGPreviewStatus.open();
+      }else{
+        alert("Preview-Versionsanzeige noch nicht verfügbar.");
+      }
+      return;
+    }
     try{
       if(window.KGGReleaseCenter && typeof window.KGGReleaseCenter.open === "function"){
         window.KGGReleaseCenter.open();
@@ -26032,8 +26056,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       group.appendChild(admin);
     }
 
+    var label=isNativePreview()?"Preview-Version":"Update-Zentrale";
     if(!byId("kggReleaseCenterOpen")){
-      group.appendChild(makeButton("kggReleaseCenterOpen", "Update-Zentrale", "tabletSideMenuAction"));
+      group.appendChild(makeButton("kggReleaseCenterOpen", label, "tabletSideMenuAction"));
+    }else if(byId("kggReleaseCenterOpen").textContent!==label){
+      byId("kggReleaseCenterOpen").textContent=label;
     }
 
     return true;
@@ -26042,9 +26069,12 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   function ensurePhoneAdminEntry(){
     var tools = q(".adminCodePackageTools");
     if(!tools) return false;
+    var label=isNativePreview()?"Preview-Version":"Update-Zentrale";
     if(!byId("kggReleaseCenterOpenPhone")){
-      var phone = makeButton("kggReleaseCenterOpenPhone", "Update-Zentrale", "mutedBtn wide");
+      var phone = makeButton("kggReleaseCenterOpenPhone", label, "mutedBtn wide");
       tools.appendChild(phone);
+    }else if(byId("kggReleaseCenterOpenPhone").textContent!==label){
+      byId("kggReleaseCenterOpenPhone").textContent=label;
     }
     return true;
   }
@@ -32268,6 +32298,103 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v140-cockpit-v2-verified-preview -->
+<!-- KGG PATCH START kgg-v141-preview-version-status -->
+<script id="kgg-v141-preview-version-status">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v141-preview-version-status";
+  var modal=null;
+  function nativeStatus(){
+    try{
+      var bridge=window.KGGAndroidApp;
+      if(!bridge||typeof bridge.updateStatus!=="function")return null;
+      var data=JSON.parse(String(bridge.updateStatus()||""));
+      return data&&data.previewChannel===true?data:null;
+    }catch(_){return null;}
+  }
+  function webVersion(){
+    try{
+      var node=document.getElementById("kgg-source-truth");
+      var data=node&&JSON.parse(node.textContent||"{}");
+      var current=data&&data.currentVersion;
+      if(!current||!Number.isSafeInteger(current.versionCode))return null;
+      return {versionCode:current.versionCode,versionName:String(current.versionName||"")};
+    }catch(_){return null;}
+  }
+  function read(){
+    return {native:nativeStatus(),web:webVersion()};
+  }
+  function showText(id,value){
+    var node=document.getElementById(id);
+    if(node)node.textContent=value==null||value===""?"Nicht verfügbar":String(value);
+  }
+  function ensureDialog(){
+    if(modal&&modal.isConnected)return modal;
+    if(!document.body)return null;
+    var css=document.getElementById("kggPreviewStatusCss");
+    if(!css){
+      css=document.createElement("style");css.id="kggPreviewStatusCss";
+      css.textContent="#kggPreviewVersionDialog{position:fixed;inset:0;z-index:2147483001;display:flex;align-items:center;justify-content:center;background:rgba(10,15,30,.56);padding:16px;font-family:system-ui,sans-serif}"
+        +"#kggPreviewVersionDialog[hidden]{display:none}#kggPreviewVersionDialog .kgg-pvs-panel{width:min(100%,500px);max-height:90dvh;overflow:auto;border-radius:18px;background:white;color:#0f172a;padding:20px;box-shadow:0 20px 64px #0004}"
+        +"#kggPreviewVersionDialog h2{font-size:22px;margin:0 0 10px;font-weight:750}#kggPreviewVersionDialog .kgg-pvs-row{padding:9px 0;border-bottom:1px solid #e2e8f0;display:flex;gap:12px;justify-content:space-between;align-items:flex-start}"
+        +"#kggPreviewVersionDialog .kgg-pvs-label{color:#475569;min-width:42%;font-size:14px}#kggPreviewVersionDialog .kgg-pvs-value{min-width:0;text-align:right;font-weight:650;overflow-wrap:anywhere}"
+        +"#kggPreviewVersionDialog .kgg-pvs-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}#kggPreviewVersionDialog button{border:1px solid #94a3b8;background:#f8fafc;color:#0f172a;border-radius:10px;padding:12px 14px;font-weight:700;min-height:44px}"
+        +"#kggPreviewVersionDialog button:disabled{opacity:.5}#kggPreviewVersionDialog #kggPreviewStatusFeedback{font-size:14px;color:#475569;margin-top:12px;min-height:1em}";
+      document.head.appendChild(css);
+    }
+    modal=document.createElement("div");
+    modal.id="kggPreviewVersionDialog";modal.hidden=true;
+    modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
+    modal.setAttribute("aria-label","KGG Preview-Version");
+    modal.innerHTML='<div class="kgg-pvs-panel"><h2>KGG Preview-Version</h2>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Geladene HTML-Version</span><span class="kgg-pvs-value" id="kggPreviewStatusHtml"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Installierte APK</span><span class="kgg-pvs-value" id="kggPreviewStatusApk"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">HTML-Quelle laut Android</span><span class="kgg-pvs-value" id="kggPreviewStatusSource"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Preview-Release-ID</span><span class="kgg-pvs-value" id="kggPreviewStatusRelease"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Rollout-Code</span><span class="kgg-pvs-value" id="kggPreviewStatusRollout"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Native Gesundheitsprüfung</span><span class="kgg-pvs-value" id="kggPreviewStatusHealth"></span></div>'
+      +'<div class="kgg-pvs-actions"><button type="button" id="kggPreviewStatusCheck">HTML-Update prüfen</button><button type="button" id="kggPreviewStatusClose">Schließen</button></div>'
+      +'<p id="kggPreviewStatusFeedback" role="status" aria-live="polite"></p></div>';
+    document.body.appendChild(modal);
+    document.getElementById("kggPreviewStatusClose").addEventListener("click",close);
+    document.getElementById("kggPreviewStatusCheck").addEventListener("click",function(){
+      var bridge=window.KGGPreviewWebUpdateNative;
+      var feedback=document.getElementById("kggPreviewStatusFeedback");
+      try{
+        if(!bridge||typeof bridge.requestPreviewWebUpdate!=="function"){
+          feedback.textContent="Diese App kann keine native Preview-Aktualisierung anfordern.";return;
+        }
+        if(bridge.requestPreviewWebUpdate()!==true){
+          feedback.textContent="Die Update-Prüfung konnte nicht gestartet werden.";return;
+        }
+        feedback.textContent="HTML-Prüfung angefordert. Erst eine geänderte geladene HTML-Version bestätigt ein Update.";
+      }catch(_){feedback.textContent="Die Update-Prüfung konnte nicht gestartet werden.";}
+    });
+    modal.addEventListener("click",function(e){if(e.target===modal)close();});
+    modal.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
+    return modal;
+  }
+  function open(){
+    var ui=ensureDialog();if(!ui)return false;
+    var status=read(),native=status.native,web=status.web;
+    showText("kggPreviewStatusHtml",web?"v"+web.versionCode+" ("+web.versionName+")":"Nicht ermittelbar");
+    showText("kggPreviewStatusApk",native&&native.versionName);
+    showText("kggPreviewStatusSource",native&&native.loadedHtmlSource);
+    showText("kggPreviewStatusRelease",native&&native.releaseId);
+    showText("kggPreviewStatusRollout",native&&native.rolloutCode);
+    showText("kggPreviewStatusHealth",!native?"Nicht ermittelbar":(native.pendingHealthCheck?"Noch offen":"Kein ausstehender Gesundheitscheck"));
+    var canCheck=!!(native&&window.KGGPreviewWebUpdateNative&&typeof window.KGGPreviewWebUpdateNative.requestPreviewWebUpdate==="function");
+    document.getElementById("kggPreviewStatusCheck").disabled=!canCheck;
+    document.getElementById("kggPreviewStatusFeedback").textContent=native?"HTML-Version und APK-Version sind getrennt. Diese Anzeige bestätigt nicht die neueste GitHub-Version.":"Keine native Preview-App erkannt.";
+    ui.hidden=false;return true;
+  }
+  function close(){if(modal)modal.hidden=true;}
+  window.KGGPreviewStatus=Object.freeze({read:read,open:open,close:close,isPreview:function(){return !!nativeStatus();}});
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v141-preview-version-status -->
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "versionCode": 140,
-  "versionName": "1.0.140-cockpit-v2-verified-preview",
-  "indexUrl": "index.html?v=140",
-  "sha256": "0f519ec72dccb39d9f5ae2253f95d374073adc6528a014d0fac2c93d8eb395f8",
-  "notes": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten."
+  "versionCode": 141,
+  "versionName": "1.0.141-preview-version-status",
+  "indexUrl": "index.html?v=141",
+  "sha256": "e0de0094f88119979b0abd7c95cbc9e9c25c729202769c7eb7588c68803b56ca",
+  "notes": "Preview: tatsächliche HTML- und APK-Version getrennt anzeigen, fehlleitende Update-Zentrale ersetzen und native HTML-Update-Prüfung sicher anfordern."
 }

@@ -86,7 +86,8 @@
     "kgg-v138-admin-qr-minimum-zoom",
     "kgg-v139-admin-qr-full-frame",
     "kgg-v138-cockpit-drive-read-fallback",
-    "kgg-v140-cockpit-v2-verified-preview"
+    "kgg-v140-cockpit-v2-verified-preview",
+    "kgg-v141-preview-version-status"
   ],
   "parts": [
     "base-head.html",
@@ -190,6 +191,7 @@
     "patches/v139-admin-qr-full-frame.html",
     "patches/v138-cockpit-drive-read-fallback.html",
     "patches/v140-cockpit-v2-verified-preview.html",
+    "patches/v141-preview-version-status.html",
     "footer.html"
   ]
 }

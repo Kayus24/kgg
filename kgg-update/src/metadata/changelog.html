@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 140,
+  "latestVersionCode": 141,
   "entries": [
+    {
+      "versionCode": 141,
+      "versionName": "1.0.141-preview-version-status",
+      "patchId": "kgg-v141-preview-version-status",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Preview-Version und Android-HTML-Status sichtbar",
+      "reason": "Preview: tatsächliche HTML- und APK-Version getrennt anzeigen, fehlleitende Update-Zentrale ersetzen und native HTML-Update-Prüfung sicher anfordern.",
+      "whatChanged": [
+        "Preview-Menü zeigt Preview-Version statt uninitialisierter Admin-Update-Zentrale",
+        "Direkt aus der geladenen HTML-Quelle Version und aus dem nativen Bridge-Status APK, Release-ID, Rollout-Code und Quelle anzeigen",
+        "Nur HTML-Updateprüfung anfordern, nicht deren Erfolg behaupten; kein neuer Android-Build"
+      ],
+      "touchedAreas": [
+        "Therapeuten-UI",
+        "HTML-Preview"
+      ],
+      "notTouched": [
+        "PDF",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "HTML-only Preview; kein APK/Main/Beta-Release."
+    },
     {
       "versionCode": 140,
       "versionName": "1.0.140-cockpit-v2-verified-preview",
@@ -450,44 +481,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max 23.10.2026: KGG-Arbeit fortsetzen und offene Performancebefunde abschliessen. Nur Sync-QR-Bilddarstellung und Menueeingabe; kein QR-Datenformat-/Layout-/Patienten-/Native-/Releasewechsel."
-    },
-    {
-      "versionCode": 126,
-      "versionName": "1.0.126-responsive-library-sync",
-      "patchId": "kgg-v126-responsive-library-sync",
-      "status": "implemented",
-      "type": "module-patch",
-      "title": "Reaktionsfaehiger Bibliothekssync",
-      "reason": "Bibliothekssync verarbeitet native Datei-/Providerarbeit seriell im Hintergrund; Status und Partneranzeige lesen kleine Snapshots. Reines Oeffnen exportiert nicht erneut, und Bildbytes werden ohne teure Callback-Konvertierung uebernommen.",
-      "whatChanged": [
-        "Native Datei-/Providerarbeit laeuft ueber eine begrenzte serielle Queue; Promise-Ergebnisse bestaetigen den Abschluss statt nur die Annahme.",
-        "Status-/Partneranzeigen nutzen kleine Snapshots mit Generation und ehrlicher Frische; alte Shell-Vertraege und isolierter Preview bleiben beruecksichtigt.",
-        "Reines Oeffnen loest keinen Voll-Export unveraenderter Uebungen/Bilder aus.",
-        "Base64-Bildbytes werden nach unveraenderter Validierung mit einem direkten Byte-Loop uebernommen."
-      ],
-      "touchedAreas": [
-        "UI",
-        "Medien/Upload",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "QR/Patienten-App",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "Gezielte Bootstrap-/Core-/JVM-Pruefungen PASS; finale Integration und Geraeteabnahme siehe Aufgabenbericht.",
-        "certification": "pending"
-      },
-      "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
     }
   ],
-  "latestVersionName": "1.0.140-cockpit-v2-verified-preview",
+  "latestVersionName": "1.0.141-preview-version-status",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -704,6 +700,14 @@
       "entriesSha256": "83e807f94f6d91b7065a0fa0c43e9c4a8a1f9672992c67dc81152967c0e4fd5f",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v140-cockpit-v2-verified-preview"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v141.json",
+      "snapshotVersionCode": 141,
+      "entryCount": 82,
+      "entriesSha256": "855f79925175c15ef44aeb5a86a5b6ac0c1b0a3f39b3d72582105f088190f4bf",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v141-preview-version-status"
     }
   ]
 }
