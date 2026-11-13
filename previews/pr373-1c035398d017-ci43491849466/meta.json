@@ -1,0 +1,21 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "verified-pr",
+  "requestId": "pr373-1c035398d017-ci43491849466",
+  "patchHash": "7f7012e950eb9804967f1be1f295608715314bb21f3300873a17042015628577",
+  "sourceSha": "1c035398d01749e0e8fea381883b58713e33b498",
+  "baseSha": "1c035398d01749e0e8fea381883b58713e33b498",
+  "commitSha": "1c035398d01749e0e8fea381883b58713e33b498",
+  "baseVersionCode": 141,
+  "rolloutCode": 1794597876,
+  "title": "Verified PR #373 test preview",
+  "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
+  "versionName": "1.0.141-preview-version-status",
+  "createdAt": "2026-11-13T19:24:36Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/pr373-1c035398d017-ci43491849466/admin.html",
+  "sha256": "e0de0094f88119979b0abd7c95cbc9e9c25c729202769c7eb7588c68803b56ca",
+  "sourcePr": 373,
+  "sourcePrUrl": "https://github.com/Kayus24/kgg/pull/373",
+  "verificationRunId": 43491849466,
+  "verificationRunUrl": "https://github.com/Kayus24/kgg/actions/runs/43491849466"
+}
