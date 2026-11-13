@@ -1,0 +1,21 @@
+{
+  "kind": "kgg_gpt_preview",
+  "sourceType": "verified-pr",
+  "requestId": "pr373-844bafdf53bf-ci43419588710",
+  "patchHash": "685663f726f3ce067ce38e4c9c6c2d95067f95f538eee15cfad579a3ae2b5ae6",
+  "sourceSha": "844bafdf53bf8ff08699c2484f54f041a1cdc72e",
+  "baseSha": "844bafdf53bf8ff08699c2484f54f041a1cdc72e",
+  "commitSha": "844bafdf53bf8ff08699c2484f54f041a1cdc72e",
+  "baseVersionCode": 140,
+  "rolloutCode": 1794570355,
+  "title": "Verified PR #373 test preview",
+  "summary": "Exact pinned PR HTML; source and GitHub CI independently verified; no new patch created.",
+  "versionName": "1.0.140-cockpit-v2-verified-preview",
+  "createdAt": "2026-11-13T11:45:55Z",
+  "url": "https://raw.githubusercontent.com/Kayus24/kgg/gpt-preview/previews/pr373-844bafdf53bf-ci43419588710/admin.html",
+  "sha256": "0f519ec72dccb39d9f5ae2253f95d374073adc6528a014d0fac2c93d8eb395f8",
+  "sourcePr": 373,
+  "sourcePrUrl": "https://github.com/Kayus24/kgg/pull/373",
+  "verificationRunId": 43419588710,
+  "verificationRunUrl": "https://github.com/Kayus24/kgg/actions/runs/43419588710"
+}
