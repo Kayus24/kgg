@@ -84,7 +84,9 @@
     "kgg-v136-tablet-scan-flow-collision",
     "kgg-v137-tablet-two-slot-edge-taps",
     "kgg-v138-admin-qr-minimum-zoom",
-    "kgg-v139-admin-qr-full-frame"
+    "kgg-v139-admin-qr-full-frame",
+    "kgg-v138-cockpit-drive-read-fallback",
+    "kgg-v140-cockpit-v2-verified-preview"
   ],
   "parts": [
     "base-head.html",
@@ -186,6 +188,8 @@
     "patches/v137-tablet-two-slot-edge-taps.html",
     "patches/v138-admin-qr-minimum-zoom.html",
     "patches/v139-admin-qr-full-frame.html",
+    "patches/v138-cockpit-drive-read-fallback.html",
+    "patches/v140-cockpit-v2-verified-preview.html",
     "footer.html"
   ]
 }

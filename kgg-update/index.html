@@ -112,31 +112,30 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-scan-flow-collision",
     "tablet-two-slot-edge-taps",
     "admin-qr-minimum-zoom",
-    "admin-qr-full-frame"
+    "admin-qr-full-frame",
+    "cockpit-drive-read-fallback",
+    "cockpit-v2-verified-preview"
   ],
   "currentVersion": {
-    "versionCode": 139,
-    "versionName": "1.0.139-admin-qr-full-frame",
-    "lastPatchId": "kgg-v139-admin-qr-full-frame",
+    "versionCode": 140,
+    "versionName": "1.0.140-cockpit-v2-verified-preview",
+    "lastPatchId": "kgg-v140-cockpit-v2-verified-preview",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v139-admin-qr-full-frame",
+  "latestPatchId": "kgg-v140-cockpit-v2-verified-preview",
   "lastUpdateIntent": {
-    "id": "kgg-v139-admin-qr-full-frame",
-    "summary": "Beim Admin-QR-Scan ein natives 4:3-Rückkamerabild ohne zusätzlichen WebView-Zuschnitt bevorzugen. Den Teststations-Startknopf kompakt anzeigen und Kameratasten freihalten.",
+    "id": "kgg-v140-cockpit-v2-verified-preview",
+    "summary": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
     "touched": [
-      "Scan/OCR"
+      "QR/Patienten-App",
+      "Plan-State",
+      "Medien/Upload"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Parser",
-      "Plan-State",
-      "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -247,31 +246,30 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "tablet-scan-flow-collision",
     "tablet-two-slot-edge-taps",
     "admin-qr-minimum-zoom",
-    "admin-qr-full-frame"
+    "admin-qr-full-frame",
+    "cockpit-drive-read-fallback",
+    "cockpit-v2-verified-preview"
   ],
   "currentVersion": {
-    "versionCode": 139,
-    "versionName": "1.0.139-admin-qr-full-frame",
-    "lastPatchId": "kgg-v139-admin-qr-full-frame",
+    "versionCode": 140,
+    "versionName": "1.0.140-cockpit-v2-verified-preview",
+    "lastPatchId": "kgg-v140-cockpit-v2-verified-preview",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v139-admin-qr-full-frame",
+  "latestPatchId": "kgg-v140-cockpit-v2-verified-preview",
   "lastUpdateIntent": {
-    "id": "kgg-v139-admin-qr-full-frame",
-    "summary": "Beim Admin-QR-Scan ein natives 4:3-Rückkamerabild ohne zusätzlichen WebView-Zuschnitt bevorzugen. Den Teststations-Startknopf kompakt anzeigen und Kameratasten freihalten.",
+    "id": "kgg-v140-cockpit-v2-verified-preview",
+    "summary": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
     "touched": [
-      "Scan/OCR"
+      "QR/Patienten-App",
+      "Plan-State",
+      "Medien/Upload"
     ],
     "notTouched": [
       "PDF",
-      "QR/Patienten-App",
-      "Parser",
-      "Plan-State",
-      "Medien/Upload",
       "API-Key-Logik",
       "Android/APK",
-      "GitHub Manifest",
-      "Handy-Layout"
+      "GitHub Manifest"
     ]
   }
 }
@@ -281,8 +279,39 @@ Before editing this app, any LLM/agent/human should read these blocks:
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 139,
+  "latestVersionCode": 140,
   "entries": [
+    {
+      "versionCode": 140,
+      "versionName": "1.0.140-cockpit-v2-verified-preview",
+      "patchId": "kgg-v140-cockpit-v2-verified-preview",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit-V2-Links und Drive-Nachladung – HTML-Testpreview",
+      "reason": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
+      "whatChanged": [
+        "Kompakte Cockpit-V2-Links mit stabiler Übungsbank-ID und zusätzlicher Namens-/Cockpit-ID-Prüfung",
+        "Fehlerfester manueller Import, einmaliger freigegebener SAF-Nachladeversuch und Rückwärtskompatibilität zu V1",
+        "Drive-/Peer-Import-Rollbacks und lokale Bearbeitungen vor Datenverlust schützen",
+        "Die bisherigen v139-QR-Kameraänderungen bleiben im HTML-Build enthalten"
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "HTML-only Testpreview; keine neue APK, kein Main- oder Beta-Release."
+    },
     {
       "versionCode": 139,
       "versionName": "1.0.139-admin-qr-full-frame",
@@ -732,40 +761,9 @@ Before editing this app, any LLM/agent/human should read these blocks:
         "certification": "pending"
       },
       "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
-    },
-    {
-      "versionCode": 125,
-      "versionName": "1.0.125-library-image-names",
-      "patchId": "kgg-v125-library-image-names",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Uebungskatalog, Bilder und Namenshilfe gemeinsam",
-      "reason": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
-      "whatChanged": [
-        "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
-      ],
-      "touchedAreas": [
-        "Medien/Upload",
-        "QR/Patienten-App",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max Handoff COMPLETENESS_PUSH_20261022 generation1 revision1: existing drafts plus narrowly authorized R2 metadata and isolated native sync; no live release."
     }
   ],
-  "latestVersionName": "1.0.139-admin-qr-full-frame",
+  "latestVersionName": "1.0.140-cockpit-v2-verified-preview",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -974,6 +972,14 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "entriesSha256": "0fa3755f8f6f4ae295ff02f821470953c9d276a08f6346e8e3882cace2451844",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v139-admin-qr-full-frame"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v140.json",
+      "snapshotVersionCode": 140,
+      "entryCount": 81,
+      "entriesSha256": "83e807f94f6d91b7065a0fa0c43e9c4a8a1f9672992c67dc81152967c0e4fd5f",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v140-cockpit-v2-verified-preview"
     }
   ]
 }
@@ -1091,7 +1097,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
       "Max approval"
     ]
   },
-  "lastUpdatedByPatchId": "kgg-v139-admin-qr-full-frame",
+  "lastUpdatedByPatchId": "kgg-v140-cockpit-v2-verified-preview",
   "phoneViewportLeakGuardPolicy": {
     "patchId": "kgg-v014-phone-viewport-state-release-guard",
     "purpose": "Phone-only gesture/layout state must not leak into tablet or landscape viewports.",
@@ -1226,7 +1232,7 @@ Before editing this app, any LLM/agent/human should read these blocks:
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="kgg_therapist_manifest.webmanifest">
   <link rel="icon" href="kgg_therapist_icon.svg" type="image/svg+xml">
-  <title>KGG Update v139 Admin-QR mit nativem Kamerabild</title>
+  <title>KGG Update v140 Cockpit V2 + Admin QR</title>
   <style>
     :root{
       --bg:#e8eef6;--paper:#fff;--ink:#071027;--muted:#657386;--line:#dce3eb;--blue:#dcecff;--blue2:#eef6ff;--accent:#0a1024;--danger:#e23b54;--soft:#f6f8fb;--shadow:0 4px 14px rgba(7,16,39,.08);--r:22px;
@@ -17150,11 +17156,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
 </script>
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v139_admin_qr_full_frame';
+  const VERSION='KGG_GITHUB_UPDATE_v140_cockpit_v2_verified_preview';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v139","buildTime":"2026-11-11T09:13:39Z","buildCode":"module-v139-admin-qr-full-frame","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v140","buildTime":"2026-11-11T09:13:39Z","buildCode":"module-v140-cockpit-v2-verified-preview","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -17297,6 +17303,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       tx.objectStore(mediaStoreName).put(record);
       tx.oncomplete=()=>resolve(record);
       tx.onerror=()=>reject(tx.error||new Error('Media-Blob konnte nicht gespeichert werden'));
+      tx.onabort=()=>reject(tx.error||new Error('Media-Blob-Speichern wurde abgebrochen'));
     }));
   }
   function getEncryptedMediaBlob(id){
@@ -17305,6 +17312,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       const req=tx.objectStore(mediaStoreName).get(id);
       req.onsuccess=()=>resolve(req.result||null);
       req.onerror=()=>reject(req.error||new Error('Media-Blob konnte nicht gelesen werden'));
+      tx.onabort=()=>reject(tx.error||new Error('Media-Blob-Lesen wurde abgebrochen'));
     }));
   }
   function deleteEncryptedMediaBlob(id){
@@ -17313,6 +17321,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       tx.objectStore(mediaStoreName).delete(id);
       tx.oncomplete=()=>resolve(true);
       tx.onerror=()=>resolve(false);
+      tx.onabort=()=>resolve(false);
     })).catch(()=>false);
   }
   function isMediaReferencedElsewhere(id,owner){
@@ -17323,7 +17332,8 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     return lists.some(ex=>{
       if(!ex)return false;
       if(owner&&String(ex.localId||ex.id)===String(ownerId))return false;
-      return ensureExerciseMediaList(ex).some(media=>String(media.id)===sid);
+      const stages=Array.isArray(ex.progressionVariants)?ex.progressionVariants:[];
+      return [ex,...stages].some(item=>ensureExerciseMediaList(item).some(media=>String(media.id)===sid));
     });
   }
   function deleteUnsharedMediaBlob(media,owner){
@@ -20222,17 +20232,75 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
         const manifest=ensureMediaShape({...ref,crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key},encryptedSize:encrypted.encryptedSize,compressedSize:blob.bytes.length,storage:'indexeddb-local',status:'local-encrypted'});manifest.syncSha256=blob.item.sha256;media.set(ref.id,manifest);prepared.push({id:ref.id,blob:encrypted.blob,manifest,createdAt:manifest.createdAt});
       }
     }
-    // All documents, references and hashes have passed before any persistent or bank mutation.
-    for(const record of prepared)await putEncryptedMediaBlob(record);
-    return {doc,options:{...opts,media}};
+    // The import may still fail during the bank merge. Keep track only of blobs
+    // that were absent locally before this import, so existing media is never removed.
+    const newMediaIds=prepared.map(item=>item.id);
+    try{for(const record of prepared)await putEncryptedMediaBlob(record);}
+    catch(err){
+      const cleaned=await cleanupUnreferencedImportMedia(newMediaIds);
+      if(!cleaned)throw new Error('Importmedien konnten nicht zurueckgesetzt werden.');
+      throw err;
+    }
+    return {doc,options:{...opts,media},newMediaIds};
+  }
+  async function cleanupUnreferencedImportMedia(ids){
+    let success=true;
+    for(const id of ids){
+      if(!isMediaReferencedElsewhere(id,null)&&!(await deleteEncryptedMediaBlob(id)))success=false;
+    }
+    return success;
   }
   async function mergeNativeExerciseBankSyncTransportDocument(raw,options){
-    const prepared=await prepareNativeLibraryImport(raw,options),previousApplying=nativeExerciseSyncApplying;
-    const previousBank=bank.map(ex=>JSON.parse(JSON.stringify(ex))),previousDeleted=new Set(deletedBankIds),previousStored=localStorage.getItem(customBankKey),previousDeletedStored=localStorage.getItem(deletedBankKey);
+    // Check local storage access before asynchronous media preparation; no
+    // imported media must be written when the storage snapshot is unreadable.
+    localStorage.getItem(customBankKey);
+    localStorage.getItem(deletedBankKey);
+    // A native-backed import cannot use a potentially stale Web fallback
+    // if reading the actual native peer configuration fails.
+    nativeSyncFollowConfigForImportSnapshot();
+    const prepared=await prepareNativeLibraryImport(raw,options);
+    // An edit may have been confirmed while prepare awaited IndexedDB/crypto.
+    // Snapshot the CURRENT state immediately before the synchronous merge.
+    let previousBank,previousDeleted,previousStored,previousDeletedStored,previousFollowConfig;
+    try{
+      previousBank=bank.map(ex=>JSON.parse(JSON.stringify(ex)));
+      previousDeleted=new Set(deletedBankIds);
+      previousStored=localStorage.getItem(customBankKey);
+      previousDeletedStored=localStorage.getItem(deletedBankKey);
+      previousFollowConfig=JSON.parse(JSON.stringify(nativeSyncFollowConfigForImportSnapshot()));
+    }catch(err){
+      const cleaned=await cleanupUnreferencedImportMedia(prepared.newMediaIds);
+      if(!cleaned)throw new Error('Importmedien konnten nicht zurueckgesetzt werden.');
+      throw err;
+    }
+    // Keep the internal merge/rollback synchronous under this guard. Media
+    // cleanup can await IDB; user edits during that wait must receive revisions
+    // and queue their own sync work. No await may cross the finally below.
+    const previousApplying=nativeExerciseSyncApplying;
     nativeExerciseSyncApplying=true;
+    let mergeError=null,storesRestored=true;
     try{return mergeNativeExerciseBankSyncDocument(prepared.doc,prepared.options);}
-    catch(err){bank.splice(0,bank.length,...previousBank);deletedBankIds=previousDeleted;rememberNativeLibraryState();try{if(previousStored===null)localStorage.removeItem(customBankKey);else localStorage.setItem(customBankKey,previousStored);if(previousDeletedStored===null)localStorage.removeItem(deletedBankKey);else localStorage.setItem(deletedBankKey,previousDeletedStored);}catch(restoreError){}render();throw err;}
+    catch(err){
+      mergeError=err;
+      bank.splice(0,bank.length,...previousBank);
+      deletedBankIds=previousDeleted;
+      rememberNativeLibraryState();
+      for(const [key,value] of [[customBankKey,previousStored],[deletedBankKey,previousDeletedStored]]){
+        try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}
+        catch(restoreError){storesRestored=false;}
+      }
+      // Peer discovery is part of the same import transaction. Undo only
+      // changes made by a failed merge; successful discovery remains intact.
+      try{
+        const now=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig());
+        if(JSON.stringify(now)!==JSON.stringify(previousFollowConfig)&&!writeNativeSyncFollowConfig(previousFollowConfig))storesRestored=false;
+      }catch(restoreError){storesRestored=false;}
+    }
     finally{nativeExerciseSyncApplying=previousApplying;}
+    const cleaned=await cleanupUnreferencedImportMedia(prepared.newMediaIds);
+    render();
+    if(!storesRestored||!cleaned)throw new Error('Lokaler Bibliotheks-Rollback unvollstaendig.');
+    throw mergeError;
   }
   async function resolveNativeSyncValue(value){return value&&typeof value.then==='function'?await value:value;}
   function normalizeNativeLocalLibraryRead(raw){
@@ -20263,7 +20331,11 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
   }
   function scheduleNativeExerciseSync(delay){clearTimeout(nativeExerciseSyncTimer);nativeExerciseSyncTimer=setTimeout(()=>{nativeExerciseSyncTimer=null;runNativeExerciseBankSync();},delay);}
   function nativeSyncSafeFailureText(err){const message=String(err&&err.message||'');if(/32 MB|mesh_too_large/.test(message))return 'Abgleich ausstehend: gemeinsame Dateiliste groesser als 32 MB. Partnerauswahl verkleinern.';if(/8 MB|payload_too_large|document_too_large/.test(message))return 'Abgleich ausstehend: eine Bibliotheksdatei ist groesser als 8 MB.';if(/Bild.*gross/.test(message))return 'Abgleich ausstehend: ein Bibliotheksbild ist groesser als 2 MB.';if(/Bild.*fehl|Bildhash|Bildbytes|Bild-ID/.test(message))return 'Abgleich ausstehend: Bibliotheksbild fehlt oder ist beschaedigt. Bild und Dateizugriff pruefen.';return 'Abgleich ausstehend. Automatische Wiederholung; Verbindung und Dateizugriff pruefen.';}
+  // Keep a Cockpit SAF read separate from the ordinary sync run, but serialize
+  // both against the same provider so a pending normal push waits for the read.
+  let nativeCockpitRefreshRunning=null;
   async function runNativeExerciseBankSync(){
+    if(nativeCockpitRefreshRunning)await nativeCockpitRefreshRunning;
     if(nativeExerciseSyncRunning)return nativeExerciseSyncRunning;
     if(!nativeExerciseSyncAvailable()){setNativeExerciseSyncStatus('Automatischer Drive-Abgleich braucht die eingerichtete Android-Verbindung.',nativeExerciseSyncDirty);return false;}
     clearTimeout(nativeExerciseSyncTimer);nativeExerciseSyncTimer=null;
@@ -20284,6 +20356,30 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       finally{nativeExerciseSyncRunning=null;if((nativeExerciseSyncDirty||nativeExerciseSyncPullRequested)&&!nativeExerciseSyncTimer)scheduleNativeExerciseSync(350);}
     })();return nativeExerciseSyncRunning;
   }
+  // Cockpit-only fallback: read the already configured SAF library once, without
+  // calling the ordinary sync scheduler (which can flush pending Drive writes).
+  async function refreshCockpitExerciseBankFromDrive(){
+    const bridge=window.KGGNativeSync;
+    if(!nativeExerciseSyncAvailable()||nativeExerciseSyncRunning||nativeCockpitRefreshRunning||typeof bridge.status!=='function')return false;
+    try{
+      const status=bridge.status()||{};
+      if(status.transport!=='saf-document'||status.driveConfigured!==true)return false;
+    }catch(err){return false;}
+    const task=(async()=>{
+      // Claim this provider read before any asynchronous operation can yield.
+      await Promise.resolve();
+      try{
+        const remote=await resolveNativeSyncValue(bridge.read());
+        // Reuse validated import, followed-peer authorization and local rollback.
+        // An unmatched exercise remains unmatched in the calling decoder.
+        await mergeNativeExerciseBankSyncTransportDocument(normalizeNativeLocalLibraryRead(remote));
+        return true;
+      }catch(err){return false;}
+    })();
+    nativeCockpitRefreshRunning=task;
+    try{return await task;}
+    finally{if(nativeCockpitRefreshRunning===task)nativeCockpitRefreshRunning=null;}
+  }
   async function pullNativeExerciseBankSync(reason){nativeExerciseSyncPullRequested=true;return runNativeExerciseBankSync();}
   async function pushNativeExerciseBankSync(reason){nativeExerciseSyncDirty=true;return runNativeExerciseBankSync();}
   function queueNativeExerciseBankSync(reason){if(nativeExerciseSyncApplying)return;nativeExerciseSyncDirty=true;try{localStorage.setItem(nativeExerciseSyncPendingKey,'1');}catch(err){}scheduleNativeExerciseSync(350);}
@@ -20295,7 +20391,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     window.addEventListener('kgg:native-sync-ready',activate);window.addEventListener('kgg:native-sync-resume',refresh);window.addEventListener('pageshow',refresh);window.addEventListener('online',refresh);document.addEventListener('visibilitychange',refresh);
     const poll=()=>{if(document.visibilityState!=='hidden'&&nativeExerciseSyncAvailable())refresh();nativeExerciseSyncPollTimer=setTimeout(poll,15000);};nativeExerciseSyncPollTimer=setTimeout(poll,15000);
   }
-  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,buildTransport:buildNativeExerciseBankSyncTransportDocument,merge:mergeNativeExerciseBankSyncDocument,mergeTransport:mergeNativeExerciseBankSyncTransportDocument,pull:pullNativeExerciseBankSync,push:pushNativeExerciseBankSync};
+  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,buildTransport:buildNativeExerciseBankSyncTransportDocument,merge:mergeNativeExerciseBankSyncDocument,mergeTransport:mergeNativeExerciseBankSyncTransportDocument,pull:pullNativeExerciseBankSync,refreshForCockpit:refreshCockpitExerciseBankFromDrive,push:pushNativeExerciseBankSync};
   const syncPairDeviceIdKey='kgg_sync_pair_device_id_v1';
   const syncPairFallbackConfigKey='kgg_sync_pair_follow_config_v1';
   const syncPairRoomIdKey='kgg_sync_room_id_v1';
@@ -20463,6 +20559,14 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
     normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
     return normalized;
   }
+  function nativeSyncFollowConfigForImportSnapshot(){
+    if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
+      const config=window.KGGNativeSync.getFollowConfig();
+      if(!config||typeof config!=='object'||Array.isArray(config))throw new Error('Native Partnerkonfiguration konnte nicht gelesen werden.');
+      return normalizeNativeSyncFollowConfig(config);
+    }
+    return normalizeNativeSyncFollowConfig(nativeSyncFollowConfig());
+  }
   function nativeSyncFollowConfig(){
     try{
       if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
@@ -20477,7 +20581,7 @@ n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8
       if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
         return !!window.KGGNativeSync.setFollowConfig(config||{});
       }
-    }catch(err){}
+    }catch(err){return false;}
     try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
   }
   function syncPairRoomId(){
@@ -28595,6 +28699,8 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var result={id:ref.id,name:cleanOptionalText(raw.name||ref.name,80)||ref.name,...germanNameField(raw.nameDe),...(typeof raw.nameEn==="string"?{nameEn:cleanEnglishName(raw.nameEn)}:{}),sets:sets,side:String(raw.side||raw.sides||"BI")==="LR"?"LR":"BI",loadUnit:cleanUnit(raw.loadUnit||raw.weightUnit,ref.loadUnit),metricUnit:cleanUnit(raw.metricUnit||raw.unit,ref.metricUnit),previous:previous,today:today,weightUnit:cleanUnit(raw.weightUnit||raw.loadUnit,ref.loadUnit),unit:cleanOptionalText(raw.unit||raw.metricUnit||ref.metricUnit,12),measure:String(raw.measure||"")==="zeit"?"zeit":"wdh",startLoad:cleanOptionalText(raw.startLoad||"",24),startMetric:cleanOptionalText(raw.startMetric||"",24),videoUrl:cleanVideoUrl(raw.videoUrl),videoLabel:cleanOptionalText(raw.videoLabel||"Video öffnen",120)||"Video öffnen",media:cleanMediaList(raw.media),progressionGroupId:group,progressionVariants:variants,activeProgressionId:activeProgressionId};
     if(Array.isArray(raw.manual))result.manual=manualCells(raw.manual,sets);
     if(Array.isArray(raw.manualFields))result.manualFields=raw.manualFields.filter(function(field){return MANUAL_FIELDS.indexOf(field)>=0;});
+    // Stable bank identity is transport metadata; V1 rows do not serialize it.
+    if(typeof raw.bankId==="string"&&raw.bankId.length>2&&raw.bankId.length<=80)result.bankId=raw.bankId;
     return result;
   }
   function compactExerciseExtras(ex){
@@ -28668,6 +28774,117 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(resume){if(typeof resume.n!=="string"||resume.n.length>12000||!Number.isFinite(resume.u)||resume.u<0)throw error("resume_invalid");result.notes=resume.n?cleanNotes(revealName(resume.n)):"";result.notesManual=!!resume.m;result.editedAt=resume.u;result.removedIds=Array.isArray(resume.r)?resume.r.filter(function(id){return typeof id==="string"&&id.length===2;}).slice(0,MAX_EXERCISES):[];}
     return result;
   }
+  /* B10 optional compact, bank-verified browser codec. V1 is unchanged/default. */
+  var V2_FIELDS=["name","nameDe","nameEn","loadUnit","metricUnit","unit","weightUnit","measure","startLoad","startMetric","videoUrl","videoLabel","media","progressionGroupId","progressionVariants","activeProgressionId"];
+  function v2Identity(value){return String(value==null?"":value).normalize("NFKC").trim().toLocaleLowerCase("de-DE");}
+  function v2Signature(bank){return fnv(String(bank.id)+"\u0000"+v2Identity(bank.name));}
+  function v2BankIndex(){
+    var shared=window.KGGSharedBank;
+    if(!shared||typeof shared.exportPayload!=="function")throw error("bank_provider_missing");
+    var payload=shared.exportPayload(),items=payload&&payload.exercises;
+    if(!Array.isArray(items)||items.length>5000)throw error("bank_provider_invalid");
+    var ids=Object.create(null),names=Object.create(null),shortIds=Object.create(null);
+    items.forEach(function(item){
+      if(!item||typeof item!=="object")throw error("invalid_bank_entry");
+      var id=String(item.id||"").trim(),name=String(item.name||"").trim();
+      if(!id||id.length>80||!name||name.length>80)throw error("invalid_bank_entry");
+      if(Object.prototype.hasOwnProperty.call(ids,id))throw error("duplicate_bank_id");
+      var bank=bankEntryWithCockpitId(item,true),shortId=String(bank.cockpitId||"");
+      if(!shortId||shortId.length!==2)throw error("cockpit_id_mismatch");
+      if(Object.prototype.hasOwnProperty.call(shortIds,shortId))throw error("duplicate_cockpit_id");
+      ids[id]=bank;shortIds[shortId]=id;
+      var k=v2Identity(name);(names[k]||(names[k]=[])).push(bank);
+    });
+    return {ids:ids,names:names};
+  }
+  function v2BankForExercise(ex,index){
+    var explicit=String(ex.bankId||ex.sourceId||"").trim(),row=explicit?index.ids[explicit]:null;
+    if(explicit&&!row)throw error("bank_id_not_found");
+    if(!row){var candidates=index.names[v2Identity(ex.name)]||[];if(candidates.length!==1)throw error("bank_ref_missing_or_ambiguous");row=candidates[0];}
+    if(v2Identity(row.name)!==v2Identity(ex.name))throw error("bank_identity_mismatch");
+    if(String(row.cockpitId)!==String(ex.id))throw error("cockpit_id_mismatch");
+    return row;
+  }
+  function v2ManualBits(manual,sets){
+    var bits=0;for(var i=0;i<sets;i++)for(var j=0;j<2;j++)if(manual&&manual[i]&&manual[i][j])bits|=1<<(2*i+j);
+    return bits;
+  }
+  function v2ManualFromBits(bits,sets){
+    if(!Number.isInteger(bits)||bits<0||bits>=Math.pow(2,sets*2))throw error("manual_bits_invalid");
+    return Array.from({length:sets},function(_,i){return [!!(bits&(1<<(2*i))),!!(bits&(1<<(2*i+1)))];});
+  }
+  function v2Diff(ex,bank){
+    var diff={};V2_FIELDS.forEach(function(field){if(ex[field]!==undefined&&JSON.stringify(ex[field])!==JSON.stringify(bank[field]))diff[field]=ex[field];});
+    return diff;
+  }
+  function encodeV2(input){
+    var source=input||{},items=source.exercises;
+    if(!Array.isArray(items)||items.length<1||items.length>MAX_EXERCISES)throw error("exercise_count_invalid");
+    var index=v2BankIndex(),used=Object.create(null);
+    var rows=items.map(function(item){
+      var ex=exerciseInput(item),bank=v2BankForExercise(Object.assign({},item,{id:ex.id,name:ex.name}),index),id=String(bank.id);
+      if(Object.prototype.hasOwnProperty.call(used,id))throw error("duplicate_exercise");used[id]=true;
+      if(!Number.isInteger(ex.sets)||ex.sets<1||ex.sets>8)throw error("sets_invalid");
+      return [id,v2Signature(bank),String(bank.cockpitId),ex.sets,ex.side==="LR"?1:0,
+        validateValueList(ex.previous,ex.sets),validateValueList(ex.today,ex.sets),
+        v2ManualBits(ex.manual,ex.sets),ex.manualFields||[],v2Diff(ex,bank)];
+    });
+    var removed=Array.isArray(source.removedIds)?source.removedIds.filter(function(id){return typeof id==="string"&&id.length===2;}).slice(0,MAX_EXERCISES):[];
+    var body={v:2,p:cleanPlanId(source.planId||source.id||""),d:cleanDate(source.date),
+      c:[cleanNotes(source.notes),!!source.notesManual,Number(source.editedAt)||0,removed],e:rows};
+    var inner=utf8(JSON.stringify({b:body,h:fnv(JSON.stringify(body))}));
+    if(inner.length>MAX_PAYLOAD_BYTES)throw error("link_too_large");
+    if(!window.fflate||typeof window.fflate.deflateSync!=="function")throw error("compression_unavailable");
+    var code=PREFIX+"z"+b64Encode(window.fflate.deflateSync(inner,{level:6}));
+    if(code.length>MAX_CODE_CHARS)throw error("link_too_large");
+    return code;
+  }
+  function decodeV2(code){
+    var text=String(code||"").trim();if(/^https?:\/\//i.test(text))text=extractCode(text)||"";
+    if(text.length>MAX_CODE_CHARS||!/^KGGTC1:z[A-Za-z0-9_-]+$/.test(text))throw error("invalid_format");
+    if(!window.fflate||typeof window.fflate.inflateSync!=="function")throw error("invalid_payload");
+    var parsed;try{
+      var bytes=window.fflate.inflateSync(b64Decode(text.slice((PREFIX+"z").length)),{out:new Uint8Array(MAX_PAYLOAD_BYTES+1)});
+      if(bytes.length>MAX_PAYLOAD_BYTES)throw error("invalid_payload");
+      parsed=JSON.parse(fromUtf8(bytes));
+    }catch(e){if(e&&e.code==="invalid_base64")throw e;throw error("invalid_payload");}
+    var body=parsed&&parsed.b;
+    if(!body||body.v!==2||typeof parsed.h!=="string"||Object.keys(parsed).some(function(k){return k!=="b"&&k!=="h";})||
+       Object.keys(body).some(function(k){return ["v","p","d","c","e"].indexOf(k)<0;})||
+       !Array.isArray(body.c)||body.c.length!==4||!Array.isArray(body.e)||body.e.length<1||body.e.length>MAX_EXERCISES)throw error("invalid_payload");
+    if(fnv(JSON.stringify(body))!==parsed.h)throw error("integrity_failed");
+    var index=v2BankIndex(),used=Object.create(null);
+    var exercises=body.e.map(function(row){
+      if(!Array.isArray(row)||row.length!==10)throw error("invalid_row");
+      var id=row[0],sig=row[1],shortId=row[2],sets=row[3],side=row[4],previous=row[5],today=row[6],bits=row[7],fields=row[8],overrides=row[9];
+      if(typeof id!=="string"||!Object.prototype.hasOwnProperty.call(index.ids,id))throw error("bank_id_not_found");
+      var bank=index.ids[id];
+      if(v2Signature(bank)!==sig)throw error("bank_identity_mismatch");
+      if(String(bank.cockpitId)!==String(shortId))throw error("cockpit_id_mismatch");
+      if(Object.prototype.hasOwnProperty.call(used,id))throw error("duplicate_exercise");used[id]=true;
+      if(!Number.isInteger(sets)||sets<1||sets>8||(side!==0&&side!==1))throw error("set_structure_invalid");
+      if(!Array.isArray(fields)||fields.some(function(f){return MANUAL_FIELDS.indexOf(f)<0;}))throw error("manual_fields_invalid");
+      if(!overrides||typeof overrides!=="object"||Array.isArray(overrides))throw error("invalid_overrides");
+      var cleanOverrides={};Object.keys(overrides).forEach(function(k){if(V2_FIELDS.indexOf(k)<0)throw error("unknown_override");cleanOverrides[k]=overrides[k];});
+      var exercise=exerciseInput(Object.assign({},bank,cleanOverrides,{id:shortId,sets:sets,side:side?"LR":"BI",
+        previous:validateValueList(previous,sets),today:validateValueList(today,sets),manual:v2ManualFromBits(bits,sets),manualFields:fields}));
+      exercise.bankId=id;return exercise;
+    });
+    if(typeof body.p!=="string"||typeof body.d!=="string"||typeof body.c[0]!=="string"||typeof body.c[1]!=="boolean"||
+       !Number.isFinite(body.c[2])||body.c[2]<0||!Array.isArray(body.c[3]))throw error("invalid_payload");
+    return {version:2,planId:cleanPlanId(body.p),name:"Plan ohne Patientendaten",date:cleanDate(body.d),
+      notes:cleanNotes(body.c[0]),notesManual:body.c[1],editedAt:body.c[2],
+      removedIds:body.c[3].filter(function(id){return typeof id==="string"&&id.length===2;}).slice(0,MAX_EXERCISES),exercises:exercises};
+  }
+  function isV2(code){
+    try{
+      var text=String(code||"").trim();if(/^https?:\/\//i.test(text))text=extractCode(text)||"";
+      if(text.length>MAX_CODE_CHARS||!/^KGGTC1:z[A-Za-z0-9_-]+$/.test(text)||!window.fflate||typeof window.fflate.inflateSync!=="function")return false;
+      var bytes=window.fflate.inflateSync(b64Decode(text.slice((PREFIX+"z").length)),{out:new Uint8Array(MAX_PAYLOAD_BYTES+1)});
+      if(bytes.length>MAX_PAYLOAD_BYTES)return false;
+      var parsed=JSON.parse(fromUtf8(bytes));return !!(parsed&&parsed.b&&parsed.b.v===2&&fnv(JSON.stringify(parsed.b))===parsed.h);
+    }catch(e){return false;}
+  }
   function extractCode(value){
     var text=String(value||"").trim();if(text.slice(0,PREFIX.length).toUpperCase()===PREFIX)return text;
     try{var url=new URL(text,window.location.href),candidate=url.searchParams.get("cockpit")||url.searchParams.get("kggtc");if(candidate){candidate=decodeURIComponent(candidate);if(candidate.slice(0,PREFIX.length).toUpperCase()===PREFIX)return candidate;}var hash=String(url.hash||"").replace(/^#/,"");if(hash.slice(0,PREFIX.length).toUpperCase()===PREFIX)return hash;}catch(e){}
@@ -28677,7 +28894,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var code,url,explicitBase=base!=null&&String(base).trim()!=="",baseValue=explicitBase?String(base):PUBLIC_BASE;
     if(typeof payload==="string"){
       code=extractCode(payload)||String(payload||"");
-      decodeCode(code);
+      if(isV2(code))decodeV2(code);else decodeCode(code);
     }else code=encodePayload(payload);
     try{url=new URL(baseValue||PUBLIC_BASE);}catch(e){if(explicitBase)throw error("link_base_invalid");url=new URL(PUBLIC_BASE);}
     if(url.protocol!=="http:"&&url.protocol!=="https:"){if(explicitBase)throw error("link_base_invalid");url=new URL(PUBLIC_BASE);}
@@ -28690,12 +28907,17 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var source=input||{},items=Array.isArray(source.exercises)?source.exercises.map(exerciseInput):[],canonical={planId:cleanPlanId(source.planId||source.id||""),name:cleanName(source.name||source.patientName||""),date:cleanDate(source.date),exercises:items.map(function(ex){return {id:ex.id,name:ex.name,sets:ex.sets,side:ex.side,loadUnit:ex.loadUnit,metricUnit:ex.metricUnit,previous:ex.previous,today:ex.today,startLoad:ex.startLoad,startMetric:ex.startMetric,measure:ex.measure,progressionGroupId:ex.progressionGroupId,progressionVariants:ex.progressionVariants.map(function(item){var identity=Object.assign({},item);delete identity.nameEn;delete identity.nameDe;return identity;}),activeProgressionId:ex.activeProgressionId};})};
     return fnv(JSON.stringify(canonical));
   }
-  function bankEntryWithCockpitId(item){
+  function bankEntryWithCockpitId(item,allowLocalHydration){
     if(!item||!item.name)return item;
     var explicit=String(item.cockpitId||item.cockpitExerciseId||"").trim(),ref=explicit&&byId[explicit];
     if(explicit){
       if(explicit.length!==2||explicit.split("").some(function(ch){return BASE62.indexOf(ch)<0;}))throw error("exercise_id_invalid");
-      if(!ref)throw error("unknown_exercise_id");
+      if(!ref){
+        // A local bank read can hydrate a new ID; an inbound merge may not.
+        if(!allowLocalHydration)throw error("unknown_exercise_id");
+        registerCanonical(item.name,explicit,item);
+        ref=byId[explicit];
+      }
       if(key(ref.name)!==key(item.name))throw error("exercise_id_collision");
     }else ref=registryLookup(item.name)||ensureDerived(item.name,item);
     return Object.assign({},item,{cockpitId:ref.id});
@@ -28703,20 +28925,54 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function hydrateRegistryFromBank(){
     var shared=window.KGGSharedBank;
     if(!shared||typeof shared.exportPayload!=="function")return;
-    try{var payload=shared.exportPayload()||{};if(Array.isArray(payload.exercises))payload.exercises.forEach(function(item){bankEntryWithCockpitId(item);});}catch(e){if(e&&e.code==="exercise_id_collision")window.KGGTherapyCockpitRegistryWarning=e.code;}
+    try{var payload=shared.exportPayload()||{};if(Array.isArray(payload.exercises))payload.exercises.forEach(function(item){bankEntryWithCockpitId(item,true);});}catch(e){if(e&&e.code==="exercise_id_collision")window.KGGTherapyCockpitRegistryWarning=e.code;}
+  }
+  // Prepare incoming IDs without changing the registry. The underlying
+  // Shared/Native merge must succeed before derived IDs become visible.
+  function prepareInboundBankEntries(rows){
+    var pending=Object.create(null);
+    var mapped=rows.map(function(item){
+      if(!item||!item.name)return item;
+      var explicit=String(item.cockpitId||item.cockpitExerciseId||"").trim();
+      if(explicit){
+        if(pending[explicit]){
+          if(key(pending[explicit].name)!==key(item.name))throw error("exercise_id_collision");
+          return Object.assign({},item,{cockpitId:explicit});
+        }
+        return bankEntryWithCockpitId(item,false);
+      }
+      var ref=registryLookup(item.name);
+      if(ref)return Object.assign({},item,{cockpitId:ref.id});
+      var name=String(item.name||"").trim();
+      if(!name||name.length>80)throw error("exercise_name_invalid");
+      var id=stableIdForName(name),occupied=byId[id],planned=pending[id];
+      if(occupied&&key(occupied.name)!==key(name))throw error("exercise_id_collision");
+      if(planned&&key(planned.name)!==key(name))throw error("exercise_id_collision");
+      if(!planned)pending[id]={name:name,id:id,metadata:item};
+      return Object.assign({},item,{cockpitId:id});
+    });
+    return {mapped:mapped,pending:Object.keys(pending).map(function(id){return pending[id];})};
+  }
+  function finishInboundBankMerge(result,prepared){
+    function commit(){
+      prepared.pending.forEach(function(item){registerCanonical(item.name,item.id,item.metadata);});
+      return result;
+    }
+    if(result&&typeof result.then==="function")return result.then(function(value){result=value;return commit();});
+    return commit();
   }
   function installBankRegistryHooks(){
     hydrateRegistryFromBank();
     var shared=window.KGGSharedBank;
     if(shared&&!shared.__kggTherapyCockpitWrapped){
-      if(typeof shared.exportPayload==="function"){var exportBank=shared.exportPayload;shared.exportPayload=function(){var payload=exportBank.apply(this,arguments)||{};if(Array.isArray(payload.exercises))payload.exercises=payload.exercises.map(bankEntryWithCockpitId);return payload;};}
-      if(typeof shared.merge==="function"){var mergeBank=shared.merge;shared.merge=function(raw){var value=raw;if(raw&&typeof raw==="object"&&Array.isArray(raw.exercises))value=Object.assign({},raw,{exercises:raw.exercises.map(bankEntryWithCockpitId)});return mergeBank.call(this,value);};}
+      if(typeof shared.exportPayload==="function"){var exportBank=shared.exportPayload;shared.exportPayload=function(){var payload=exportBank.apply(this,arguments)||{};if(Array.isArray(payload.exercises))payload.exercises=payload.exercises.map(function(item){return bankEntryWithCockpitId(item,true);});return payload;};}
+      if(typeof shared.merge==="function"){var mergeBank=shared.merge;shared.merge=function(raw){var value=raw,prepared=null;if(raw&&typeof raw==="object"&&Array.isArray(raw.exercises)){prepared=prepareInboundBankEntries(raw.exercises);value=Object.assign({},raw,{exercises:prepared.mapped});}var result=mergeBank.call(this,value);return prepared?finishInboundBankMerge(result,prepared):result;};}
       shared.__kggTherapyCockpitWrapped=true;
     }
     var nativeSync=window.KGGNativeExerciseSync;
     if(nativeSync&&!nativeSync.__kggTherapyCockpitWrapped){
-      if(typeof nativeSync.build==="function"){var buildSync=nativeSync.build;nativeSync.build=function(){var doc=buildSync.apply(this,arguments)||{};if(Array.isArray(doc.exerciseBank))doc=Object.assign({},doc,{exerciseBank:doc.exerciseBank.map(bankEntryWithCockpitId)});return doc;};}
-      if(typeof nativeSync.merge==="function"){var mergeSync=nativeSync.merge;nativeSync.merge=function(raw,options){var value=raw;if(raw&&typeof raw==="object"&&Array.isArray(raw.exerciseBank))value=Object.assign({},raw,{exerciseBank:raw.exerciseBank.map(bankEntryWithCockpitId)});return mergeSync.call(this,value,options);};}
+      if(typeof nativeSync.build==="function"){var buildSync=nativeSync.build;nativeSync.build=function(){var doc=buildSync.apply(this,arguments)||{};if(Array.isArray(doc.exerciseBank))doc=Object.assign({},doc,{exerciseBank:doc.exerciseBank.map(function(item){return bankEntryWithCockpitId(item,true);})});return doc;};}
+      if(typeof nativeSync.merge==="function"){var mergeSync=nativeSync.merge;nativeSync.merge=function(raw,options){var value=raw,prepared=null;if(raw&&typeof raw==="object"&&Array.isArray(raw.exerciseBank)){prepared=prepareInboundBankEntries(raw.exerciseBank);value=raw; /* Preserve strict Native exerciseBank wire schema; no cockpitId. */}var result=mergeSync.call(this,value,options);return prepared?finishInboundBankMerge(result,prepared):result;};}
       nativeSync.__kggTherapyCockpitWrapped=true;
     }
   }
@@ -28855,9 +29111,21 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   function showOutput(results){
     var modal=document.getElementById("kggTherapyCockpitOutputModal"),output=document.getElementById("kggTherapyCockpitOutput");if(!modal||!output)return;if(!slotCount())setCockpitOpen(true);var allUpdated=results.length>0&&results.every(function(result){return result.hook==="updated";}),title=modal.querySelector("h2"),hint=modal.querySelector("p");if(title)title.textContent=allUpdated?"Dokumentation bereit":"Dokumentationstext bereit";if(hint)hint.textContent=allUpdated?"Die verknüpften Planquellen wurden mit der vorhandenen Aktion aktualisiert.":"Link und Text sind bereit. Mindestens eine Planquelle wurde nicht übernommen; bitte den Status im Text prüfen.";var labels={updated:"Planquelle aktualisiert",plan_mismatch:"Planquelle nicht übernommen: Plan stimmt nicht überein",exercise_mismatch:"Planquelle nicht übernommen: keine Übung zugeordnet",hook_unavailable:"Planquelle nicht übernommen: Aktualisierung nicht verfügbar",hook_failed:"Planquelle nicht übernommen: Aktualisierung fehlgeschlagen","nicht übernommen":"Planquelle nicht übernommen"};var failures=results.filter(function(result){return result.hook!=="updated";}).map(function(result){return labels[result.hook]||"Planquelle nicht übernommen";});if(hint&&failures.length)hint.textContent="Achtung: "+failures.join(" · ")+". Cockpit-Daten und Link bleiben erhalten.";output.value=results.map(function(result){return result.text;}).join("\n\n--------------------\n\n");modal.hidden=false;if(typeof window.KGGCockpitSetOutputLink==="function")window.KGGCockpitSetOutputLink(results.length===1?results[0].link:"");
   }
+  function makeFinishLink(payload){
+    try{return {link:makeLink(encodeV2(payload)),compact:true};}
+    catch(err){
+      // Never guess a cross-device identity. Keep the historical V1 escape
+      // route only when a verified V2 bank reference is unavailable.
+      if(!err||["bank_provider_missing","bank_provider_invalid","bank_ref_missing_or_ambiguous","bank_id_not_found","bank_identity_mismatch","cockpit_id_mismatch","duplicate_bank_id","duplicate_cockpit_id","exercise_id_collision"].indexOf(err.code)<0)throw err;
+      return {link:makeLink(payload),compact:false};
+    }
+  }
   function finishSlot(index,skipRender){
-    var slot=slots[index];if(!slot)return null;var link,hook="nicht übernommen";try{link=makeLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
-    var result={slot:index,link:link,text:documentationFor(slot,link),hook:hook};rememberSlot(normalizeSlot(payloadFromSlot(slot,true)));slot.lastCompletion=result;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;if(!slotCount()){currentView="normal";setCockpitOpen(false);}if(!skipRender)render();return result;
+    var slot=slots[index];if(!slot)return null;var output,hook="nicht übernommen";try{output=makeFinishLink(payloadFromSlot(slot,true));hook=dispatchPlanHook(slot);}catch(e){notice="Abschluss fehlgeschlagen ("+(e.code||"invalid_payload")+").";if(!skipRender)render();return null;}
+    var text=documentationFor(slot,output.link);
+    // Keep the portable link as the FINAL line of the documentation contract.
+    if(!output.compact)text=text.replace("\n\nNeuer Cockpit-Link:\n","\n\nHinweis: Standard-Link V1; eindeutige Bankreferenz für den kompakten geräteübergreifenden Link fehlt.\n\nNeuer Cockpit-Link:\n");
+    var result={slot:index,link:output.link,compact:output.compact,text:text,hook:hook};rememberSlot(normalizeSlot(payloadFromSlot(slot,true)));slot.lastCompletion=result;slots[index]=null;if(activeInput&&activeInput.slot===index)activeInput=null;if(!slotCount()){currentView="normal";setCockpitOpen(false);}if(!skipRender)render();return result;
   }
   function setCockpitOpen(open){if(document.body&&document.body.classList)document.body.classList.toggle("kggTherapyCockpitOpen",!!open);}
   function finishAll(){var results=[];for(var i=0;i<MAX_SLOTS;i++){var result=finishSlot(i,true);if(result)results.push(result);}currentView="normal";setCockpitOpen(false);render();if(results.length)showOutput(results);}
@@ -28880,11 +29148,38 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     var normalized=normalizeSlot(candidate);normalized.sourceContentKey=current.sourceContentKey||current.contentKey;normalized.openExercise=Number.isInteger(source.openExercise)&&source.openExercise>=0&&source.openExercise<exercises.length?source.openExercise:null;normalized.contentKey=contentKey(candidate);slots[index]=normalized;rememberSlot(normalized);notice="";render();return slotSnapshot(normalized);
   }
   function syncSlotToPlan(index){if(index<0||index>=MAX_SLOTS||!slots[index])return "slot_not_found";return dispatchPlanHook(slots[index]);}
-  function importCode(value){
-    var code=extractCode(value)||String(value||"").trim(),decoded=decodeCode(code),index=matchingSlot(decoded.planId),incoming=normalizeSlot(decoded),saved=index>=0?slots[index]:readRemembered(decoded.planId);
+  function importDecodedPlan(decoded,compact){
+    // Validate and merge an entire candidate before changing slots or storage.
+    var index=matchingSlot(decoded.planId),incoming=normalizeSlot(decoded),saved=index>=0?slots[index]:readRemembered(decoded.planId);
     if(saved){var newer=saved.editedAt>=incoming.editedAt?saved:incoming,older=newer===saved?incoming:saved;incoming=mergePatientSlot(normalizeSlot(payloadFromSlot(newer,false)),older,true);}
-    if(incoming.exercises.length)encodePayload(payloadFromSlot(incoming,false));
+    if(incoming.exercises.length){
+      var candidate=payloadFromSlot(incoming,false);
+      if(compact)encodeV2(candidate);else encodePayload(candidate);
+    }
     if(index<0)index=firstFreeSlot();if(index<0)throw error("slots_full");slots[index]=incoming;rememberSlot(incoming);notice="";currentView="cockpit";setCockpitOpen(true);render();return {slot:index,state:getState()};
+  }
+  function importCode(value){
+    var code=extractCode(value)||String(value||"").trim();
+    return importDecodedPlan(decodeCode(code),false);
+  }
+  var v2ImportRunning=false;
+  async function importCodeAsync(value){
+    var code=extractCode(value)||String(value||"").trim();
+    if(!isV2(code))return importCode(code);
+    if(v2ImportRunning)throw error("import_busy");
+    v2ImportRunning=true;
+    try{
+      var decoded;
+      try{decoded=decodeV2(code);}
+      catch(err){
+        if(!err||["bank_id_not_found","bank_identity_mismatch","cockpit_id_mismatch"].indexOf(err.code)<0)throw err;
+        var nativeSync=window.KGGNativeExerciseSync,refresh=nativeSync&&nativeSync.refreshForCockpit;
+        if(typeof refresh!=="function"||await refresh.call(nativeSync,"cockpit_missing_exercise")!==true)throw error("bank_refresh_unavailable");
+        // A refreshed bank is read locally. Never accept a guessed remote match.
+        decoded=decodeV2(code);
+      }
+      return importDecodedPlan(decoded,true);
+    }finally{v2ImportRunning=false;}
   }
   function openView(){currentView="cockpit";setCockpitOpen(true);render();}
   function closeView(){currentView="normal";activeInput=null;setCockpitOpen(false);render();}
@@ -28906,7 +29201,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     root.addEventListener("input",function(event){var input=event.target;if(!input||!input.hasAttribute("data-tc-notes"))return;var slot=slots[Number(input.getAttribute("data-tc-notes"))];if(slot){slot.notes=cleanNotes(input.value);slot.notesManual=true;markEdited(slot);}});
     document.addEventListener("pointerdown",handleOutsidePointer,true);
     render();
-    var incoming=extractCode(window.location.href);if(incoming){try{importCode(incoming);clearIncomingParam();}catch(e){notice="Cockpit-Link nicht geladen ("+(e.code||"invalid_format")+").";render();notify("Cockpit-Link konnte nicht geladen werden.");}}
+    var incoming=extractCode(window.location.href);if(incoming){Promise.resolve().then(function(){return importCodeAsync(incoming);}).then(function(){clearIncomingParam();}).catch(function(e){notice="Cockpit-Link nicht geladen ("+(e.code||"invalid_format")+").";render();notify("Cockpit-Link konnte nicht geladen werden.");});}
   }
   function handleOutsidePointer(event){
     if(!activeInput||!document.body.classList.contains("kggTherapyCockpitOpen"))return;
@@ -28921,7 +29216,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
     if(action==="use-previous"){var previousExercise=slots[slot]&&slots[slot].exercises[exercise];if(previousExercise&&previousExercise.previous[set]){previousExercise.today[set]=previousExercise.previous[set].slice();markCell(slots[slot],previousExercise,set,0);markCell(slots[slot],previousExercise,set,1);activeInput=null;render();}return;}
     if(action==="import-open"){document.getElementById("kggTherapyCockpitImportModal").hidden=false;setTimeout(function(){var input=document.getElementById("kggTherapyCockpitImportInput");if(input)input.focus();},0);return;}
     if(action==="import-cancel"){document.getElementById("kggTherapyCockpitImportModal").hidden=true;return;}
-    if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";try{importCode(value);document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}catch(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));}return;}
+    if(action==="import-submit"){var input=document.getElementById("kggTherapyCockpitImportInput"),value=input&&input.value||"";Promise.resolve().then(function(){return importCodeAsync(value);}).then(function(){document.getElementById("kggTherapyCockpitImportModal").hidden=true;if(input)input.value="";}).catch(function(e){notify("Link nicht geladen: "+(e.code||"invalid_format"));});return;}
     if(action==="output-close"){document.getElementById("kggTherapyCockpitOutputModal").hidden=true;if(!slotCount())closeView();return;}
     if(action==="output-copy"){var output=document.getElementById("kggTherapyCockpitOutput");if(output&&navigator.clipboard)navigator.clipboard.writeText(output.value).then(function(){notify("Dokumentation kopiert.");}).catch(function(){notify("Kopieren im Browser nicht verfügbar.");});return;}
     if(action==="finish-all"){finishAll();return;}
@@ -28934,7 +29229,7 @@ window.KGG_PDF_PLAN_THUMBNAILS_V052={
   }
   function getState(){return {version:1,view:currentView,slotCount:slotCount(),slots:slots.map(function(slot,index){return slot?{slot:index,name:slot.name,planId:slot.planId,contentKey:slot.contentKey,exerciseCount:slot.exercises.length,progress:slotProgress(slot),openExercise:slot.openExercise}:null;})};}
   installBankRegistryHooks();
-  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importPatientPlan:importPatientPlan,getResumePlan:function(planId){return slotSnapshot(readRemembered(String(planId||"")));},importCode:importCode,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
+  var api={patchId:PATCH_ID,prefix:PREFIX,registry:{entries:function(){return Object.keys(byId).map(function(id){var item=byId[id];return {id:item.id,key:item.key,name:item.name,canonical:!!item.canonical};});},lookup:function(value){var item=registryLookup(value);return item?{id:item.id,name:item.name}:null;},register:registerCanonical,derive:ensureDerived},encode:encodePayload,decode:decodeCode,encodeV2:encodeV2,decodeV2:decodeV2,isV2:isV2,makeLink:makeLink,fromPlan:buildFromPlan,contentKey:contentKey,importPatientPlan:importPatientPlan,getResumePlan:function(planId){return slotSnapshot(readRemembered(String(planId||"")));},importCode:importCode,importCodeAsync:importCodeAsync,getState:getState,getSlot:function(index){return slotSnapshot(slots[Number(index)]);},updateSlot:updateSlot,syncSlot:syncSlotToPlan,maxSlots:MAX_SLOTS,open:openView,close:closeView,finish:function(index){return finishSlot(Number(index));},remove:removeSlot};
   window.KGGTherapyCockpit=api;window.KGG_PATCHES=window.KGG_PATCHES||{};window.KGG_PATCHES[PATCH_ID]={installed:true,version:1};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installDom,{once:true});else installDom();
 })();
@@ -31950,6 +32245,29 @@ button.kgg-tc-prev:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;}
 })();
 </script>
 <!-- KGG PATCH END kgg-v139-admin-qr-full-frame -->
+<!-- KGG PATCH START kgg-v138-cockpit-drive-read-fallback -->
+<!-- Cockpit Drive Read Fallback -->
+<script id="kgg-v138-cockpit-drive-read-fallback">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v138-cockpit-drive-read-fallback";
+  // Den kleinstmoeglichen Patch hier implementieren. Bestehende Hooks beibehalten.
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v138-cockpit-drive-read-fallback -->
+<!-- KGG PATCH START kgg-v140-cockpit-v2-verified-preview -->
+<!-- Cockpit V2 compatibility marker; implementation remains in existing v082/runtime modules. -->
+<script id="kgg-v140-cockpit-v2-verified-preview">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v140-cockpit-v2-verified-preview";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v140-cockpit-v2-verified-preview -->
 
 </body>
 </html>

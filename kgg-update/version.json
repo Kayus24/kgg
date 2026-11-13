@@ -1,7 +1,7 @@
 {
-  "versionCode": 139,
-  "versionName": "1.0.139-admin-qr-full-frame",
-  "indexUrl": "index.html?v=139",
-  "sha256": "b3e138137eb8c7bdafe8654f250e526884d13cbd7f58525f5789635556c95aae",
-  "notes": "v139: Beim Admin-QR-Scan ein natives 4:3-Rückkamerabild ohne zusätzlichen WebView-Zuschnitt bevorzugen. Den Teststations-Startknopf kompakt anzeigen und Kameratasten freihalten."
+  "versionCode": 140,
+  "versionName": "1.0.140-cockpit-v2-verified-preview",
+  "indexUrl": "index.html?v=140",
+  "sha256": "0f519ec72dccb39d9f5ae2253f95d374073adc6528a014d0fac2c93d8eb395f8",
+  "notes": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten."
 }

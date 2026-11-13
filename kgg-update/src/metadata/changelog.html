@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 139,
+  "latestVersionCode": 140,
   "entries": [
+    {
+      "versionCode": 140,
+      "versionName": "1.0.140-cockpit-v2-verified-preview",
+      "patchId": "kgg-v140-cockpit-v2-verified-preview",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Cockpit-V2-Links und Drive-Nachladung – HTML-Testpreview",
+      "reason": "Cockpit-V2-Links, sichere Bank-Identität und synchronisationsgeschützte Drive-Nachladung; v139-QR-Kamerakorrekturen bleiben erhalten.",
+      "whatChanged": [
+        "Kompakte Cockpit-V2-Links mit stabiler Übungsbank-ID und zusätzlicher Namens-/Cockpit-ID-Prüfung",
+        "Fehlerfester manueller Import, einmaliger freigegebener SAF-Nachladeversuch und Rückwärtskompatibilität zu V1",
+        "Drive-/Peer-Import-Rollbacks und lokale Bearbeitungen vor Datenverlust schützen",
+        "Die bisherigen v139-QR-Kameraänderungen bleiben im HTML-Build enthalten"
+      ],
+      "touchedAreas": [
+        "QR/Patienten-App",
+        "Plan-State",
+        "Medien/Upload"
+      ],
+      "notTouched": [
+        "PDF",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      },
+      "approvalNote": "HTML-only Testpreview; keine neue APK, kein Main- oder Beta-Release."
+    },
     {
       "versionCode": 139,
       "versionName": "1.0.139-admin-qr-full-frame",
@@ -454,40 +485,9 @@
         "certification": "pending"
       },
       "approvalNote": "Max 23.10.2026: belegte Verzoegerung ohne angeschlossenes Tablet beheben und testen; kein Merge/Release. Eigener Emulator ersetzt keine physische Tablet-/Drive-SAF-Abnahme."
-    },
-    {
-      "versionCode": 125,
-      "versionName": "1.0.125-library-image-names",
-      "patchId": "kgg-v125-library-image-names",
-      "status": "scaffolded",
-      "type": "module-patch",
-      "title": "Uebungskatalog, Bilder und Namenshilfe gemeinsam",
-      "reason": "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten.",
-      "whatChanged": [
-        "Vorbereitete Bibliotheks-/Bildsynchronisation und fehlende DE/EN-Bezeichnungen gemeinsam integrieren; kompatible Metadaten erhalten."
-      ],
-      "touchedAreas": [
-        "Medien/Upload",
-        "QR/Patienten-App",
-        "Android/APK"
-      ],
-      "notTouched": [
-        "PDF",
-        "Scan/OCR",
-        "Parser",
-        "Plan-State",
-        "API-Key-Logik",
-        "GitHub Manifest",
-        "Handy-Layout"
-      ],
-      "testStatus": {
-        "local": "pending",
-        "certification": "pending"
-      },
-      "approvalNote": "Max Handoff COMPLETENESS_PUSH_20261022 generation1 revision1: existing drafts plus narrowly authorized R2 metadata and isolated native sync; no live release."
     }
   ],
-  "latestVersionName": "1.0.139-admin-qr-full-frame",
+  "latestVersionName": "1.0.140-cockpit-v2-verified-preview",
   "archiveSnapshots": [
     {
       "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v062.json",
@@ -696,6 +696,14 @@
       "entriesSha256": "0fa3755f8f6f4ae295ff02f821470953c9d276a08f6346e8e3882cace2451844",
       "retainedEntryCountAtCompaction": 15,
       "createdByPatchId": "kgg-v139-admin-qr-full-frame"
+    },
+    {
+      "repositoryPath": "docs/changelog-archive/kgg-therapist-changelog-through-v140.json",
+      "snapshotVersionCode": 140,
+      "entryCount": 81,
+      "entriesSha256": "83e807f94f6d91b7065a0fa0c43e9c4a8a1f9672992c67dc81152967c0e4fd5f",
+      "retainedEntryCountAtCompaction": 15,
+      "createdByPatchId": "kgg-v140-cockpit-v2-verified-preview"
     }
   ]
 }
