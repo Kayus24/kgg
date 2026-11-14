@@ -166,6 +166,94 @@ expectCode(
   "exercise_id_collision",
 );
 
+// A wrapper passed directly to Array.map receives (item, index, array).
+// Unknown explicit IDs at index 1 and index 2 must remain forbidden on
+// incoming shared AND native merges, without poisoning the local registry.
+for (const source of ["shared", "native"]) {
+  for (const position of [1, 2]) {
+    let underlyingCalls = 0;
+    const localWindow = {
+      location: { href: "https://example.test/index.html?v=82" },
+      KGG_PATCHES: {},
+      KGGSharedBank: {
+        exportPayload: () => ({ exercises: [] }),
+        merge: raw => { underlyingCalls++; return raw; },
+      },
+      KGGNativeExerciseSync: {
+        merge: raw => { underlyingCalls++; return raw; },
+      },
+      addEventListener() {},
+      dispatchEvent() {},
+    };
+    const localDocument = {
+      readyState: "loading", body: null, title: "Import negative",
+      addEventListener() {}, getElementById() { return null; },
+    };
+    const localContext = { ...context, window: localWindow, document: localDocument };
+    vm.createContext(localContext);
+    vm.runInContext(match[1], localContext, { filename: sourcePath });
+    const incoming = [
+      { name: "Beinpresse", cockpitId: "03" },
+      ...(position === 2 ? [{ name: "Rudern", cockpitId: "0B" }] : []),
+      { name: "Synthetischer fremder Peer-Eintrag", cockpitId: "zZ" },
+    ];
+    const localApi = localWindow.KGGTherapyCockpit;
+    assert(!localApi.registry.lookup("Synthetischer fremder Peer-Eintrag"), "negative fixture already registered");
+    expectCode(() => {
+      if (source === "shared") localWindow.KGGSharedBank.merge({ exercises: incoming });
+      else localWindow.KGGNativeExerciseSync.merge({ exerciseBank: incoming });
+    }, "unknown_exercise_id");
+    assert(underlyingCalls === 0, source + " imported unknown ID at index " + position);
+    assert(!localApi.registry.lookup("Synthetischer fremder Peer-Eintrag"), source + " poisoned registry at index " + position);
+  }
+}
+// An incoming merge is one transaction: even a nameless-ID predecessor
+// must not create a registry ghost before a later validation/merge failure.
+for (const channel of ["shared", "native"]) {
+  for (const scenario of ["bad-later-1", "bad-later-2", "merge-throws", "valid"]) {
+    const ghostName = "Synthetischer Vorlauf " + channel + " " + scenario;
+    let called = 0, rejected = null;
+    const w = {
+      location: {href:"https://example.test/index.html?v=82"},
+      KGG_PATCHES: {}, addEventListener(){}, dispatchEvent(){},
+      KGGSharedBank: {
+        exportPayload:()=>({exercises:[]}),
+        merge: raw=>{called++; if(scenario==="merge-throws")throw Error("synthetic_merge_rejected"); return raw;}
+      },
+      KGGNativeExerciseSync: {
+        merge: raw=>{called++; if(scenario==="merge-throws")throw Error("synthetic_merge_rejected"); return raw;}
+      }
+    };
+    const d = {readyState:"loading",body:null,title:"Atomic negative",
+      addEventListener(){},getElementById(){return null;}};
+    const c = {...context,window:w,document:d};
+    vm.createContext(c);vm.runInContext(match[1],c,{filename:sourcePath});
+    const api = w.KGGTherapyCockpit;
+    const inputs = [{name:ghostName},...(scenario==="bad-later-2"?[{name:"Beinpresse",cockpitId:"03"}]:[])];
+    if(scenario.startsWith("bad-later"))inputs.push({name:"Fremde ungültige ID",cockpitId:"zZ"});
+    const before = JSON.stringify(api.registry.entries());
+    try {
+      if(channel==="shared")w.KGGSharedBank.merge({exercises:inputs});
+      else w.KGGNativeExerciseSync.merge({exerciseBank:inputs});
+    }catch(e){rejected=e;}
+    if(scenario.startsWith("bad-later")){
+      assert(rejected&&rejected.code==="unknown_exercise_id","bad later entry must be rejected");
+      assert(called===0,"underlying rejected merge executed");
+      assert(JSON.stringify(api.registry.entries())===before,channel+" mutated registry during rejected validation");
+    }else if(scenario==="merge-throws"){
+      assert(rejected&&String(rejected.message)==="synthetic_merge_rejected","underlying failure not observed");
+      assert(called===1,"underlying merge not called");
+      assert(JSON.stringify(api.registry.entries())===before,channel+" mutated registry during failed underlying merge");
+    }else{
+      assert(!rejected&&called===1,"valid legacy no-ID incoming merge must succeed");
+      assert(api.registry.lookup(ghostName),"valid incoming item should register after success");
+    }
+  }
+}
+console.log("INBOUND_REGISTRY_ATOMICITY_PASS=true");
+
+console.log("INBOUND_MULTIROW_SHORTID_FAIL_CLOSED=true");
+
 const derived = api.registry.derive("Kabelzug Spezial", { sets: 2, metricUnit: "Wdh", loadUnit: "kg" });
 assert(/^[0-9A-Za-z]{2}$/.test(derived.id), "derived exercise ID is not Base62");
 assert(api.registry.derive("Kabelzug Spezial").id === derived.id, "derived exercise ID is not deterministic");

@@ -121,6 +121,22 @@ async function main() {
     let launcher = page.locator("#kgg-device-test-station button");
     if ((await launcher.count()) !== 1 || (await launcher.textContent()).trim() !== "Teststation laden") fail("v404 launcher missing");
 
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, "mediaDevices", {
+        configurable: true,
+        value: { getUserMedia: () => new Promise(() => {}) },
+      });
+      window.KGGScan.pick("camera");
+    });
+    const camera = page.locator("#kgg-v061-cross-app-live-qr-camera-camera");
+    await camera.waitFor();
+    await camera.getByRole("button", { name: "Systemkamera", exact: true }).click({ trial: true, timeout: 2500 });
+    await camera.getByRole("button", { name: "Kamera schliessen" }).click();
+    const launcherBox = await page.locator("#kgg-device-test-station").boundingBox();
+    if (!launcherBox || launcherBox.height > 58 || launcherBox.width > 180) fail("station launcher covers too much of the app");
+    await page.setViewportSize({ width: 1180, height: 820 });
+
     await launcher.click();
     await page.locator("#kgg-device-test-station h2").filter({ hasText: "Teststation blockiert" }).waitFor({ timeout: 10000 });
     if ((await page.evaluate(() => window.__runtimeContextSeen)) !== null) fail("native session started while patient PWA still belonged to run A");

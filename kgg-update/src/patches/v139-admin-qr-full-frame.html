@@ -1,0 +1,28 @@
+<!-- KGG PATCH START kgg-v139-admin-qr-full-frame -->
+<!-- Admin-QR mit nativem Kamerabild -->
+<!-- The installed v404 APK injects this legacy launcher after the HTML loads. -->
+<style>
+  #kgg-device-test-station { z-index: 100110 !important; }
+  #kgg-device-test-station:has(> .panel > h2 + p + p + .actions > .primary:only-child) {
+    inset: auto 12px 12px auto !important;
+  }
+  #kgg-device-test-station > .panel:has(> h2 + p + p + .actions > .primary:only-child) {
+    display: contents;
+  }
+  #kgg-device-test-station > .panel:has(> h2 + p + p + .actions > .primary:only-child) > :is(h2, p) {
+    display: none;
+  }
+  #kgg-device-test-station > .panel:has(> h2 + p + p + .actions > .primary:only-child) > .actions {
+    display: block;
+    margin: 0;
+  }
+</style>
+<script id="kgg-v139-admin-qr-full-frame">
+(function(){
+  "use strict";
+  const PATCH_ID="kgg-v139-admin-qr-full-frame";
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v139-admin-qr-full-frame -->
