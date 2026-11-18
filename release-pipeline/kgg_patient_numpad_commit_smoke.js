@@ -151,4 +151,30 @@ assert(commits.length===4&&commits[3].value==='55','programmatic field switch di
 assert(closeCalls.length===2&&closeCalls[1]===false,'programmatic switch unexpectedly closed the numpad');
 assert(!pad.classList.contains('hide'),'numpad was not left open after programmatic switch');
 
+context.window.closePad(false);flush(120);
+const scrollField=input('scrollField'),scrollOther=input('scrollOther');
+main.scrollHeight=1800;
+main.scrollTop=180;
+scrollField.getBoundingClientRect=()=>{
+  const top=720-(main.scrollTop-180);
+  return {left:20,top,right:140,bottom:top+50,width:120,height:50};
+};
+context.window.openPad(scrollField,ma);
+assert(main.scrollTop>180,'opening the numpad did not move the field above the pad');
+const raisedPosition=main.scrollTop;
+context.window.openPad(scrollOther,mb);
+assert(main.scrollTop===raisedPosition,'field switching unexpectedly reset the scroll position');
+context.window.closePad(false);flush(120);
+assert(main.scrollTop===180,'closing the numpad did not restore the pre-open scroll position');
+
+main.scrollTop=65;
+context.window.openPad(scrollOther,ma);
+main.scrollTop=240;
+context.window.closePad(false);
+context.window.openPad(scrollOther,ma);
+flush(120);
+assert(!pad.classList.contains('hide')&&main.scrollTop===240,'stale cleanup changed an already reopened numpad');
+context.window.closePad(false);flush(120);
+assert(main.scrollTop===240,'reopened numpad did not preserve its own initial scroll position');
+
 console.log('Patient numpad stay-open switch smoke: OK');
