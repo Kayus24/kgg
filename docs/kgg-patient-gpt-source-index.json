@@ -167,9 +167,9 @@
       "sha256": "c794bf28fa6b54e3f3df9a20e9e520a9c9708369351ca85e443f5866d0095929"
     },
     {
-      "characters": 7554,
+      "characters": 7706,
       "path": "docs/kgg-patient-gpt-source/chunk-033.md",
-      "sha256": "017ef2531bf8e8af4d4045f7d166f1c803c5dd3d9ee670475f1ed2bb7ae48e34"
+      "sha256": "1a0396b9a0533233ebbc8fc5aac3f73de42a1401e4bc8f3cf1e10c9c1365a07f"
     },
     {
       "characters": 24201,
@@ -364,9 +364,9 @@
       "sha256": "1571cd41ded5034e53b39740c8c825d436e2e5a381d1c1a79a1bad4503c52a99"
     },
     {
-      "characters": 7353,
+      "characters": 7505,
       "path": "patient-set-k2-inline-editor.js",
-      "sha256": "42932bff4be2094454ef810256d50e864a346f6350aff70b8e4d88bf9b29aa7b"
+      "sha256": "5270edf4ab8c090c587a3ee1ea0c1b766b0467595615113a15f1214dc62234ff"
     },
     {
       "characters": 37981,

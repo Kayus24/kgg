@@ -1,8 +1,8 @@
 # KGG Patient Source Chunk 033
 
 - Source file: `patient-set-k2-inline-editor.js`
-- Characters: 1-7353
-- Full source SHA-256: `42932bff4be2094454ef810256d50e864a346f6350aff70b8e4d88bf9b29aa7b`
+- Characters: 1-7505
+- Full source SHA-256: `5270edf4ab8c090c587a3ee1ea0c1b766b0467595615113a15f1214dc62234ff`
 
 ```
 /* KGG K2: inline kg/Wdh editor. Presentation only; KGG NumPad owns all saves. */
@@ -58,8 +58,10 @@
   function updateDraft(value,position){
     if(!editing()||!editor||!editor.isConnected)return;
     const clean=sanitize(value);
-    draft()?.setValue(clean||'0');
+    // Mark dirty before broadcasting the draft change: the existing transfer
+    // renderer checks isDirty synchronously when it receives that event.
     controller()?.markDirty?.();
+    draft()?.setValue(clean||'0');
     editor.value=clean;
     editor.focus({preventScroll:true});
     const at=Math.max(0,Math.min(clean.length,position??clean.length));

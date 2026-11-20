@@ -51,8 +51,10 @@
   function updateDraft(value,position){
     if(!editing()||!editor||!editor.isConnected)return;
     const clean=sanitize(value);
-    draft()?.setValue(clean||'0');
+    // Mark dirty before broadcasting the draft change: the existing transfer
+    // renderer checks isDirty synchronously when it receives that event.
     controller()?.markDirty?.();
+    draft()?.setValue(clean||'0');
     editor.value=clean;
     editor.focus({preventScroll:true});
     const at=Math.max(0,Math.min(clean.length,position??clean.length));
