@@ -32,8 +32,13 @@ vorhandenen Gates.
 Der Workflow verlangt einen offenen Same-Repo-PR mit `kgg-no-release` und
 einen erfolgreichen, aktuellen Required-Gate-Run für den exakten PR-Head
 gegen aktuelles Main. Er übernimmt bis zu vier Änderungen an vorhandenen
-Patienten-Runtime-Dateien. Unterstützende Patienten-Tests und generierte
-Quelldokumentation aus dem PR werden weder ausgeführt noch veröffentlicht.
+Patienten-Runtime-Dateien und höchstens drei neue versionierte PNG-Icons
+(192, 512 und maskable-512; maximal 1 MB je regulärem Git-Blob). Die neuen
+Icons benötigen einen passenden PNG-Header und die benannten Abmessungen;
+Browser-Smokes prüfen anschließend das erzeugte Preview ohne Schreibzugang.
+Unterstützende Patienten-Tests, generierte Quelldokumentation sowie die genau
+benannten Paket-, PWA-Vertrags- und Parity-Dateien werden weder ausgeführt noch
+veröffentlicht. Der Publisher übernimmt keine CI-Definition aus dem PR.
 Bei Remote-Erfolg mit ausstehendem Pages-Rollout den laufenden Stand unter
 der veröffentlichten Meta-URL prüfen. Der unveränderliche Pfad verhindert
 einen zweiten Push desselben PR-Heads.
