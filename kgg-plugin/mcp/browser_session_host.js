@@ -168,6 +168,21 @@ async function stateValue(page, policy) {
     const node = document.querySelector(`[${config.state_attribute}]`);
     const explicit = node?.getAttribute(config.state_attribute) || document.body?.getAttribute(config.state_attribute);
     if (explicit) return { kind: "explicit", value: explicit };
+    // Native KGG pages have no test markers. Report only fixed UI states,
+    // never exercise names, form values or plan contents. Generic hosts keep
+    // their own contract; hidden modal DOM must not attest an open modal.
+    if (config.evidence_namespace === "kgg-ui-lab") {
+      const visible = element => !!element && element.getClientRects().length > 0 &&
+        getComputedStyle(element).visibility !== "hidden";
+      if (document.querySelector("#plan #list") && document.querySelector("#pad .padBox")) {
+        if (visible(document.querySelector("#pad:not(.hide) .padBox"))) return { value: "patient-numpad" };
+        if (visible(document.querySelector("#plan #list"))) return { value: "patient-plan" };
+      }
+      if (document.querySelector("#planList") && document.querySelector("#editorModal .editorSheet")) {
+        if (visible(document.querySelector("#editorModal.open .editorSheet"))) return { value: "therapist-editor" };
+        if (visible(document.querySelector("#planList"))) return { value: "therapist-plan" };
+      }
+    }
     // Some supported synthetic patient previews expose a bounded language
     // toggle but no data-kgg-state marker. Expose only that non-sensitive
     // state, never page text, values, or storage contents.

@@ -458,7 +458,7 @@ class PersistentRealBrowser:
             )
         except OSError as exc:
             raise RealBrowserError("real_browser_process_failed") from exc
-        self._responses: queue.Queue[str] = queue.Queue()
+        self._responses: queue.Queue[str | None] = queue.Queue()
         self._reader = threading.Thread(target=self._read_responses, daemon=True)
         self._reader.start()
         self._timeout_seconds = _foreground_wait_seconds(timeout_ms)
@@ -476,10 +476,14 @@ class PersistentRealBrowser:
 
     def _read_responses(self) -> None:
         stdout = self._process.stdout
-        if stdout is None:
-            return
-        for line in stdout:
-            self._responses.put(line)
+        try:
+            if stdout is not None:
+                for line in stdout:
+                    self._responses.put(line)
+        finally:
+            # EOF is a failed host/transport, not a browser that is still busy.
+            # Wake a pending call instead of waiting out its entire MCP budget.
+            self._responses.put(None)
 
     def _send(self, request: Mapping[str, Any]) -> dict[str, Any]:
         if self._process.poll() is not None or self._process.stdin is None:
@@ -494,6 +498,9 @@ class PersistentRealBrowser:
         except (BrokenPipeError, OSError) as exc:
             self.close()
             raise RealBrowserError("real_browser_process_failed") from exc
+        if line is None:
+            self.close()
+            raise RealBrowserError("real_browser_process_failed")
         try:
             raw = json.loads(line.strip())
         except json.JSONDecodeError as exc:

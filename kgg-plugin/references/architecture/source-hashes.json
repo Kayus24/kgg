@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "90f91614970a3b227d334a2964efb44dd21af541ed9d4176146890159306bec0"
+      "sha256": "38141ff4e223f2c171a50e77977c32d4340c872b1ecd960037ffef355bf455b1"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",
@@ -133,7 +133,7 @@
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "1ba3206075c8e86eb211d3a583e18265300da093dcfb08be788874e6c7689059"
+      "sha256": "693882f3e9ca2fb3b33fc0d19d3a7b877e79591c2473fbab39ea98a7b559b786"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
@@ -141,7 +141,7 @@
     },
     {
       "path": "kgg-plugin/mcp/browser_session_host.js",
-      "sha256": "878078acc8e1a00bfa6a20f9a978134571a1f287b3efc87e13772192eede62c2"
+      "sha256": "a9cad000741bd0d649db0bbaadf4a705acded44cbb9c5966c66fbe21a727302e"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
