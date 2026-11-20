@@ -934,6 +934,21 @@ class Runtime:
         self.evidence.setdefault(session["session_id"], []).append(evidence)
         return {"observation": public_observation, "evidence": evidence, "image": dict(image)}
 
+    def _record_visual_failure(self, session: Mapping[str, Any], request: Mapping[str, Any], phase: str, code: str) -> None:
+        # Retain only bounded diagnostics, never URLs, page contents or typed text.
+        # A failed capture has no screenshot; an earlier observation remains separate.
+        self.evidence.setdefault(session["session_id"], []).append({
+            "schema": "kgg-ui-lab/visual-evidence/v1",
+            "status": "FAIL",
+            "surface": "real_browser",
+            "operation": request["operation"],
+            "phase": phase,
+            "request_id": request["request_id"],
+            "main_sha": session["app"]["main_sha"],
+            "error_class": code,
+            "artifacts": [],
+        })
+
     def _open_visual_fallback(self, session: Mapping[str, Any], failure: str) -> dict[str, Any] | None:
         """Open G05 only after a real, deterministic Quick-Flow drift."""
 
@@ -1555,6 +1570,7 @@ class Runtime:
         session["status"] = "observing"
         session["used_requests"].append(checked["request_id"])
         real_browser = _load_real_browser_module()
+        phase = "initialize"
         try:
             self._close_visual(session["session_id"])
             browser = real_browser.PersistentRealBrowser(
@@ -1565,10 +1581,12 @@ class Runtime:
                 bootstrap=self.browser_bootstrap,
             )
             self.visual_sessions[session["session_id"]] = browser
+            phase = "observe"
             observed = browser.observe()
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
+            self._record_visual_failure(session, checked, phase, exc.code)
             _fail(exc.code)
         try:
             record = self._record_visual_observation(session, observed)
@@ -1607,11 +1625,13 @@ class Runtime:
             session["status"] = "failed"
             _fail("visual_session_not_initialized")
         real_browser = _load_real_browser_module()
+        phase = "act"
         try:
             action_result = browser.act(decision)
             action = action_result.get("action")
             if not isinstance(action, Mapping) or action.get("before_state") != observation["state"]:
                 _fail("visual_state_changed_before_action")
+            phase = "verify"
             verified = browser.observe()
             after_state = verified["state"]
             if after_state != decision["expected_state_after"]:
@@ -1623,6 +1643,7 @@ class Runtime:
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
+            self._record_visual_failure(session, checked, phase, exc.code)
             _fail(exc.code)
         except ServerError:
             self._close_visual(session["session_id"])
