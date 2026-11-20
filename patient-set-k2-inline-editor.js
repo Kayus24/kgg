@@ -53,8 +53,9 @@
     const clean=sanitize(value);
     // Mark dirty before broadcasting the draft change: the existing transfer
     // renderer checks isDirty synchronously when it receives that event.
-    controller()?.markDirty?.();
+    controller()?.markDirty?.(); // transfer hints observe dirty before the draft event
     draft()?.setValue(clean||'0');
+    controller()?.markDirty?.(); // refresh snapshot with the new buffer value
     editor.value=clean;
     editor.focus({preventScroll:true});
     const at=Math.max(0,Math.min(clean.length,position??clean.length));
