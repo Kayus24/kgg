@@ -32,6 +32,8 @@ jobs:
       patient_media: ${{ steps.scope.outputs.patient_media }}
       admin_camera_qr: ${{ steps.scope.outputs.admin_camera_qr }}
       patient_react: ${{ steps.scope.outputs.patient_react }}
+      patient_acceptance_required: ${{ steps.scope.outputs.patient_acceptance_required }}
+      drive_sync: ${{ steps.scope.outputs.drive_sync }}
       browser_required: ${{ (steps.scope.outputs.patient_gpt == 'true' || steps.scope.outputs.patient_runtime == 'true' || steps.scope.outputs.patient_day_flow == 'true' || steps.scope.outputs.patient_last_value_shimmer == 'true' || steps.scope.outputs.patient_set_view == 'true' || steps.scope.outputs.patient_media == 'true' || steps.scope.outputs.patient_react == 'true') && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
@@ -62,6 +64,8 @@ jobs:
           patient_media=false
           patient_react=false
           admin_camera_qr=false
+          patient_acceptance_required=false
+          drive_sync=false
           while IFS= read -r path; do
             [[ -z "$path" ]] && continue
             case "$path" in
@@ -83,6 +87,16 @@ jobs:
           if grep -Eq '^patient-ui/|^patient-react-dist/|^release-pipeline/kgg_patient_react_[^/]*\.js$' "$changed_file"; then patient_react=true; fi
           if [[ -f patient-ui/package.json || -d patient-react-dist ]] && grep -Eq '^index\.html$|^service-worker\.js$|^numpad-ui-fix\.js$|^patient-numpad-visibility-fix\.js$' "$changed_file"; then patient_react=true; fi
           if grep -Eq '^android-wrapper/app/src/main/(java/de/kgg/app/MainActivity\.java|assets/android/kgg_android_sync_bootstrap\.js)$|^kgg-update/src/patches/.*(camera|qr|scan).*$|^release-pipeline/kgg_admin_camera_qr_smoke\.js$' "$changed_file" || grep -Fxq 'kgg-update/src/parts.json' "$changed_file" || grep -Fxq "$runtime_identity_path" "$changed_file"; then admin_camera_qr=true; fi
+          if grep -Eq '^kgg-update/index\.html$|^kgg-update/src/runtime/|^kgg-update/src/parts\.json$|^kgg-update/src/patches/[^/]*(bank|library|sync|exercise)[^/]*$|^release-pipeline/(kgg_drive_sync_|test_kgg_drive_sync_|test_kgg_required_gate\.py$|package(-lock)?\.json$)|^\.github/workflows/kgg-required-gate\.yml$' "$changed_file"; then drive_sync=true; fi
+          # Keep the feature map advisory: new patient paths and their own tests
+          # receive the existing UI regressions as well as integrated acceptance.
+          if grep -Eq '^index\.html$|^service-worker\.js$|^patient-[^/]+\.js$|^patient-ui/|^patient-react-dist/|^(collapse-cards|numpad-ui-fix)\.js$|^release-pipeline/(kgg_patient_|test_kgg_patient_|kgg_ticket_015_browser_smoke\.js$|kgg_test_battery\.py$|patient-integrated-suites\.json$|patient-scan-fixtures/|package(-lock)?\.json$|test_kgg_required_gate\.py$)|^docs/quality/patient-(react-|feature-test-map)|^\.github/workflows/kgg-(required-gate|patient-ui-parity|react-numpad-webkit)\.yml$' "$changed_file"; then
+            ui_or_html=true
+            patient_acceptance_required=true
+          fi
+          if [[ "$patient_scan" == 'true' || "$pwa_contract" == 'true' || "$patient_summary" == 'true' || "$patient_gpt" == 'true' || "$patient_runtime" == 'true' || "$patient_day_flow" == 'true' || "$patient_last_value_shimmer" == 'true' || "$patient_set_view" == 'true' || "$patient_media" == 'true' || "$patient_react" == 'true' ]]; then
+            patient_acceptance_required=true
+          fi
           echo "pipeline_only=$pipeline_only" >> "$GITHUB_OUTPUT"
           echo "ui_or_html=$ui_or_html" >> "$GITHUB_OUTPUT"
           echo "patient_scan=$patient_scan" >> "$GITHUB_OUTPUT"
@@ -96,6 +110,11 @@ jobs:
           echo "patient_media=$patient_media" >> "$GITHUB_OUTPUT"
           echo "admin_camera_qr=$admin_camera_qr" >> "$GITHUB_OUTPUT"
           echo "patient_react=$patient_react" >> "$GITHUB_OUTPUT"
+          echo "patient_acceptance_required=$patient_acceptance_required" >> "$GITHUB_OUTPUT"
+          echo "drive_sync=$drive_sync" >> "$GITHUB_OUTPUT"
+      - name: Verify required gate scope and completion contracts
+        shell: bash
+        run: python release-pipeline/test_kgg_required_gate.py
       - name: Validate patient feature-test mapping (metadata-only)
         shell: bash
         run: |
@@ -107,6 +126,8 @@ jobs:
     needs: scope
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      drive_sync_completed: ${{ steps.drive_sync.outputs.completed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -119,6 +140,27 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: release-pipeline/package-lock.json
+      - name: Check Patient Custom GPT resources
+        shell: bash
+        run: |
+          python release-pipeline/kgg_patient_gpt_resources.py --check
+          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
+          python release-pipeline/kgg_patient_gpt_eval.py
+      - name: Check Custom GPT live context freshness
+        shell: bash
+        run: python release-pipeline/kgg_gpt_context.py --check
+      - name: Check Custom GPT bug knowledge freshness
+        shell: bash
+        run: python release-pipeline/kgg_bug_knowledge.py --check
+      - name: Check Custom GPT source context freshness
+        shell: bash
+        run: python release-pipeline/kgg_gpt_source_context.py --check
+      - name: Check Custom GPT knowledge pack freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check
+      - name: Check Custom GPT resource contract freshness
+        shell: bash
+        run: python release-pipeline/kgg_custom_gpt_resource_audit.py --check
       - name: Install Poppler for PDF readability smoke
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
@@ -127,6 +169,23 @@ jobs:
         env:
           KGG_ALLOW_RELEASE_DRIFT: ${{ (needs.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
+      - name: Run scoped Drive sync end-to-end regression
+        id: drive_sync
+        if: needs.scope.outputs.drive_sync == 'true'
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          node release-pipeline/kgg_drive_sync_e2e.js --run --run-id "ci-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo 'completed=true' >> "$GITHUB_OUTPUT"
+      - name: Keep scoped Drive sync evidence including failures
+        if: ${{ always() && needs.scope.outputs.drive_sync == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: drive-sync-e2e-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: output/drive-sync-e2e-20261015/ci-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 7
       - name: Run patient PWA contract smoke
         if: needs.scope.outputs.pwa_contract == 'true'
         shell: bash
@@ -158,27 +217,6 @@ jobs:
         if: needs.scope.outputs.patient_runtime == 'true'
         shell: bash
         run: node release-pipeline/kgg_patient_pain_vertical_smoke.js
-      - name: Check Patient Custom GPT resources
-        shell: bash
-        run: |
-          python release-pipeline/kgg_patient_gpt_resources.py --check
-          python release-pipeline/kgg_patient_gpt_write_gate.py --self-test --self-test-preview-root "$RUNNER_TEMP/kgg-patient-preview-smoke"
-          python release-pipeline/kgg_patient_gpt_eval.py
-      - name: Check Custom GPT live context freshness
-        shell: bash
-        run: python release-pipeline/kgg_gpt_context.py --check
-      - name: Check Custom GPT bug knowledge freshness
-        shell: bash
-        run: python release-pipeline/kgg_bug_knowledge.py --check
-      - name: Check Custom GPT source context freshness
-        shell: bash
-        run: python release-pipeline/kgg_gpt_source_context.py --check
-      - name: Check Custom GPT knowledge pack freshness
-        shell: bash
-        run: python release-pipeline/kgg_custom_gpt_knowledge_pack.py --check
-      - name: Check Custom GPT resource contract freshness
-        shell: bash
-        run: python release-pipeline/kgg_custom_gpt_resource_audit.py --check
       - name: Check blind Repair-Lab contracts
         shell: bash
         run: |
@@ -189,25 +227,40 @@ jobs:
         shell: bash
         run: python release-pipeline/kgg_test_battery.py --suite ui-stability --level regression
       - name: Run patient QR camera regression
-        if: needs.scope.outputs.patient_scan == 'true'
+        if: needs.scope.outputs.patient_scan == 'true' || needs.scope.outputs.admin_camera_qr == 'true'
         shell: bash
         run: python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
       - name: Run Admin camera and cross-app QR regression
         if: needs.scope.outputs.admin_camera_qr == 'true'
         shell: bash
-        run: |
-          python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
-          python release-pipeline/kgg_test_battery.py --suite patient-scan --level regression
+        run: python release-pipeline/kgg_test_battery.py --suite camera-qr --level regression
+  patient-acceptance:
+    needs: scope
+    if: needs.scope.outputs.patient_acceptance_required == 'true'
+    uses: ./.github/workflows/kgg-patient-ui-parity.yml
+    with:
+      candidate_sha: ${{ github.sha }}
   patient-browser:
     name: patient-browser
     needs: scope
     if: needs.scope.outputs.browser_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:cf0daee9b994042e011bc29f20cdff1a9f682a039b43fcd738f7d8a9d3bcd9d6
+      options: --ipc=host
+    env:
+      KGG_PLAYWRIGHT_IMAGE_VERSION: '1.61.1'
+      KGG_SKIP_PLAYWRIGHT_INSTALL: '1'
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Checkout's temporary Git trust does not persist into later container steps.
+      - name: Allow Git access to the mounted workspace
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -222,7 +275,22 @@ jobs:
         run: |
           cd release-pipeline
           npm ci
-          npx playwright install --with-deps chromium
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          def read_json(path):
+              return json.loads(Path(path).read_text(encoding='utf-8'))
+          versions = {
+              'image': os.environ['KGG_PLAYWRIGHT_IMAGE_VERSION'],
+              'declared': read_json('package.json')['devDependencies']['playwright'],
+              'locked': read_json('package-lock.json')['packages']['node_modules/playwright']['version'],
+              'installed': read_json('node_modules/playwright/package.json')['version'],
+          }
+          expected = versions['image']
+          if not re.fullmatch(r'\d+\.\d+\.\d+', expected) or any(value != expected for value in versions.values()):
+              raise SystemExit('Playwright/image version mismatch: ' + json.dumps(versions, sort_keys=True))
+          print('Pinned Playwright image/package versions match: ' + expected)
+          PY
       - name: Build and verify patient React UI (when affected)
         if: needs.scope.outputs.patient_react == 'true'
         shell: bash
@@ -313,7 +381,7 @@ jobs:
   required-gate:
     # Keep the existing branch-protection check name; never equate SKIPPED with PASS.
     name: required-gate
-    needs: [scope, core-gate, patient-browser]
+    needs: [scope, core-gate, patient-browser, patient-acceptance]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -325,13 +393,29 @@ jobs:
           CORE_RESULT: ${{ needs.core-gate.result }}
           BROWSER_RESULT: ${{ needs.patient-browser.result }}
           BROWSER_REQUIRED: ${{ needs.scope.outputs.browser_required }}
+          ACCEPTANCE_RESULT: ${{ needs.patient-acceptance.result }}
+          ACCEPTANCE_REQUIRED: ${{ needs.scope.outputs.patient_acceptance_required }}
+          ACCEPTANCE_ACCEPTED: ${{ needs.patient-acceptance.outputs.accepted }}
+          DRIVE_SYNC_REQUIRED: ${{ needs.scope.outputs.drive_sync }}
+          DRIVE_SYNC_COMPLETED: ${{ needs.core-gate.outputs.drive_sync_completed }}
         run: |
           set -euo pipefail
           [[ "$SCOPE_RESULT" == "success" ]] || { echo "Scope classification not successful: $SCOPE_RESULT"; exit 1; }
           [[ "$CORE_RESULT" == "success" ]] || { echo "Critical/core gate not successful: $CORE_RESULT"; exit 1; }
+          [[ "$BROWSER_REQUIRED" == 'true' || "$BROWSER_REQUIRED" == 'false' ]] || { echo "Invalid browser requirement: $BROWSER_REQUIRED"; exit 1; }
+          [[ "$ACCEPTANCE_REQUIRED" == 'true' || "$ACCEPTANCE_REQUIRED" == 'false' ]] || { echo "Invalid acceptance requirement: $ACCEPTANCE_REQUIRED"; exit 1; }
+          [[ "$DRIVE_SYNC_REQUIRED" == 'true' || "$DRIVE_SYNC_REQUIRED" == 'false' ]] || { echo "Invalid Drive sync requirement: $DRIVE_SYNC_REQUIRED"; exit 1; }
+          if [[ "$DRIVE_SYNC_REQUIRED" == 'true' ]]; then
+            [[ "$DRIVE_SYNC_COMPLETED" == 'true' ]] || { echo "Required Drive sync completion not proven: $DRIVE_SYNC_COMPLETED"; exit 1; }
+          fi
           if [[ "$BROWSER_REQUIRED" == "true" ]]; then
             [[ "$BROWSER_RESULT" == "success" ]] || { echo "Required browser suite not successful: $BROWSER_RESULT"; exit 1; }
           else
             [[ "$BROWSER_RESULT" == "skipped" || "$BROWSER_RESULT" == "success" ]] || { echo "Unexpected browser result: $BROWSER_RESULT"; exit 1; }
           fi
-          echo 'Required scope, core and applicable browser gates: PASS' >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$ACCEPTANCE_REQUIRED" == 'true' ]]; then
+            [[ "$ACCEPTANCE_RESULT" == 'success' && "$ACCEPTANCE_ACCEPTED" == 'true' ]] || { echo "Required integrated acceptance not proven: result=$ACCEPTANCE_RESULT accepted=$ACCEPTANCE_ACCEPTED"; exit 1; }
+          else
+            [[ "$ACCEPTANCE_RESULT" == 'skipped' || "$ACCEPTANCE_RESULT" == 'success' ]] || { echo "Unexpected acceptance result: $ACCEPTANCE_RESULT"; exit 1; }
+          fi
+          echo 'Required scope, core and applicable browser/acceptance/sync gates: PASS' >> "$GITHUB_STEP_SUMMARY"
