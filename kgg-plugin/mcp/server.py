@@ -842,8 +842,8 @@ def tool_catalog() -> list[dict[str, Any]]:
         _tool("run_quick_flow", "Run the bounded synthetic Quick Flow, or allowlisted browser steps when the opt-in real-browser host is enabled; record sanitized evidence and never write the repository.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
         _tool("capture_screenshot", "Return a deterministic synthetic screenshot, or capture from the session app URL when the opt-in real-browser host is enabled; record evidence and never write the repository.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
         _tool("record_screen", "Opt-in, origin-allowlisted, session-bound viewport trace with a hard duration cap; return traceable timestamped PNG keyframes when video transport is unavailable, never a false video-success claim or a continuous recording.", record_screen_request["properties"], ["request", "duration_ms", "frame_interval_ms"], read_only=False, destructive=False, idempotent=False, open_world=True),
-        _tool("observe_visual_state", "When the opt-in real-browser host is enabled, observe one screenshot and state from a persistent bounded browser page; store the observation and evidence for the caller's next action.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
-        _tool("execute_visual_action", "When the opt-in real-browser host is enabled, execute exactly one bounded caller-supplied action in the same page; it may change app state and returns a second screenshot plus state verification.", {"request": request, "decision": visual_decision}, ["request", "decision"], read_only=False, destructive=True, idempotent=False, open_world=True),
+        _tool("observe_visual_state", "In the opt-in real browser, observe screenshot, state and bounded controls (stable app action IDs only, never page text). For screenshot-independent Fast loops, choose an exact label from observation.controls; do not guess coordinates.", {"request": request}, ["request"], read_only=False, destructive=False, idempotent=False, open_world=True),
+        _tool("execute_visual_action", "Execute one bounded action on the observed page; it may change app state. Prefer exact observation.controls labels without coordinates (unique, visible and enabled only); coordinate clicks require externally verified image evidence. Returns a verified state and second screenshot.", {"request": request, "decision": visual_decision}, ["request", "decision"], read_only=False, destructive=True, idempotent=False, open_world=True),
         _tool("compare_visual_reference", "Compare the latest observed real-browser screenshot against an explicitly transferred, approved, or same-fixture reference PNG with exact viewport, mask, threshold, hash, and pixel-diff evidence; never infer a reference from an upload or filesystem.", {"request": request, "reference": visual_reference}, ["request", "reference"], read_only=False, destructive=False, idempotent=False, open_world=True),
         _tool("run_width_sweep", "Capture up to ten real viewport screenshots within one bounded opt-in run; without a real-browser host return PREVIEW_ONLY. Capture-only evidence does not certify visual comparison or layout parity.", {"session_id": session_id, "actor": actor, "viewports": {"type": "array", "maxItems": 10}}, ["session_id", "actor", "viewports"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("get_test_evidence", "Read sanitized in-memory evidence for a session; never writes or dispatches.", {"session_id": session_id, "actor": actor}, ["session_id", "actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
@@ -908,11 +908,19 @@ class Runtime:
         if not isinstance(artifact, Mapping) or not isinstance(image, Mapping):
             _fail("visual_observation_missing_screenshot")
         state = str(observed.get("state", "unknown"))
-        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}".encode("utf-8")).hexdigest()
+        controls = observed.get("controls", [])
+        if not isinstance(controls, list) or len(controls) > 24:
+            _fail("visual_controls_invalid")
+        # Bind the discovered controls to the same observation as the screenshot.
+        control_fingerprint = json.dumps(controls, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+        observation_id = hashlib.sha256(
+            f"{session['session_id']}|{artifact['sha256']}|{state}|{control_fingerprint}".encode("utf-8")
+        ).hexdigest()
         public_observation = {
             "id": observation_id,
             "state": state,
             "artifact": dict(artifact),
+            "controls": deepcopy(controls),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
         }
         stored_observation = {**public_observation, "image": dict(image), "viewport": deepcopy(session["viewport"])}
@@ -1674,6 +1682,10 @@ class Runtime:
         if action.get("navigation_completed") is True:
             evidence["navigation_completed"] = True
         self.evidence.setdefault(session["session_id"], []).append(evidence)
+        # Event count must track verified actions, not only synthetic flows.
+        session.setdefault("events", []).append({
+            "event": "visual_action_verified", "status": "PASS", "at": _now(),
+        })
         return {
             "schema": MCP_SCHEMA,
             "operation": "execute_visual_action",

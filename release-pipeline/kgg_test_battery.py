@@ -863,6 +863,7 @@ TEST_REGISTRY = [
             run([sys.executable, "-B", "release-pipeline/test_kgg_navigation.py"]),
             run([node_executable(), "--test", "release-pipeline/test_kgg_browser_navigation.js"]),
             run([sys.executable, "-B", "release-pipeline/test_kgg_width_sweep.py"]),
+            run([sys.executable, "-B", "-m", "unittest", "test_kgg_fast_controls"], cwd=ROOT / "release-pipeline"),
         ),
     },
     {

@@ -402,6 +402,21 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
         "artifacts": artifacts,
         "images": images,
     }
+    # Untrusted page content crosses the browser boundary only as bounded,
+    # stable action identifiers (never accessibility text or input values).
+    controls = value.get("controls", [])
+    if not isinstance(controls, list) or len(controls) > 24:
+        raise RealBrowserError("real_browser_controls_invalid")
+    seen: set[str] = set()
+    for control in controls:
+        if not isinstance(control, Mapping) or set(control) != {"role", "label"}:
+            raise RealBrowserError("real_browser_controls_invalid")
+        label = control["label"]
+        if (control["role"] != "button" or not isinstance(label, str)
+                or not re.fullmatch(r"[a-z][a-z0-9._-]{0,63}", label) or label in seen):
+            raise RealBrowserError("real_browser_controls_invalid")
+        seen.add(label)
+    result["controls"] = [dict(item) for item in controls]
     action = value.get("action")
     if action is not None:
         if not isinstance(action, Mapping) or not {"expected", "actual", "status", "before_state", "after_state"}.issubset(action):

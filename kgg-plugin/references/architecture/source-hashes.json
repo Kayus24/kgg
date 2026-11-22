@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "0204b41dacbb50a44c8ac67364bc524d1c9a49598ecd8ff2a8d6469c050135b8"
+      "sha256": "6563021fc555fa369144436c901ee236d66626b6c044847a852885e88553213c"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "38141ff4e223f2c171a50e77977c32d4340c872b1ecd960037ffef355bf455b1"
+      "sha256": "e3b79bad1bac6d20533ca8eed7c3aeb2f3ce7842133c55f0bf5cf6f850758735"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",
@@ -133,7 +133,7 @@
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "693882f3e9ca2fb3b33fc0d19d3a7b877e79591c2473fbab39ea98a7b559b786"
+      "sha256": "b1dcb52061116b504707ee9f6957d6892287ccb564e66379663f61665066a3e2"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
@@ -141,7 +141,7 @@
     },
     {
       "path": "kgg-plugin/mcp/browser_session_host.js",
-      "sha256": "a9cad000741bd0d649db0bbaadf4a705acded44cbb9c5966c66fbe21a727302e"
+      "sha256": "8966f90408ca6d99e04b174483c040af4e8154ae591c16ea839ae5a774066f74"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
@@ -185,7 +185,7 @@
     },
     {
       "path": "kgg-plugin/mcp/README.md",
-      "sha256": "901cd880f27cea7d7e365b04230ec5aadf89a3e66c0e58f699eba6203eac3e41"
+      "sha256": "ff40d69c0cc65b42cd5712256d958e596050103afdcd4da494c380a96efcf798"
     },
     {
       "path": "release-pipeline/test_kgg_vc12_migration_contract.py",
