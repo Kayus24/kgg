@@ -14,9 +14,9 @@ const ROOT_FILES = [
   "index.html",
   "update-recovery.html",
   "manifest-v64.webmanifest",
-  "kgg-icon-192-v63.png",
-  "kgg-icon-512-v63.png",
-  "kgg-icon-maskable-512-v63.png",
+  "kgg-icon-192-v64.png",
+  "kgg-icon-512-v64.png",
+  "kgg-icon-maskable-512-v64.png",
   "numpad-ui-fix.js",
   "patient-i18n.js",
   "patient-version-label.js",
@@ -138,8 +138,8 @@ function buildPackage(args) {
     .replace(/kgg-handyplan-v[0-9]+-[a-z0-9-]+/, "kgg-device-test-v404-" + sourceSha.slice(0, 12))
     .replace("const APP_VERSION = '81';", "const APP_VERSION = '404-device-test';")
     .replace(
-      "const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v63.png','./kgg-icon-512-v63.png'];",
-      "const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v63.png','./kgg-icon-512-v63.png','./kgg-dual-device-fixtures.js','./patient-device-test-storage.js','./patient-device-test-agent.js','./vendor/qrcode-generator-1.5.2.js'];",
+      "const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v64.png','./kgg-icon-512-v64.png'];",
+      "const CORE_ASSETS = ['./index.html','./manifest.json','./manifest-v64.webmanifest','./kgg-icon-192-v64.png','./kgg-icon-512-v64.png','./kgg-dual-device-fixtures.js','./patient-device-test-storage.js','./patient-device-test-agent.js','./vendor/qrcode-generator-1.5.2.js'];",
     )
     .replace(
       "function isIndexRequest(request){const url=new URL(request.url);if(url.origin!==self.location.origin)return false;return url.pathname.endsWith('/kgg/')||url.pathname.endsWith('/kgg/index.html')}",
@@ -161,9 +161,9 @@ function buildPackage(args) {
     background_color: "#f4f7fb",
     theme_color: "#111827",
     icons: [
-      { src: "kgg-icon-192-v63.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "kgg-icon-512-v63.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "kgg-icon-maskable-512-v63.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "kgg-icon-192-v64.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "kgg-icon-512-v64.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "kgg-icon-maskable-512-v64.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
   fs.writeFileSync(path.join(output, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
