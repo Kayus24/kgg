@@ -125,5 +125,19 @@ class FastControlDiscoveryTests(unittest.TestCase):
                     })
 
 
+    def test_active_host_tool_catalog_sha_is_preserved(self):
+        # The signed launcher pins the complete MCP tool catalog; do not
+        # require an unsafe host-contract update for a browser implementation fix.
+        import hashlib
+        import json
+        digest = hashlib.sha256(json.dumps(
+            server.tool_catalog(), sort_keys=True, separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")).hexdigest()
+        self.assertEqual(
+            digest, "0cc291eface08da646164bc0785b78f1800f6b201255ad0cf3d581c13973f071",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

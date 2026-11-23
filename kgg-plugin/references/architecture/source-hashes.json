@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "e3b79bad1bac6d20533ca8eed7c3aeb2f3ce7842133c55f0bf5cf6f850758735"
+      "sha256": "0c4565630ab150cb5b3d0b57e79e39766e47667f4274984690c45451ee4239c2"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",
