@@ -1,5 +1,6 @@
 """Bounded real GitHub binding: no arbitrary routes or remote writes."""
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 from unittest.mock import Mock
@@ -65,6 +66,77 @@ class ActionBindingTests(unittest.TestCase):
         self.assertTrue(result['reconciliation_required'])
         self.transport.assert_not_called()
         self.assertEqual(dispatch.call_count, 1)
+
+    def test_verified_patient_preview_host_only_contract(self):
+        name = 'submitKggVerifiedPatientPrPreview'
+        url = '/repos/Kayus24/kgg/actions/workflows/kgg-patient-pr-preview.yml/dispatches'
+        dispatch = Mock(return_value={'status': 'dispatch_accepted', 'http_status': 204})
+        binding = self.module.KggActions(transport=self.transport, dispatch_transport=dispatch,
+                                        allowed_workflow_operations=(name,))
+        self.assertEqual(len(binding.capabilities()['actions']), 30)
+        self.assertNotIn(name, binding.actions)  # Keep legacy editor/API contract unchanged.
+        spec = importlib.util.spec_from_file_location('verified_preview_server', ROOT / 'kgg-plugin/mcp/server.py')
+        server = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(server)
+        dispatch_tool = next(tool for tool in server.tool_catalog() if tool['name'] == 'dispatch_kgg_workflow')
+        self.assertIn(name, dispatch_tool['inputSchema']['properties']['operation']['enum'])
+        available = {x['operation']: x for x in binding.workflow_capabilities()['actions']}
+        self.assertEqual(available[name]['status'], 'AVAILABLE')
+        payload = {'ref': 'main', 'inputs': {
+            'source_pr': '380', 'expected_head_sha': 'a' * 40, 'verified_run_id': '123456',
+        }}
+        result = binding.dispatch(name, payload)
+        self.assertEqual(result['status'], 'dispatch_accepted')
+        self.assertTrue(result['reconciliation_required'])
+        self.assertEqual(result['source_sha'], 'a' * 40)
+        self.assertTrue(result['request_id'].startswith('verified-pr-'))
+        dispatch.assert_called_once_with(url, payload)
+        self.assertEqual(binding.dispatch(name, payload), result)
+        self.assertEqual(dispatch.call_count, 1)  # Dedupe accepted requests.
+
+        for altered in [
+            {'ref': 'dev', 'inputs': dict(payload['inputs'])},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'source_pr': '0'}},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'source_pr': '-4'}},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'verified_run_id': '0'}},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'expected_head_sha': 'bad'}},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'mode': 'publish'}},
+            {'ref': 'main', 'inputs': {'source_pr': '380'}},
+            {'ref': 'main', 'inputs': {**payload['inputs'], 'request_id': 'untrusted'}},
+        ]:
+            with self.subTest(altered=altered), self.assertRaisesRegex(self.module.ActionError, 'workflow_payload_invalid'):
+                binding.dispatch(name, altered)
+        self.assertEqual(dispatch.call_count, 1)
+
+    def test_verified_patient_preview_disabled_by_default(self):
+        name = 'submitKggVerifiedPatientPrPreview'
+        with self.assertRaisesRegex(self.module.ActionError, 'workflow_host_disabled'):
+            self.binding.dispatch(name, {'ref': 'main', 'inputs': {
+                'source_pr': '380', 'expected_head_sha': 'a' * 40, 'verified_run_id': '123456',
+            }})
+        self.assertNotIn(name, self.binding.actions)
+        self.transport.assert_not_called()
+
+    def test_verified_preview_native_transport_uses_fixed_github_endpoint(self):
+        from unittest.mock import patch
+        name = 'submitKggVerifiedPatientPrPreview'
+        route = '/repos/Kayus24/kgg/actions/workflows/kgg-patient-pr-preview.yml/dispatches'
+        payload = {'ref': 'main', 'inputs': {
+            'source_pr': '380', 'expected_head_sha': 'a' * 40, 'verified_run_id': '123456',
+        }}
+        process = Mock(returncode=0, stdout='HTTP/2.0 204 No Content\r\n\r\n', stderr='')
+        with patch.object(self.module.shutil, 'which', return_value='gh.exe'), \
+             patch.object(self.module.subprocess, 'run', return_value=process) as called:
+            result = self.module.github_dispatch(route, payload)
+        self.assertEqual(result, {'status': 'dispatch_accepted', 'http_status': 204})
+        args = called.call_args.args[0]
+        self.assertEqual(args[-1], route)
+        self.assertIn('POST', args)
+        self.assertNotIn('shell', called.call_args.kwargs)
+        self.assertEqual(json.loads(called.call_args.kwargs['input']), payload)
+        self.assertTrue('request_id' not in payload['inputs'])  # Workflow accepts only 3 exact inputs.
+        with self.assertRaisesRegex(self.module.ActionError, 'workflow_route_invalid'):
+            self.module.github_dispatch('/repos/Kayus24/kgg/actions/workflows/not-allowed.yml/dispatches', payload)
 
     def test_fixed_resource_and_issue_identity_never_fetch_arbitrary_paths(self):
         with self.assertRaisesRegex(self.module.ActionError, 'kgg_resource_invalid'):

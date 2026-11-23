@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "90f91614970a3b227d334a2964efb44dd21af541ed9d4176146890159306bec0"
+      "sha256": "1644ca12baa1465d6ded70c6bc08a077b41ecbfa87e89840fa22363601d723c2"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",
@@ -197,7 +197,7 @@
     },
     {
       "path": "kgg-plugin/mcp/kgg_actions.py",
-      "sha256": "82f1342a30ee3c6506e133e5741f5d5e4575c891f5e9af103cc82992355d6272"
+      "sha256": "4bdf30c310f20b8e54dbc42b481b0462c74275282127fec5b004537d84f2c16b"
     },
     {
       "path": "kgg-plugin/mcp/kgg_action_routes.json",
@@ -205,7 +205,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_action_binding.py",
-      "sha256": "2857bc8d5b72e96304293d8ae4b2507425557e21e385015976faa03a9c171f5c"
+      "sha256": "e07d1b10adb37606ad372dda44872c9efb79f7c2b944affe985eefd10b8bf89d"
     },
     {
       "path": "release-pipeline/test_kgg_navigation.py",
@@ -237,7 +237,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_workflow_dispatch.py",
-      "sha256": "6c6f42bc919556b5468776fb93978867a2777c9eea47f6052a83be79dc6e18c7"
+      "sha256": "4d287c9735c98251e1cb41aa4184d1fe9c6867e876c90b362b79584a3c184854"
     }
   ]
 }
