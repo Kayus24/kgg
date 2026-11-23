@@ -6,7 +6,10 @@ on:
       - "android-wrapper/**"
       - "device-test/**"
       - "patient-start-scan.js"
-      - "release-pipeline/kgg_dual_device_*.js"
+      # kgg_dual_device_package.js packages the web/device-test bundle only; its
+      # --self-test runs in the required test battery (core-gate), so it must not
+      # trigger APK builds on its own.
+      - "release-pipeline/kgg_dual_device_job.js"
       - "release-pipeline/test_kgg_dual_device_v404.py"
       - "therapist-app/android_update_manifest.json"
       - ".github/workflows/android-wrapper-check.yml"
