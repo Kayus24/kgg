@@ -127,6 +127,8 @@ jobs:
         env:
           KGG_ALLOW_RELEASE_DRIFT: ${{ (needs.scope.outputs.pipeline_only == 'true' || contains(github.event.pull_request.labels.*.name, 'kgg-no-release')) && '1' || '' }}
         run: python release-pipeline/kgg_test_battery.py --level critical
+      - name: Verify patient PR preview contract
+        run: python -m unittest discover -s release-pipeline -p test_kgg_patient_pr_preview.py
       - name: Run patient PWA contract smoke
         if: needs.scope.outputs.pwa_contract == 'true'
         shell: bash

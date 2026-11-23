@@ -1,0 +1,163 @@
+name: KGG Verified Patient PR Preview
+on:
+  workflow_dispatch:
+    inputs:
+      source_pr:
+        type: string
+        required: true
+      expected_head_sha:
+        type: string
+        required: true
+      verified_run_id:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: kgg-patient-pr-preview
+  cancel-in-progress: false
+
+env:
+  SOURCE_PR: ${{ inputs.source_pr }}
+  SOURCE_SHA: ${{ inputs.expected_head_sha }}
+  VERIFIED_RUN: ${{ inputs.verified_run_id }}
+
+jobs:
+  stage:
+    if: github.repository == 'Kayus24/kgg' && github.ref == 'refs/heads/main' && github.ref_protected
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      artifact_id: ${{ steps.artifact.outputs.artifact-id }}
+      request_id: ${{ steps.preview.outputs.request_id }}
+      meta_hash: ${{ steps.preview.outputs.meta_hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build from verified inert blobs
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python release-pipeline/kgg_patient_pr_preview.py build \
+            "$SOURCE_PR" "$SOURCE_SHA" "$VERIFIED_RUN" "$GITHUB_SHA" "$RUNNER_TEMP/patient"
+          request_id="pr-$SOURCE_PR-$SOURCE_SHA"
+          echo "request_id=$request_id" >> "$GITHUB_OUTPUT"
+          echo "meta_hash=$(sha256sum "$RUNNER_TEMP/patient/previews/$request_id/meta.json" | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: verified-patient-preview-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/patient/previews/${{ steps.preview.outputs.request_id }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+      - name: Test first load, storage and recovery
+        env:
+          REQUEST_ID: ${{ steps.preview.outputs.request_id }}
+        run: |
+          set -euo pipefail
+          npm ci --prefix release-pipeline --ignore-scripts
+          npm exec --prefix release-pipeline -- playwright install --with-deps chromium
+          python release-pipeline/kgg_update_recovery_smoke.py
+          preview="$RUNNER_TEMP/patient/previews/$REQUEST_ID"
+          node release-pipeline/kgg_patient_preview_first_load_smoke.js "$preview"
+          node release-pipeline/kgg_patient_preview_storage_isolation_smoke.js "$PWD" "$preview" "$REQUEST_ID"
+
+  publish:
+    needs: stage
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: patient-pr-preview
+    env:
+      REQUEST_ID: ${{ needs.stage.outputs.request_id }}
+      META_HASH: ${{ needs.stage.outputs.meta_hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.stage.outputs.artifact_id }}
+          path: ${{ runner.temp }}/verified/previews/${{ needs.stage.outputs.request_id }}
+      - name: Verify artifact integrity and current PR/CI binding
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          meta="$RUNNER_TEMP/verified/previews/$REQUEST_ID/meta.json"
+          test "$(sha256sum "$meta" | cut -d ' ' -f1)" = "$META_HASH"
+          python release-pipeline/kgg_patient_pr_preview.py verify \
+            "$SOURCE_PR" "$SOURCE_SHA" "$VERIFIED_RUN" "$GITHUB_SHA" "$RUNNER_TEMP/verified"
+      - name: Checkout dedicated preview destination
+        uses: actions/checkout@v4
+        with:
+          repository: Kayus24/kgg-patient-preview
+          ref: main
+          path: patient-pages
+          token: ${{ secrets.KGG_PATIENT_PREVIEW_PUBLISH_TOKEN }}
+          persist-credentials: true
+      - name: Recheck binding and push the immutable preview directory
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source="$RUNNER_TEMP/verified/previews/$REQUEST_ID"
+          target="patient-pages/previews/$REQUEST_ID"
+          test ! -e "$target" && test ! -L "$target"
+          test ! -L patient-pages/previews
+          mkdir -p patient-pages/previews
+          cp -a "$source" "$target"
+          git -C patient-pages config user.name 'github-actions[bot]'
+          git -C patient-pages config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C patient-pages add -f -- "previews/$REQUEST_ID"
+          git -C patient-pages commit -m "Verified synthetic patient PR preview $REQUEST_ID"
+          python release-pipeline/kgg_patient_pr_preview.py verify \
+            "$SOURCE_PR" "$SOURCE_SHA" "$VERIFIED_RUN" "$GITHUB_SHA" "$RUNNER_TEMP/verified"
+          git -C patient-pages push origin HEAD:refs/heads/main
+          echo "Preview repository commit: $(git -C patient-pages rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify public first load and recovery bytes
+        run: |
+          set -euo pipefail
+          base="https://kayus24.github.io/kgg-patient-preview/previews/$REQUEST_ID"
+          staged="$RUNNER_TEMP/verified/previews/$REQUEST_ID"
+          url="$(jq -er .url "$staged/meta.json")"
+          recovery="$(jq -er .recoveryUrl "$staged/meta.json")"
+          for attempt in {1..20}; do
+            if curl -fsS --max-time 8 "$base/meta.json" -o "$RUNNER_TEMP/public-meta" &&
+               cmp -s "$staged/meta.json" "$RUNNER_TEMP/public-meta"; then
+              curl -fsS --max-time 8 "$url" -o "$RUNNER_TEMP/public-index"
+              curl -fsS --max-time 8 "$recovery" -o "$RUNNER_TEMP/public-recovery"
+              curl -fsS --max-time 8 "$base/service-worker.js" -o "$RUNNER_TEMP/public-worker"
+              cmp "$staged/index.html" "$RUNNER_TEMP/public-index"
+              cmp "$staged/update-recovery.html" "$RUNNER_TEMP/public-recovery"
+              cmp "$staged/service-worker.js" "$RUNNER_TEMP/public-worker"
+              {
+                echo "Patient preview: $url"
+                echo "Recovery: $recovery"
+                echo "Metadata SHA-256: $META_HASH"
+                echo "Required Gate run: $VERIFIED_RUN"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Pages did not serve the expected preview metadata" >&2
+          exit 1
