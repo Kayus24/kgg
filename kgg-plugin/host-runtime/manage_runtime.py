@@ -21,6 +21,11 @@ from typing import Callable
 ROOT = Path(r"C:\src\kgg-runtime\ui-lab")
 SCHEMA = "kgg-ui-lab/active-runtime/v1"
 APPROVED_CONTRACT = "0cc291eface08da646164bc0785b78f1800f6b201255ad0cf3d581c13973f071"
+# Only exact pre-reviewed catalog versions are accepted; no runtime-provided trust.
+STAGED_PREVIEW_CONTRACT = "4ca861d8504daed6d2f1698306f97dab3dbe2bea0506fc39ef1eae0c816d685d"
+APPROVED_CONTRACTS = (APPROVED_CONTRACT, STAGED_PREVIEW_CONTRACT)
+TRUSTED_MIGRATED_LAUNCHER = Path(os.environ.get("APPDATA", "")) / "tunnel-client/bin/kgg_ui_lab_mcp_real.py"
+TRUSTED_MIGRATED_LAUNCHER_SHA256 = "3960e0fbb80e6c325b5a631d38e36f01956cf15e250454766e000bc595949f84"
 KEYS = frozenset(("schema", "release", "server_sha256", "server_version", "tool_contract_sha256"))
 RELEASE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
@@ -33,6 +38,16 @@ class PromotionError(RuntimeError):
 
 def sha(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _trusted_contracts(contract: str | tuple[str, ...]) -> frozenset[str]:
+    """Validate a local policy, not hashes discovered from a candidate runtime."""
+    values = (contract,) if isinstance(contract, str) else contract
+    if (not isinstance(values, tuple) or not 1 <= len(values) <= 2
+            or any(not isinstance(x, str) or not DIGEST.fullmatch(x) for x in values)
+            or len(set(values)) != len(values)):
+        raise PromotionError("approved_contract_policy_invalid")
+    return frozenset(values)
 
 
 def _validate_release(root: Path, name: str) -> Path:
@@ -56,7 +71,7 @@ def _read_manifest(root: Path, filename: str, contract: str) -> tuple[bytes, dic
         raise PromotionError("manifest_invalid_schema")
     if not isinstance(obj["server_sha256"], str) or not DIGEST.fullmatch(obj["server_sha256"]):
         raise PromotionError("manifest_invalid_server_sha")
-    if obj["tool_contract_sha256"] != contract:
+    if obj["tool_contract_sha256"] not in _trusted_contracts(contract):
         raise PromotionError("manifest_contract_changed")
     _validate_release(root, obj["release"])
     if not isinstance(obj["server_version"], str) or not SEMVER.fullmatch(obj["server_version"]):
@@ -64,11 +79,11 @@ def _read_manifest(root: Path, filename: str, contract: str) -> tuple[bytes, dic
     return raw, obj
 
 
-def verify(root: Path, manifest: dict, *, contract: str = APPROVED_CONTRACT) -> dict:
+def verify(root: Path, manifest: dict, *, contract: str | tuple[str, ...] = APPROVED_CONTRACTS) -> dict:
     """Fail closed on content, tool schema or version drift."""
     if not isinstance(manifest, dict) or set(manifest) != KEYS or manifest["schema"] != SCHEMA:
         raise PromotionError("manifest_invalid_schema")
-    if manifest["tool_contract_sha256"] != contract:
+    if manifest["tool_contract_sha256"] not in _trusted_contracts(contract):
         raise PromotionError("contract_not_approved")
     expected = manifest["server_sha256"]
     if not isinstance(expected, str) or not DIGEST.fullmatch(expected):
@@ -86,14 +101,16 @@ def verify(root: Path, manifest: dict, *, contract: str = APPROVED_CONTRACT) -> 
     if captured.getvalue():
         raise PromotionError("server_emitted_protocol_output")
     digest = sha(json.dumps(tools, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf8"))
-    if digest != contract or module.get("SERVER_VERSION") != manifest["server_version"]:
+    if digest != manifest["tool_contract_sha256"] or module.get("SERVER_VERSION") != manifest["server_version"]:
         raise PromotionError("tool_contract_or_version_mismatch")
+    if digest == STAGED_PREVIEW_CONTRACT and module["SERVER_VERSION"] != "1.5.0":
+        raise PromotionError("preview_contract_requires_server_1_5_0")
     if sha(path.read_bytes()) != expected:
         raise PromotionError("release_modified_during_validation")
     return manifest
 
 
-def candidate(root: Path, name: str, expected_server_sha: str, *, contract: str = APPROVED_CONTRACT) -> dict:
+def candidate(root: Path, name: str, expected_server_sha: str, *, contract: str | tuple[str, ...] = APPROVED_CONTRACTS) -> dict:
     if not isinstance(expected_server_sha, str) or not DIGEST.fullmatch(expected_server_sha):
         raise PromotionError("candidate_hash_must_be_pinned")
     path = _validate_release(root, name)
@@ -107,8 +124,11 @@ def candidate(root: Path, name: str, expected_server_sha: str, *, contract: str 
     version = module.get("SERVER_VERSION")
     if not isinstance(version, str) or not SEMVER.fullmatch(version):
         raise PromotionError("candidate_invalid_version")
+    actual_contract = sha(json.dumps(catalog, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf8"))
+    if actual_contract not in _trusted_contracts(contract):
+        raise PromotionError("tool_contract_or_version_mismatch")
     manifest = {"schema": SCHEMA, "release": name, "server_sha256": expected_server_sha,
-                "server_version": version, "tool_contract_sha256": contract}
+                "server_version": version, "tool_contract_sha256": actual_contract}
     verify(root, manifest, contract=contract)
     return manifest
 
@@ -165,7 +185,7 @@ def _exclusive(root: Path):
         file.close()
 
 
-def status(root: Path = ROOT, *, contract: str = APPROVED_CONTRACT) -> dict:
+def status(root: Path = ROOT, *, contract: str | tuple[str, ...] = APPROVED_CONTRACTS) -> dict:
     _, cur = _read_manifest(root, "current.json", contract)
     verify(root, cur, contract=contract)
     return cur
@@ -177,8 +197,9 @@ def promote(
     expected_active_sha: str,
     *,
     root: Path = ROOT,
-    contract: str = APPROVED_CONTRACT,
+    contract: str | tuple[str, ...] = APPROVED_CONTRACTS,
     post_switch_check: Callable[[], None] | None = None,
+    approve_contract_transition: bool = False,
 ) -> dict:
     """Compare-and-swap pointer; backup previous and restore on local failure.
 
@@ -193,6 +214,13 @@ def promote(
             raise PromotionError("active_pointer_changed")
         verify(root, previous, contract=contract)
         nxt = candidate(root, name, pinned_server_sha, contract=contract)
+        if nxt["tool_contract_sha256"] != previous["tool_contract_sha256"]:
+            if approve_contract_transition is not True:
+                raise PromotionError("contract_transition_requires_explicit_operator_enable")
+            # Require the exact launcher which boots both catalog versions safely.
+            if (not TRUSTED_MIGRATED_LAUNCHER.is_file()
+                    or sha(TRUSTED_MIGRATED_LAUNCHER.read_bytes()) != TRUSTED_MIGRATED_LAUNCHER_SHA256):
+                raise PromotionError("trusted_dual_contract_launcher_not_installed")
         if nxt == previous:
             return {"state": "UNCHANGED", "release": name, "active_sha": sha(old_raw)}
         _write_atomic(root, "previous.json", previous)
@@ -210,7 +238,7 @@ def promote(
                 "release": name, "active_sha": sha((root / "current.json").read_bytes())}
 
 
-def rollback(expected_active_sha: str, *, root: Path = ROOT, contract: str = APPROVED_CONTRACT) -> dict:
+def rollback(expected_active_sha: str, *, root: Path = ROOT, contract: str | tuple[str, ...] = APPROVED_CONTRACTS) -> dict:
     if not DIGEST.fullmatch(expected_active_sha):
         raise PromotionError("expected_active_sha_required")
     root = root.resolve(strict=True)
@@ -221,6 +249,9 @@ def rollback(expected_active_sha: str, *, root: Path = ROOT, contract: str = APP
         verify(root, current, contract=contract)
         _, previous = _read_manifest(root, "previous.json", contract)
         verify(root, previous, contract=contract)
+        if (current["tool_contract_sha256"] == APPROVED_CONTRACT
+                and previous["tool_contract_sha256"] == STAGED_PREVIEW_CONTRACT):
+            raise PromotionError("rollback_cannot_activate_new_contract")
         if current == previous:
             return {"state": "UNCHANGED", "release": current["release"], "active_sha": sha(current_raw)}
         # Preserve the rolled-back-from revision for potential diagnostics.
@@ -235,6 +266,7 @@ def main() -> int:
     parser.add_argument("--release")
     parser.add_argument("--server-sha256")
     parser.add_argument("--expect-active-sha256")
+    parser.add_argument("--approve-contract-transition", action="store_true")
     args = parser.parse_args()
     try:
         if args.operation == "status":
@@ -243,7 +275,10 @@ def main() -> int:
         elif args.operation == "verify-candidate":
             result = candidate(ROOT, args.release, args.server_sha256)
         elif args.operation == "promote":
-            result = promote(args.release, args.server_sha256, args.expect_active_sha256)
+            result = promote(
+                args.release, args.server_sha256, args.expect_active_sha256,
+                approve_contract_transition=args.approve_contract_transition,
+            )
         else:
             result = rollback(args.expect_active_sha256)
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))

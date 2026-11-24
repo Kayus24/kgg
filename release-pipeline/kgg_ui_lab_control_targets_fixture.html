@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>UI Lab Control Fixture</title></head>
+<body data-kgg-state="lang-de">
+  <button id="kggLangSwitch" type="button">DE zu EN</button>
+  <button data-kgg-action="pilot-action" id="pilot" type="button">Pilot</button>
+  <p id="private-text">Synthetic plan text must stay private</p>
+  <script>
+    const mode = new URLSearchParams(location.search).get("mode") || "normal";
+    const toggle = document.getElementById("kggLangSwitch");
+    toggle.addEventListener("click", () => {
+      document.body.dataset.kggState = "lang-en";
+      toggle.textContent = "EN zu DE";
+    });
+    if (mode === "duplicate") {
+      const second = document.getElementById("pilot").cloneNode(true);
+      second.id = "pilot-copy";
+      document.body.append(second);
+    }
+    if (mode === "disabled") document.getElementById("pilot").disabled = true;
+    if (mode === "hidden") document.getElementById("pilot").hidden = true;
+    if (mode === "aria-hidden") document.getElementById("pilot").setAttribute("aria-hidden", "true");
+  </script>
+</body>
+</html>

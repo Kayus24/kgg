@@ -855,6 +855,16 @@ TEST_REGISTRY = [
         "run": lambda: run([sys.executable, "-B", "-m", "unittest", "test_kgg_action_binding", "test_kgg_workflow_dispatch", "test_kgg_reference_provenance", "test_kgg_ui_lab_mcp_server", "test_kgg_ui_lab_mcp_adapter", "test_kgg_plugin_candidate", "test_kgg_plugin_candidate_gate"], cwd=ROOT / "release-pipeline"),
     },
     {
+        "id": "kgg-host-contract-transition",
+        "level": "critical",
+        "suite": "gpt",
+        "reason": "Versioned launcher/catalog transition must preserve old permissions, require explicit authorization, and retain a verified rollback.",
+        "run": lambda: run(
+            [sys.executable, "-B", "-m", "unittest", "discover", "-s", "kgg-plugin/host-runtime", "-p", "test_*.py"],
+            cwd=ROOT,
+        ),
+    },
+    {
         "id": "ui-lab-browser-acceptance",
         "level": "regression",
         "suite": "gpt",
@@ -863,6 +873,7 @@ TEST_REGISTRY = [
             run([sys.executable, "-B", "release-pipeline/test_kgg_navigation.py"]),
             run([node_executable(), "--test", "release-pipeline/test_kgg_browser_navigation.js"]),
             run([sys.executable, "-B", "release-pipeline/test_kgg_width_sweep.py"]),
+            run([sys.executable, "-B", "-m", "unittest", "test_kgg_fast_controls"], cwd=ROOT / "release-pipeline"),
         ),
     },
     {

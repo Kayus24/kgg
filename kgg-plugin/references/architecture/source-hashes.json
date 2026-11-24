@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "0204b41dacbb50a44c8ac67364bc524d1c9a49598ecd8ff2a8d6469c050135b8"
+      "sha256": "8cece815be3069358ee87d3794b585bb5e6a1fbe6117c4d787060749c347f7e8"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "90f91614970a3b227d334a2964efb44dd21af541ed9d4176146890159306bec0"
+      "sha256": "ec5abfcc6d82f3f72530901182faa430dddaf0dc40f4b65d1b9576e01398d587"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",
@@ -133,7 +133,7 @@
     },
     {
       "path": "kgg-plugin/mcp/real_browser.py",
-      "sha256": "1ba3206075c8e86eb211d3a583e18265300da093dcfb08be788874e6c7689059"
+      "sha256": "b1dcb52061116b504707ee9f6957d6892287ccb564e66379663f61665066a3e2"
     },
     {
       "path": "kgg-plugin/mcp/browser_host.js",
@@ -141,7 +141,7 @@
     },
     {
       "path": "kgg-plugin/mcp/browser_session_host.js",
-      "sha256": "878078acc8e1a00bfa6a20f9a978134571a1f287b3efc87e13772192eede62c2"
+      "sha256": "8966f90408ca6d99e04b174483c040af4e8154ae591c16ea839ae5a774066f74"
     },
     {
       "path": "release-pipeline/kgg_ui_lab_real_fixture.html",
@@ -185,7 +185,7 @@
     },
     {
       "path": "kgg-plugin/mcp/README.md",
-      "sha256": "901cd880f27cea7d7e365b04230ec5aadf89a3e66c0e58f699eba6203eac3e41"
+      "sha256": "ff40d69c0cc65b42cd5712256d958e596050103afdcd4da494c380a96efcf798"
     },
     {
       "path": "release-pipeline/test_kgg_vc12_migration_contract.py",
@@ -197,7 +197,7 @@
     },
     {
       "path": "kgg-plugin/mcp/kgg_actions.py",
-      "sha256": "82f1342a30ee3c6506e133e5741f5d5e4575c891f5e9af103cc82992355d6272"
+      "sha256": "4bdf30c310f20b8e54dbc42b481b0462c74275282127fec5b004537d84f2c16b"
     },
     {
       "path": "kgg-plugin/mcp/kgg_action_routes.json",
@@ -205,7 +205,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_action_binding.py",
-      "sha256": "2857bc8d5b72e96304293d8ae4b2507425557e21e385015976faa03a9c171f5c"
+      "sha256": "e07d1b10adb37606ad372dda44872c9efb79f7c2b944affe985eefd10b8bf89d"
     },
     {
       "path": "release-pipeline/test_kgg_navigation.py",
@@ -237,7 +237,7 @@
     },
     {
       "path": "release-pipeline/test_kgg_workflow_dispatch.py",
-      "sha256": "6c6f42bc919556b5468776fb93978867a2777c9eea47f6052a83be79dc6e18c7"
+      "sha256": "4d287c9735c98251e1cb41aa4184d1fe9c6867e876c90b362b79584a3c184854"
     }
   ]
 }

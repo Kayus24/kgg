@@ -168,6 +168,21 @@ async function stateValue(page, policy) {
     const node = document.querySelector(`[${config.state_attribute}]`);
     const explicit = node?.getAttribute(config.state_attribute) || document.body?.getAttribute(config.state_attribute);
     if (explicit) return { kind: "explicit", value: explicit };
+    // Native KGG pages have no test markers. Report only fixed UI states,
+    // never exercise names, form values or plan contents. Generic hosts keep
+    // their own contract; hidden modal DOM must not attest an open modal.
+    if (config.evidence_namespace === "kgg-ui-lab") {
+      const visible = element => !!element && element.getClientRects().length > 0 &&
+        getComputedStyle(element).visibility !== "hidden";
+      if (document.querySelector("#plan #list") && document.querySelector("#pad .padBox")) {
+        if (visible(document.querySelector("#pad:not(.hide) .padBox"))) return { value: "patient-numpad" };
+        if (visible(document.querySelector("#plan #list"))) return { value: "patient-plan" };
+      }
+      if (document.querySelector("#planList") && document.querySelector("#editorModal .editorSheet")) {
+        if (visible(document.querySelector("#editorModal.open .editorSheet"))) return { value: "therapist-editor" };
+        if (visible(document.querySelector("#planList"))) return { value: "therapist-plan" };
+      }
+    }
     // Some supported synthetic patient previews expose a bounded language
     // toggle but no data-kgg-state marker. Expose only that non-sensitive
     // state, never page text, values, or storage contents.
@@ -182,13 +197,62 @@ async function stateValue(page, policy) {
   return safeText(String(marker.value), "state");
 }
 
+// Expose only stable app-owned action IDs, never DOM text or patient values.
+async function discoverControls(page, policy) {
+  assertSafePage();
+  return page.evaluate(config => {
+    const candidates = [...document.querySelectorAll("[" + config.action_attribute + "]")];
+    const language = config.language_toggle_id ? document.getElementById(config.language_toggle_id) : null;
+    if (language && !candidates.includes(language)) candidates.push(language);
+    // Never declare a label unique when later DOM candidates were not checked.
+    if (candidates.length > 80) return [];
+    const counts = new Map();
+    for (const element of candidates) {
+      if (!element.matches('button,input[type="button"],input[type="submit"],[role="button"]')) continue;
+      const label = element === language ? "language-toggle" : element.getAttribute(config.action_attribute);
+      if (!/^[a-z][a-z0-9._-]{0,63}$/.test(label || "")) continue;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const visible = rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.bottom > 0 &&
+        rect.left < innerWidth && rect.top < innerHeight && style.visibility === "visible" &&
+        style.display !== "none" && Number(style.opacity) > 0 &&
+        !element.closest('[hidden],[inert],[aria-hidden="true"]');
+      const enabled = !element.matches(":disabled") && element.getAttribute("aria-disabled") !== "true";
+      const item = counts.get(label) || { count: 0, actionable: false };
+      item.count++;
+      item.actionable = visible && enabled;
+      counts.set(label, item);
+    }
+    return [...counts.entries()]
+      .filter(([, item]) => item.count === 1 && item.actionable)
+      .map(([label]) => ({ role: "button", label }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+      .slice(0, 24);
+  }, policy);
+}
+
 async function locateAction(page, label, policy) {
-  const escaped = label.replace(/"/g, "");
-  const marked = page.locator(`[${policy.action_attribute}="${escaped}"]`).first();
-  if (await marked.count()) return marked;
-  const roleButton = page.getByRole("button", { name: label, exact: true }).first();
-  if (await roleButton.count()) return roleButton;
-  fail("action_target_not_found");
+  // A matching ID and action marker may refer to the same DOM node; CSS union
+  // deduplicates it. A second match must never be silently chosen via .first().
+  const marker = "[" + policy.action_attribute + '="' + label + '"]';
+  const toggle = label === "language-toggle" && policy.language_toggle_id ?
+    ',[id="' + policy.language_toggle_id + '"]' : "";
+  let target = page.locator(marker + toggle);
+  if (!(await target.count())) target = page.getByRole("button", { name: label, exact: true });
+  const count = await target.count();
+  if (!count) fail("action_target_not_found");
+  if (count !== 1) fail("action_target_ambiguous");
+  if (!(await target.isVisible()) || await target.evaluate(element => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.bottom <= 0 ||
+      rect.left >= innerWidth || rect.top >= innerHeight || Number(style.opacity) <= 0 ||
+      !!element.closest('[hidden],[inert],[aria-hidden="true"]');
+  })) fail("action_target_not_visible");
+  if (!(await target.isEnabled()) || await target.evaluate(element =>
+    element.matches(":disabled") || element.getAttribute("aria-disabled") === "true"
+  )) fail("action_target_disabled");
+  return target;
 }
 
 async function performAction(page, step, policy) {
@@ -282,7 +346,8 @@ async function handle(request) {
     assertSafePage();
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber, session.policy);
-    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact] };
+    const controls = await discoverControls(session.page, session.policy);
+    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], controls };
   }
   if (request.command === "act") {
     assertSafePage();

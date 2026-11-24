@@ -19,6 +19,34 @@ MAX_PAYLOAD_JSON_BYTES = 120_000
 MAX_TRACKED_DISPATCHES = 256
 PROTECTED_WORKFLOWS = frozenset({"submitKggMainGate", "submitKggAdminEditorSyncSnapshotPr"})
 MEMORY_WORKFLOW = "submitKggMemoryUpdate"
+VERIFIED_PR_PREVIEW = 'submitKggVerifiedPatientPrPreview'
+
+# Trusted-host-only dispatch: separate from the 30 editor/OpenAPI Action routes.
+# Only GitHub's protected main workflow can publish this inert-blob PR preview.
+HOST_ONLY_WORKFLOW_ACTIONS = {
+    VERIFIED_PR_PREVIEW: {
+        'operation': VERIFIED_PR_PREVIEW,
+        'method': 'POST',
+        'consequential': False,
+        'path': '/repos/Kayus24/kgg/actions/workflows/kgg-patient-pr-preview.yml/dispatches',
+        'request_schema': {
+            'type': 'object',
+            'required': ['ref', 'inputs'],
+            'properties': {
+                'ref': {'type': 'string', 'enum': ['main']},
+                'inputs': {
+                    'type': 'object',
+                    'required': ['source_pr', 'expected_head_sha', 'verified_run_id'],
+                    'properties': {
+                        'source_pr': {'type': 'string', 'pattern': '^[1-9][0-9]{0,8}$'},
+                        'expected_head_sha': {'type': 'string', 'pattern': '^[0-9a-f]{40}$'},
+                        'verified_run_id': {'type': 'string', 'pattern': '^[1-9][0-9]{0,19}$'},
+                    },
+                },
+            },
+        },
+    },
+}
 
 
 class ActionError(ValueError):
@@ -117,7 +145,7 @@ def _workflow_body(action, payload):
 
 def github_dispatch(route, payload):
     """One fixed-route POST; an accepted dispatch is never a workflow PASS."""
-    action = next((a for a in _catalog_actions().values() if a['method'] == 'POST' and a['path'] == route), None)
+    action = next((a for a in (*_catalog_actions().values(), *HOST_ONLY_WORKFLOW_ACTIONS.values()) if a['method'] == 'POST' and a['path'] == route), None)
     if action is None:
         raise ActionError('workflow_route_invalid')
     _body, encoded = _workflow_body(action, payload)
@@ -168,8 +196,9 @@ class KggActions:
     def __init__(self, *, transport=None, dispatch_transport=None, allowed_workflow_operations=()):
         self.transport = transport or github_read
         self.actions = _catalog_actions()
+        self.dispatch_actions = {**self.actions, **HOST_ONLY_WORKFLOW_ACTIONS}
         if not isinstance(allowed_workflow_operations, (tuple, list, set, frozenset)) or any(
-            not isinstance(name, str) or name not in self.actions or self.actions[name]['method'] != 'POST'
+            not isinstance(name, str) or name not in self.dispatch_actions or self.dispatch_actions[name]['method'] != 'POST'
             for name in allowed_workflow_operations
         ):
             raise ActionError('workflow_allowlist_invalid')
@@ -195,11 +224,12 @@ class KggActions:
             'submitKggDeviceTest': ['separate_host_device_test_authorization', 'exact_current_main_source_sha', 'authorized_physical_devices'],
             'submitKggAdminEditorSyncPreflight': ['separate_host_editor_attestation', 'published_editor_checked', 'TARGET_PASS'],
             'submitKggPatientPreviewFromAdmin': ['synthetic_only_guarded_payload', 'both_editors_live_synced_before_publish'],
+            VERIFIED_PR_PREVIEW: ['protected_main_workflow', 'marked_same_repo_open_pr', 'exact_pr_head', 'successful_current_required_gate', 'isolated_preview_destination'],
             'submitKggAgentCoordinationEvent': ['non_sensitive_v1_event', 'validate_then_identical_apply'],
             MEMORY_WORKFLOW: ['validate_only', 'no_model_approval_metadata', 'apply_requires_external_validated_payload_binding'],
         }
         actions = []
-        for operation, action in self.actions.items():
+        for operation, action in self.dispatch_actions.items():
             if action['method'] != 'POST':
                 continue
             protected = operation in PROTECTED_WORKFLOWS
@@ -224,7 +254,7 @@ class KggActions:
 
     def dispatch(self, operation, payload):
         """Dispatch each explicit phase once, keeping the request's other inputs immutable."""
-        action = self.actions.get(operation) if isinstance(operation, str) else None
+        action = self.dispatch_actions.get(operation) if isinstance(operation, str) else None
         if action is None or action['method'] != 'POST':
             raise ActionError('workflow_operation_invalid')
         if operation in PROTECTED_WORKFLOWS:
@@ -232,8 +262,8 @@ class KggActions:
         checked, encoded = _workflow_body(action, payload)
         if operation not in self.allowed_workflow_operations:
             raise ActionError('workflow_host_disabled')
-        request_id = checked['inputs']['request_id']
         digest = hashlib.sha256(encoded.encode('utf-8')).hexdigest()
+        request_id = ('verified-pr-' + digest[:24]) if operation == VERIFIED_PR_PREVIEW else checked['inputs']['request_id']
         phase = checked['inputs'].get('mode')
         bound_body = deepcopy(checked)
         bound_body['inputs'].pop('mode', None)
@@ -277,6 +307,8 @@ class KggActions:
         }
         if 'source_sha' in checked['inputs']:
             result['source_sha'] = checked['inputs']['source_sha']
+        if operation == VERIFIED_PR_PREVIEW:
+            result['source_sha'] = checked['inputs']['expected_head_sha']
         with self._dispatch_lock:
             entry['result'] = result
         return deepcopy(result)

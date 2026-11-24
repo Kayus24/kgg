@@ -33,7 +33,7 @@ import zlib
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "kgg-ui-lab"
-SERVER_VERSION = "1.4.0"
+SERVER_VERSION = "1.5.0"
 MCP_SCHEMA = "kgg-ui-lab/mcp-server/v1"
 SESSION_SCHEMA = "kgg-ui-lab/session/v1"
 REQUEST_SCHEMA = "kgg-ui-lab/request/v1"
@@ -835,7 +835,7 @@ def tool_catalog() -> list[dict[str, Any]]:
         _tool("get_ticket_state", "Read a bounded GitHub issue summary when the GitHub binding is enabled; synthetic mode is labeled explicitly. Issue numbers are not Memory ticket IDs. Never writes or dispatches.", {"actor": actor, "ticket_id": {"type": "string", "pattern": "^#?[0-9]{1,6}$"}}, ["actor", "ticket_id"], read_only=True, destructive=False, idempotent=True, open_world=True),
         _tool("get_kgg_action_capabilities", "List the 30 canonical KGG Action routes and distinguish bound reads from external write gates.", {"actor": actor}, ["actor"], read_only=True, destructive=False, idempotent=True, open_world=False),
         _tool("run_kgg_action", "Read one allowlisted KGG Main, Memory, coordination, run, job or artifact operation. Every remote write fails with external_gate_required; use its established Action gate.", {"actor": actor, "operation": {"type": "string", "enum": list(_load_kgg_actions_module().KggActions().actions)}, "payload": {"type": "object", "additionalProperties": True}}, ["actor", "operation", "payload"], read_only=True, destructive=False, idempotent=True, open_world=True),
-        _tool("dispatch_kgg_workflow", "Dispatch one canonical KGG workflow only when explicitly authorized by the trusted host allowlist. This writes a GitHub Actions run. Main, Snapshot PR and Memory apply remain externally gated; actor labels and model approval phrases grant no permission. Accepted dispatch requires read-only run/artifact reconciliation and is not a completed test or release.", {"actor": actor, "operation": {"type": "string", "enum": [name for name, route in _load_kgg_actions_module().KggActions().actions.items() if route["method"] == "POST"]}, "payload": {"type": "object", "additionalProperties": True}}, ["actor", "operation", "payload"], read_only=False, destructive=False, idempotent=False, open_world=True),
+        _tool("dispatch_kgg_workflow", "Dispatch one canonical KGG workflow only when explicitly authorized by the trusted host allowlist. This writes a GitHub Actions run. Main, Snapshot PR and Memory apply remain externally gated; actor labels and model approval phrases grant no permission. Accepted dispatch requires read-only run/artifact reconciliation and is not a completed test or release.", {"actor": actor, "operation": {"type": "string", "enum": [name for name, route in _load_kgg_actions_module().KggActions().dispatch_actions.items() if route["method"] == "POST"]}, "payload": {"type": "object", "additionalProperties": True}}, ["actor", "operation", "payload"], read_only=False, destructive=False, idempotent=False, open_world=True),
         _tool("get_kgg_resource", "Read a fixed current-Main KGG bootstrap, knowledge pack, resource manifest or source version. Does not certify editor synchronization.", {"actor": actor, "resource": {"type": "string", "enum": ["resource-manifest", "source-version", *[profile + '-' + topic for profile in ["admin", "patient"] for topic in ["bootstrap", "architecture", "operations", "safety", "testing"]]]}}, ["actor", "resource"], read_only=True, destructive=False, idempotent=True, open_world=True),
         _tool("start_ui_session", "Create or replace an in-memory session binding actor, lease, runner, and caller-supplied Fresh-Main SHA; it does not open a browser or write app/repository data.", {"session": session}, ["session"], read_only=False, destructive=False, idempotent=False, open_world=False),
         _tool("set_device_profile", "Change only the in-memory device profile of an active session; no app or repository write occurs.", {"session_id": session_id, "actor": actor, "profile": {"type": "string", "enum": sorted(PROFILES)}}, ["session_id", "actor", "profile"], read_only=False, destructive=False, idempotent=True, open_world=False),
@@ -908,11 +908,19 @@ class Runtime:
         if not isinstance(artifact, Mapping) or not isinstance(image, Mapping):
             _fail("visual_observation_missing_screenshot")
         state = str(observed.get("state", "unknown"))
-        observation_id = hashlib.sha256(f"{session['session_id']}|{artifact['sha256']}|{state}".encode("utf-8")).hexdigest()
+        controls = observed.get("controls", [])
+        if not isinstance(controls, list) or len(controls) > 24:
+            _fail("visual_controls_invalid")
+        # Bind the discovered controls to the same observation as the screenshot.
+        control_fingerprint = json.dumps(controls, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+        observation_id = hashlib.sha256(
+            f"{session['session_id']}|{artifact['sha256']}|{state}|{control_fingerprint}".encode("utf-8")
+        ).hexdigest()
         public_observation = {
             "id": observation_id,
             "state": state,
             "artifact": dict(artifact),
+            "controls": deepcopy(controls),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
         }
         stored_observation = {**public_observation, "image": dict(image), "viewport": deepcopy(session["viewport"])}
@@ -933,6 +941,21 @@ class Runtime:
             evidence["flow_status"] = flow_status
         self.evidence.setdefault(session["session_id"], []).append(evidence)
         return {"observation": public_observation, "evidence": evidence, "image": dict(image)}
+
+    def _record_visual_failure(self, session: Mapping[str, Any], request: Mapping[str, Any], phase: str, code: str) -> None:
+        # Retain only bounded diagnostics, never URLs, page contents or typed text.
+        # A failed capture has no screenshot; an earlier observation remains separate.
+        self.evidence.setdefault(session["session_id"], []).append({
+            "schema": "kgg-ui-lab/visual-evidence/v1",
+            "status": "FAIL",
+            "surface": "real_browser",
+            "operation": request["operation"],
+            "phase": phase,
+            "request_id": request["request_id"],
+            "main_sha": session["app"]["main_sha"],
+            "error_class": code,
+            "artifacts": [],
+        })
 
     def _open_visual_fallback(self, session: Mapping[str, Any], failure: str) -> dict[str, Any] | None:
         """Open G05 only after a real, deterministic Quick-Flow drift."""
@@ -1555,6 +1578,7 @@ class Runtime:
         session["status"] = "observing"
         session["used_requests"].append(checked["request_id"])
         real_browser = _load_real_browser_module()
+        phase = "initialize"
         try:
             self._close_visual(session["session_id"])
             browser = real_browser.PersistentRealBrowser(
@@ -1565,10 +1589,12 @@ class Runtime:
                 bootstrap=self.browser_bootstrap,
             )
             self.visual_sessions[session["session_id"]] = browser
+            phase = "observe"
             observed = browser.observe()
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
+            self._record_visual_failure(session, checked, phase, exc.code)
             _fail(exc.code)
         try:
             record = self._record_visual_observation(session, observed)
@@ -1607,11 +1633,13 @@ class Runtime:
             session["status"] = "failed"
             _fail("visual_session_not_initialized")
         real_browser = _load_real_browser_module()
+        phase = "act"
         try:
             action_result = browser.act(decision)
             action = action_result.get("action")
             if not isinstance(action, Mapping) or action.get("before_state") != observation["state"]:
                 _fail("visual_state_changed_before_action")
+            phase = "verify"
             verified = browser.observe()
             after_state = verified["state"]
             if after_state != decision["expected_state_after"]:
@@ -1623,6 +1651,7 @@ class Runtime:
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
+            self._record_visual_failure(session, checked, phase, exc.code)
             _fail(exc.code)
         except ServerError:
             self._close_visual(session["session_id"])
@@ -1653,6 +1682,10 @@ class Runtime:
         if action.get("navigation_completed") is True:
             evidence["navigation_completed"] = True
         self.evidence.setdefault(session["session_id"], []).append(evidence)
+        # Event count must track verified actions, not only synthetic flows.
+        session.setdefault("events", []).append({
+            "event": "visual_action_verified", "status": "PASS", "at": _now(),
+        })
         return {
             "schema": MCP_SCHEMA,
             "operation": "execute_visual_action",

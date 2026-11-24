@@ -22,6 +22,19 @@ The decision is supplied by the calling agent; the bridge never invents a
 model decision. The default remains synthetic and the real host fails closed
 when Playwright or the session helper is unavailable.
 
+For ChatGPT Fast clients unable to inspect image tool parts, the same observation
+also returns `observation.controls`: up to 24 visible, enabled, uniquely
+identified buttons from fixed `data-kgg-action` markers or the existing
+`kggLangSwitch` language toggle. Labels are stable action IDs, not page text,
+patient names, input values, URLs or arbitrary accessibility content. Prefer
+`execute_visual_action` with an exact observed label and fresh observation ID;
+the real browser rechecks uniqueness, visibility and enabled state before
+clicking. Ambiguous/hidden/disabled targets fail closed. Retain screenshot
+evidence for verification; a metadata-only result is not visual understanding.
+For this multi-step path, call `observe_visual_state` then
+`execute_visual_action`, not a new one-shot `capture_screenshot` request.
+The source change does not activate the installed ChatGPT plugin automatically.
+
 Version 0.2.0 adds public `back` and `reload` decisions and saved Flow steps.
 Back requires an existing permitted history entry. Main-frame redirects outside
 the permitted origin are blocked. Reload may preserve the state only after

@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Synthetic native state contract</title>
+<style>.hide{display:none}#editorModal{display:none}#editorModal.open{display:block}</style></head><body>
+<script>
+const surface=new URLSearchParams(location.search).get('surface');
+if(surface==='therapist')document.body.innerHTML='<div id="planList">Synthetic plan</div><div id="editorModal"><div class="editorSheet">Synthetic editor</div></div><button data-kgg-action="open" onclick="document.getElementById(\'editorModal\').classList.add(\'open\')">Open</button>';
+else document.body.innerHTML='<div id="plan"><div id="list">Synthetic plan</div></div><div id="pad" class="hide"><div class="padBox">Synthetic numpad</div></div><button data-kgg-action="open" onclick="document.getElementById(\'pad\').classList.remove(\'hide\')">Open</button>';
+</script></body></html>
