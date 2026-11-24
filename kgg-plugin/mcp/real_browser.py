@@ -417,6 +417,10 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
             raise RealBrowserError("real_browser_controls_invalid")
         seen.add(label)
     result["controls"] = [dict(item) for item in controls]
+    if "language" in value:
+        if value["language"] not in ("lang-de", "lang-en") or result["state"] not in ("patient-plan", "patient-numpad"):
+            raise RealBrowserError("real_browser_session_response_invalid")
+        result["language"] = value["language"]
     action = value.get("action")
     if action is not None:
         if not isinstance(action, Mapping) or not {"expected", "actual", "status", "before_state", "after_state"}.issubset(action):
@@ -430,6 +434,11 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
             "before_state": str(action["before_state"])[:200],
             "after_state": str(action["after_state"])[:200],
         }
+        for key, state_key in (("before_language", "before_state"), ("after_language", "after_state")):
+            if key in action:
+                if action[key] not in ("lang-de", "lang-en") or action[state_key] not in ("patient-plan", "patient-numpad"):
+                    raise RealBrowserError("real_browser_action_invalid")
+                result["action"][key] = action[key]
         if "navigation_completed" in action:
             if action["navigation_completed"] is not True:
                 raise RealBrowserError("real_browser_action_invalid")

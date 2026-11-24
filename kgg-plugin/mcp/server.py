@@ -913,6 +913,11 @@ class Runtime:
             _fail("visual_controls_invalid")
         # Bind the discovered controls to the same observation as the screenshot.
         control_fingerprint = json.dumps(controls, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+        language = observed.get("language")
+        if language is not None:
+            if language not in ("lang-de", "lang-en") or state not in ("patient-plan", "patient-numpad"):
+                _fail("visual_observation_language_invalid")
+            control_fingerprint += "|" + language
         observation_id = hashlib.sha256(
             f"{session['session_id']}|{artifact['sha256']}|{state}|{control_fingerprint}".encode("utf-8")
         ).hexdigest()
@@ -923,6 +928,8 @@ class Runtime:
             "controls": deepcopy(controls),
             "fallback": flow_status == "STALE_REQUIRES_REVIEW",
         }
+        if language is not None:
+            public_observation["language"] = language
         stored_observation = {**public_observation, "image": dict(image), "viewport": deepcopy(session["viewport"])}
         session["visual_observation"] = stored_observation
         history = session.setdefault("visual_observations", {})
@@ -937,6 +944,8 @@ class Runtime:
             "state_before": state,
             "artifacts": [dict(artifact)],
         }
+        if language is not None:
+            evidence["language_before"] = language
         if flow_status is not None:
             evidence["flow_status"] = flow_status
         self.evidence.setdefault(session["session_id"], []).append(evidence)
@@ -1639,15 +1648,39 @@ class Runtime:
             action = action_result.get("action")
             if not isinstance(action, Mapping) or action.get("before_state") != observation["state"]:
                 _fail("visual_state_changed_before_action")
+            # Preserve native layout states for existing callers. A language-toggle
+            # decision can explicitly verify the independently observed language.
+            language_action = (
+                observation["state"] in ("patient-plan", "patient-numpad")
+                and decision["operation"] in ("click", "tap")
+                and decision["label"] == "language-toggle"
+                and decision["expected_state_after"] in ("lang-de", "lang-en")
+            )
+            if language_action and (
+                observation.get("language") not in ("lang-de", "lang-en")
+                or action.get("before_language") != observation.get("language")
+            ):
+                _fail("visual_state_changed_before_action")
             phase = "verify"
             verified = browser.observe()
             after_state = verified["state"]
-            if after_state != decision["expected_state_after"]:
-                _fail("visual_expected_state_not_reached")
+            if language_action:
+                if (
+                    after_state != observation["state"]
+                    or action.get("after_state") != after_state
+                    or verified.get("language") != decision["expected_state_after"]
+                    or action.get("after_language") != verified.get("language")
+                ):
+                    _fail("visual_expected_state_not_reached")
+                if verified["language"] == observation["language"]:
+                    _fail("visual_state_unchanged")
+            else:
+                if after_state != decision["expected_state_after"]:
+                    _fail("visual_expected_state_not_reached")
+                if after_state == observation["state"] and decision["operation"] != "reload":
+                    _fail("visual_state_unchanged")
             if decision["operation"] in {"back", "reload"} and action.get("navigation_completed") is not True:
                 _fail("visual_navigation_unconfirmed")
-            if after_state == observation["state"] and decision["operation"] != "reload":
-                _fail("visual_state_unchanged")
         except real_browser.RealBrowserError as exc:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
@@ -1677,6 +1710,8 @@ class Runtime:
             "state_after": after_state,
             "artifacts": [before_artifact, after_artifact],
         }
+        if language_action:
+            evidence.update(language_before=observation["language"], language_after=verified["language"], verified_dimension="language")
         if flow_stale:
             evidence["flow_status"] = "STALE_REQUIRES_REVIEW"
         if action.get("navigation_completed") is True:
@@ -1694,6 +1729,7 @@ class Runtime:
                 "action": {key: action[key] for key in ("expected", "actual", "status", "before_state", "after_state")},
                 "state_before": observation["state"],
                 "state_after": after_state,
+                **({key: evidence[key] for key in ("language_before", "language_after", "verified_dimension")} if language_action else {}),
                 "artifacts": [before_artifact, after_artifact],
                 "flow_status": "STALE_REQUIRES_REVIEW" if flow_stale else "VISUAL_LOOP",
             },
