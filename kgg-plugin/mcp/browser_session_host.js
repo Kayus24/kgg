@@ -162,7 +162,7 @@ function artifact(runId, sequence, buffer, policy) {
   };
 }
 
-async function stateValue(page, policy) {
+async function stateSnapshot(page, policy) {
   assertSafePage();
   const marker = await page.evaluate(config => {
     const node = document.querySelector(`[${config.state_attribute}]`);
@@ -175,8 +175,16 @@ async function stateValue(page, policy) {
       const visible = element => !!element && element.getClientRects().length > 0 &&
         getComputedStyle(element).visibility !== "hidden";
       if (document.querySelector("#plan #list") && document.querySelector("#pad .padBox")) {
-        if (visible(document.querySelector("#pad:not(.hide) .padBox"))) return { value: "patient-numpad" };
-        if (visible(document.querySelector("#plan #list"))) return { value: "patient-plan" };
+        const nativeState = visible(document.querySelector("#pad:not(.hide) .padBox")) ? "patient-numpad" :
+          visible(document.querySelector("#plan #list")) ? "patient-plan" : null;
+        if (nativeState) {
+          const toggle = config.language_toggle_id && document.getElementById(config.language_toggle_id);
+          let language;
+          if (toggle) {
+            try { language = localStorage.getItem("kggPatientLang") === "en" ? "lang-en" : "lang-de"; } catch {}
+          }
+          return { value: nativeState, language };
+        }
       }
       if (document.querySelector("#planList") && document.querySelector("#editorModal .editorSheet")) {
         if (visible(document.querySelector("#editorModal.open .editorSheet"))) return { value: "therapist-editor" };
@@ -194,7 +202,12 @@ async function stateValue(page, policy) {
     }
     return { kind: "unknown", value: "unknown" };
   }, policy);
-  return safeText(String(marker.value), "state");
+  const state = safeText(String(marker.value), "state");
+  return { state, ...(marker.language === "lang-de" || marker.language === "lang-en" ? { language: marker.language } : {}) };
+}
+
+async function stateValue(page, policy) {
+  return (await stateSnapshot(page, policy)).state;
 }
 
 // Expose only stable app-owned action IDs, never DOM text or patient values.
@@ -256,7 +269,7 @@ async function locateAction(page, label, policy) {
 }
 
 async function performAction(page, step, policy) {
-  const before = await stateValue(page, policy);
+  const before = await stateSnapshot(page, policy);
   let navigationCompleted = false;
   if (step.operation === "click" || step.operation === "tap") {
     if (step.coordinates) {
@@ -293,7 +306,10 @@ async function performAction(page, step, policy) {
   } else {
     fail("step_operation_invalid");
   }
-  const result = { expected: step.label, actual: navigationCompleted ? `${step.operation} completed` : "action completed", status: "pass", before_state: before, after_state: await stateValue(page, policy) };
+  const after = await stateSnapshot(page, policy);
+  const result = { expected: step.label, actual: navigationCompleted ? `${step.operation} completed` : "action completed", status: "pass", before_state: before.state, after_state: after.state };
+  if (before.language) result.before_language = before.language;
+  if (after.language) result.after_language = after.language;
   if (navigationCompleted) result.navigation_completed = true;
   return result;
 }
@@ -301,7 +317,7 @@ async function performAction(page, step, policy) {
 async function screenshot(page, runId, sequence, policy) {
   assertSafePage();
   const image = await page.screenshot({ type: "png", animations: "disabled" });
-  return { artifact: artifact(runId, sequence, image, policy), state: await stateValue(page, policy) };
+  return { artifact: artifact(runId, sequence, image, policy), ...(await stateSnapshot(page, policy)) };
 }
 
 const session = { browser: null, context: null, page: null, runId: null, screenshotNumber: 0, originViolation: false, policy: DEFAULT_POLICY, viewport: null };
@@ -347,7 +363,8 @@ async function handle(request) {
     session.screenshotNumber += 1;
     const observed = await screenshot(session.page, session.runId, session.screenshotNumber, session.policy);
     const controls = await discoverControls(session.page, session.policy);
-    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], controls };
+    return { status: "PASS", error_class: "", state: observed.state, artifacts: [observed.artifact], controls,
+      ...(observed.language ? { language: observed.language } : {}) };
   }
   if (request.command === "act") {
     assertSafePage();
