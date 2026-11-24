@@ -13,8 +13,25 @@ async function swipe(page,context,x,y,dy){const c=await context.newCDPSession(pa
  for(const [width,height,count] of [[1280,800,1],[1280,800,2],[1280,800,3],[820,1180,2],[1024,640,1],[390,857,1]]){
   const context=await browser.newContext({viewport:{width,height},screen:{width,height},isMobile:true,hasTouch:true,locale:'de-DE'});
   const page=await context.newPage();page.setDefaultTimeout(6000);await context.route(/^https?:/,r=>r.abort());
-  await page.addInitScript(()=>{localStorage.setItem('kgg_pwa_install_prompt_seen_v1','synthetic');const ex=(id,name)=>({id,name,sets:3,side:'BI',loadUnit:'kg',weightUnit:'kg',metricUnit:'Wdh',unit:'Wdh',media:[]});localStorage.setItem('kgg_html_app_v2_state',JSON.stringify({planId:'synthetic-main',patient:{name:'Synthetic'},plan:[ex('a','Kniebeuger Maschine'),ex('b','Hip Thrust')]}))});
-  await page.goto(pathToFileURL(HTML).href);await page.locator('#closeAdminSecrets').tap();
+  const firstRun=width===1280&&count===1;
+  await page.addInitScript(firstRun=>{
+   localStorage.setItem('kgg_pwa_install_prompt_seen_v1','synthetic');
+   const ex=(id,name)=>({id,name,sets:3,side:'BI',loadUnit:'kg',weightUnit:'kg',metricUnit:'Wdh',unit:'Wdh',media:[]});
+   localStorage.setItem('kgg_html_app_v2_state',JSON.stringify({planId:'synthetic-main',patient:{name:'Synthetic'},plan:[ex('a','Kniebeuger Maschine'),ex('b','Hip Thrust')]}));
+   if(!firstRun){
+    localStorage.setItem('kgg_admin_local_secrets_v1',JSON.stringify({geminiKeys:['browser-test']}));
+   }
+  },firstRun);
+  await page.goto(pathToFileURL(HTML).href);
+  await page.waitForFunction(()=>typeof window.KGGTherapyCockpit?.importCode==='function'
+   &&window.KGGDataStore?.getCurrentPlan()?.exercises?.length===2);
+  const adminSetup=page.locator('#adminSecretsModal');
+  await adminSetup.waitFor({state:'attached'});
+  if(firstRun){
+   await adminSetup.waitFor({state:'visible'});
+   await adminSetup.locator('#closeAdminSecrets').tap();
+  }
+  assert(!await adminSetup.isVisible(),'admin setup dialog covers the Cockpit fixture');
   await page.evaluate(count=>{const a=KGGTherapyCockpit;for(let i=0;i<count;i++)a.importCode(a.encode({planId:'synthetic-'+i,name:'Synthetic '+i,exercises:a.registry.entries().slice(0,12).map(e=>({id:e.id,sets:8,previous:Array.from({length:8},()=>['20','10'])}))}))},count);
   // Existing entry gesture guard intentionally ignores Add for 450ms after opening.
   await page.waitForTimeout(600);

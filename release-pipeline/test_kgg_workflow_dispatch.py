@@ -234,7 +234,9 @@ class WorkflowDispatchTests(unittest.TestCase):
         binding = self.binding((SIX[0], "submitKggMemoryUpdate"))
         result = binding.workflow_capabilities()
         actions = {a["operation"]: a for a in result["actions"]}
-        self.assertEqual(len(actions), 9)
+        self.assertEqual(len(actions), 10)  # 9 editor operations + 1 host-only PR preview.
+        self.assertEqual(actions["submitKggVerifiedPatientPrPreview"]["status"], "HOST_DISABLED")
+        self.assertEqual(actions["submitKggVerifiedPatientPrPreview"]["allowed_modes"], [])
         self.assertEqual(actions[SIX[0]]["status"], "AVAILABLE")
         self.assertEqual(actions["submitKggDeviceTest"]["status"], "HOST_DISABLED")
         self.assertEqual(actions[PROTECTED[0]]["status"], "EXTERNAL_GATE_REQUIRED")
