@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+from unittest.mock import patch
 import tempfile
 import unittest
 
@@ -120,6 +121,110 @@ class RuntimeUpdate(unittest.TestCase):
     def test_pointer_swap_leaves_no_pending_files(self):
         self.promote()
         self.assertFalse(list(self.root.glob("*.pending")))
+
+
+class VersionedContractTransitionTests(unittest.TestCase):
+    """Synthetic transition: never reads or modifies the installed KGG host."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.old_tools = [{"name": "get_current_state", "inputSchema": {}}]
+        self.new_tools = [{"name": "get_current_state", "inputSchema": {"new": True}}]
+        self.old_digest = tool.sha(json.dumps(self.old_tools, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode())
+        self.new_digest = tool.sha(json.dumps(self.new_tools, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode())
+        self.approved = (self.old_digest, self.new_digest)
+        self.launcher = self.root / "launcher.py"
+        self.candidate_launcher = MODULE.with_name("kgg_ui_lab_mcp_real_v2_candidate.py")
+        self.patches = patch.multiple(
+            tool,
+            APPROVED_CONTRACT=self.old_digest,
+            STAGED_PREVIEW_CONTRACT=self.new_digest,
+            APPROVED_CONTRACTS=self.approved,
+            TRUSTED_MIGRATED_LAUNCHER=self.launcher,
+            TRUSTED_MIGRATED_LAUNCHER_SHA256=tool.sha(self.candidate_launcher.read_bytes()),
+        )
+        self.patches.start()
+        self.addCleanup(self.patches.stop)
+        self.old_sha = self.stage("old", "1.4.0", self.old_tools)
+        self.new_sha = self.stage("new", "1.5.0", self.new_tools)
+        self.old_manifest = tool.candidate(self.root, "old", self.old_sha, contract=self.approved)
+        tool._write_atomic(self.root, "current.json", self.old_manifest)
+
+    def stage(self, name, version, catalog):
+        f = self.root / name / "mcp" / "server.py"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(fake_source(version, catalog), encoding="utf-8")
+        return tool.sha(f.read_bytes())
+
+    def etag(self):
+        return tool.sha((self.root / "current.json").read_bytes())
+
+    def promote(self, approved=False):
+        return tool.promote(
+            "new", self.new_sha, self.etag(), root=self.root,
+            contract=self.approved, approve_contract_transition=approved,
+        )
+
+    def test_default_only_one_runtime_would_refuse_new_catalog(self):
+        with self.assertRaisesRegex(tool.PromotionError, "tool_contract_or_version_mismatch"):
+            tool.candidate(self.root, "new", self.new_sha, contract=self.old_digest)
+
+    def test_cross_contract_promotion_requires_explicit_operator_flag(self):
+        before = self.etag()
+        with self.assertRaisesRegex(tool.PromotionError, "contract_transition_requires_explicit_operator_enable"):
+            self.promote()
+        self.assertEqual(before, self.etag())
+        self.assertFalse((self.root / "previous.json").exists())
+
+    def test_cross_contract_promotion_rejects_missing_or_wrong_launcher(self):
+        before = self.etag()
+        with self.assertRaisesRegex(tool.PromotionError, "trusted_dual_contract_launcher_not_installed"):
+            self.promote(approved=True)
+        self.launcher.write_bytes(b"unauthorized fake launcher")
+        with self.assertRaisesRegex(tool.PromotionError, "trusted_dual_contract_launcher_not_installed"):
+            self.promote(approved=True)
+        self.assertEqual(before, self.etag())
+        self.assertFalse((self.root / "previous.json").exists())
+
+    def test_versioned_promotion_and_old_contract_rollback(self):
+        self.launcher.write_bytes(self.candidate_launcher.read_bytes())
+        old_pointer = self.etag()
+        outcome = self.promote(approved=True)
+        self.assertEqual(outcome["state"], "POINTER_SWITCHED_NOT_RESTARTED")
+        self.assertEqual(tool.status(self.root, contract=self.approved)["tool_contract_sha256"], self.new_digest)
+        self.assertNotEqual(old_pointer, self.etag())
+        restored = tool.rollback(self.etag(), root=self.root, contract=self.approved)
+        self.assertEqual(restored["state"], "POINTER_ROLLED_BACK_NOT_RESTARTED")
+        self.assertEqual(tool.status(self.root, contract=self.approved)["tool_contract_sha256"], self.old_digest)
+
+    def test_rollback_cannot_reactivate_new_contract_from_old(self):
+        new = tool.candidate(self.root, "new", self.new_sha, contract=self.approved)
+        tool._write_atomic(self.root, "previous.json", new)
+        before = self.etag()
+        with self.assertRaisesRegex(tool.PromotionError, "rollback_cannot_activate_new_contract"):
+            tool.rollback(before, root=self.root, contract=self.approved)
+        self.assertEqual(before, self.etag())
+
+    def test_unknown_catalog_or_old_version_with_new_schema_rejected(self):
+        with self.assertRaisesRegex(tool.PromotionError, "tool_contract_or_version_mismatch"):
+            bad_sha = self.stage("new", "1.5.0", [{"name": "unreviewed_tool"}])
+            tool.candidate(self.root, "new", bad_sha, contract=self.approved)
+        old_version_sha = self.stage("new", "1.4.0", self.new_tools)
+        with self.assertRaisesRegex(tool.PromotionError, "preview_contract_requires_server_1_5_0"):
+            tool.candidate(self.root, "new", old_version_sha, contract=self.approved)
+
+    def test_unsupported_contract_policy_rejected(self):
+        for bad in [(), (self.old_digest,) * 2, ["not-an-immutable-policy"], ("x" * 64, "g" * 64)]:
+            with self.subTest(bad=bad), self.assertRaisesRegex(tool.PromotionError, "approved_contract_policy_invalid"):
+                tool.candidate(self.root, "old", self.old_sha, contract=bad)
+
+    def test_migrated_launcher_source_hash_is_pinned(self):
+        self.assertEqual(
+            tool.sha(self.candidate_launcher.read_bytes()),
+            tool.TRUSTED_MIGRATED_LAUNCHER_SHA256,
+        )
 
 
 if __name__ == "__main__":

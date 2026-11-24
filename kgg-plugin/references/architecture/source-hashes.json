@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "0204b41dacbb50a44c8ac67364bc524d1c9a49598ecd8ff2a8d6469c050135b8"
+      "sha256": "064e47ee9c3f5a10142711f25b252b0720950fd31731e956dfc630b48d6d2c77"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -125,7 +125,7 @@
     },
     {
       "path": "kgg-plugin/mcp/server.py",
-      "sha256": "1644ca12baa1465d6ded70c6bc08a077b41ecbfa87e89840fa22363601d723c2"
+      "sha256": "d9286acaf9506b7ba7ad0d8f44625e9d0390e547ca1f9417de1ca5d188508510"
     },
     {
       "path": "kgg-plugin/mcp/flow_store.py",

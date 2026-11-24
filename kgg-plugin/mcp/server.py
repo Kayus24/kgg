@@ -33,7 +33,7 @@ import zlib
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "kgg-ui-lab"
-SERVER_VERSION = "1.4.0"
+SERVER_VERSION = "1.5.0"
 MCP_SCHEMA = "kgg-ui-lab/mcp-server/v1"
 SESSION_SCHEMA = "kgg-ui-lab/session/v1"
 REQUEST_SCHEMA = "kgg-ui-lab/request/v1"

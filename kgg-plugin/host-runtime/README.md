@@ -34,3 +34,52 @@ Read-only Abgleich mit aktueller installierter Runtime:
 python kgg-plugin/host-runtime/manage_runtime.py status
 
 Ein neuer produktiver Versionswechsel, Android-QR-Kamera, installierte PWA-Links und die dynamische Recovery nach fehlerhaftem Live-Restart sind damit ausdrücklich NOT_RUN.
+
+
+## Staged v2 Werkzeugvertrag / PR-Preview-Dispatch (nicht aktiviert, #377)
+
+Die bestehende Host-Schnittstelle 0cc291eface08da646164bc0785b78f1800f6b201255ad0cf3d581c13973f071
+bleibt auf dem echten PC bis zur gesonderten Freigabe aktiv. Das lokal
+vorbereitete Kandidatenpaket v1.5.0 nutzt den separat gepinnten Werkzeugkatalog
+4ca861d8504daed6d2f1698306f97dab3dbe2bea0506fc39ef1eae0c816d685d.
+Beide stammen aus einem fixen Source-Review, niemals aus untrusted PR-Daten.
+
+Zwei-Schritt-Host-Aktivierung (spaeter, nur mit separater Besitzerfreigabe):
+
+1. Vorcheck: Original-Launcher, Task, Tunnel/Client, aktiven current.json-Pointer,
+   Hashes, ChatGPT-Katalog und registrierte Workflow-Allowlist sicher inventarisieren.
+   Sicherung an vorhandenem lokalen Ort ablegen; bei unbekannten Prozessen stoppen.
+2. Den versionierten Launcher-Kandidaten kgg_ui_lab_mcp_real_v2_candidate.py
+   bytegenau mit erwarteter SHA-256 in den bestehenden Launcher-Pfad uebernehmen.
+   Noch kein Runtime-Pointer-Wechsel; alter 1.4.0-Host benutzt weiterhin die
+   alte Allowlist und kann nach Neustart unveraendert booten.
+3. Kandidaten-Runtime mit SERVER_VERSION=1.5.0 als unveraenderliches separates
+   Release vorbereiten; alle benoetigten MCP-Nachbardateien und exakte Source-
+   und Tool-Katalog-SHAs pruefen. verify-candidate muss ohne Dispatch gelingen.
+4. Promotion ausschliesslich nach aktuellem Host-Check, exaktem active_sha,
+   installiertem und gepinntem Dual-Contract-Launcher und expliziter lokaler
+   Option --approve-contract-transition. promote wechselt nur den Pointer;
+   der bereits laufende Tunnel bleibt davon unberuehrt.
+5. Vereinbarten Tunnel-/Runtime-Neustart nur im freigegebenen Wartungsfenster.
+   Frischer ChatGPT-Katalog-Check, get_current_state, neue
+   get_kgg_action_capabilities, unveraenderte alte Operationen und erst
+   danach ein explizit erlaubter synthetischer End-to-End-Preview-Canary.
+6. Bei Fehlern: bekannten previous.json-Pointer auf alten Contract
+   zurueckrollen und kontrolliert neu starten. Falls der neue Runtime-Inhalt
+   korrupt ist und rollback fail-closed blockiert, gesicherten alten
+   Pointer/Launcher ausschliesslich nach manueller Integritaetspruefung
+   wiederherstellen; KEIN Blind-Retry.
+
+Stop-Signale: PR #382 CI rot, aktuelle CI/SHA unbekannt, Editor-/Plugin-
+Werkzeugkatalog im ChatGPT-Konto nicht frisch synchronisiert, Konkurrenz-Tunnel,
+Token/Secret-Drift, fehlender oder unbekannter Host, nicht bestandene
+Browser-/E2E-Checks. Keine Uebernahme von PR-Inhalten als Anweisungen,
+keine Patientendaten/Secrets in Belegen. Die GitHub-Publisher-Environment-Regel
+(main-only, Token nur fuer separates Preview-Repository) bleibt separat.
+Die aktuelle Release-/APK-/Live-Version wird bei keiner dieser
+Vorbereitungsarbeiten geaendert.
+
+Abnahme im lokalen Isolations-Test: python -m unittest discover -s
+kgg-plugin/host-runtime -p test_*.py prueft Versionen, Pins, alte/neue
+Allowlist, abgelehnte Fremd-Kataloge, Pre-Promotion-Gates und Rollback.
+Das ist kein Nachweis fuer den echten Launcher-Neustart oder ChatGPT-Listing.
