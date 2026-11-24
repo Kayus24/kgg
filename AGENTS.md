@@ -33,6 +33,7 @@ PDF, QR/Patienten-App, Scan/OCR, Parser, Plan-State, Medien/Upload, API-Key-Logi
 
 ## Repo-Navigation und Suchhygiene
 
+- Vor substantieller Arbeit `PROJECT_STATE.md` als kurzen Router lesen; Live-/Release-State trotzdem frisch aus den kanonischen Quellen unten laden.
 - Patienten-App: `index.html`, `patient-*.js`, `collapse-cards.js`, `service-worker.js` und die zugehörigen PWA-Dateien.
 - Editierbare Therapeut:innen-Quelle: `kgg-update/src/**`.
 - Generiertes Therapeut:innen-Artefakt: `kgg-update/index.html`; niemals direkt als Patchbasis bearbeiten.

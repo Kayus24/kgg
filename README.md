@@ -2,6 +2,12 @@
 
 Lokale Patienten-App für KGG-Trainingspläne.
 
+## Einstieg
+
+- Aktueller Projektzustand und aktive Arbeit: `PROJECT_STATE.md`.
+- Kuratierter Dokuindex: `docs/README.md`.
+- Maschinenlesbare Bereichs-/Source-Map: `docs/repo-map.json`.
+
 ## Zweck
 
 - Plan per QR-/Hash-Link öffnen

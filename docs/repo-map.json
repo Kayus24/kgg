@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "status": "active-navigation",
+  "lastVerified": "2026-10-07",
+  "verifiedMainSha": "0587ee0933a94ce047521c2d0130d11890d7ef64",
+  "note": "Navigation metadata only. Fresh code, manifests, AGENTS.md, TOOL_ROUTING.md and APP_BOUNDARIES.md outrank this file.",
+  "areas": [
+    {
+      "id": "patient-app",
+      "surface": "patient",
+      "paths": [
+        "index.html",
+        "patient-*.js",
+        "collapse-cards.js",
+        "service-worker.js",
+        "manifest.json",
+        "manifest-v64.webmanifest",
+        "ios-start.html"
+      ],
+      "sourceStatus": "editable-runtime-source",
+      "patchBasis": true,
+      "protectedContracts": [
+        "plan-state",
+        "QR/hash link",
+        "return QR",
+        "local storage semantics",
+        "PWA/offline",
+        "units/sets/sides/pain semantics"
+      ],
+      "tests": [
+        "release-pipeline/kgg_patient_numpad_commit_smoke.js",
+        "release-pipeline/kgg_patient_compact_transfer_playwright.js",
+        "release-pipeline/kgg_patient_set_view_adaptive_smoke.js",
+        "release-pipeline/kgg_patient_unit_semantics_playwright.js",
+        "release-pipeline/kgg_patient_transient_flicker_blackbox.js"
+      ]
+    },
+    {
+      "id": "therapist-source",
+      "surface": "therapist-admin",
+      "paths": [
+        "kgg-update/src/**"
+      ],
+      "sourceStatus": "editable-source",
+      "patchBasis": true,
+      "protectedContracts": [
+        "KGGDataStore.currentPlan",
+        "PDF/QR/parser/scan",
+        "admin/colleague separation"
+      ],
+      "tests": [
+        "release-pipeline/build_therapist_source.py",
+        "release-pipeline/run-kgg-tests.cmd"
+      ]
+    },
+    {
+      "id": "therapist-candidate",
+      "surface": "therapist-admin",
+      "paths": [
+        "kgg-update/index.html",
+        "kgg-update/version.json"
+      ],
+      "sourceStatus": "generated-candidate",
+      "patchBasis": false,
+      "protectedContracts": [
+        "deterministic build",
+        "candidate identity/hash"
+      ],
+      "tests": [
+        "release-pipeline/build_therapist_source.py --check",
+        "release-pipeline/run-kgg-tests.cmd --level critical"
+      ]
+    },
+    {
+      "id": "release-manifest",
+      "surface": "cross-app-release",
+      "paths": [
+        "therapist-app/android_update_manifest.json",
+        "therapist-app/kgg_update_manifest.json"
+      ],
+      "sourceStatus": "canonical-plus-legacy-compatibility",
+      "patchBasis": true,
+      "protectedContracts": [
+        "admin channel",
+        "colleague channel",
+        "Android shell identity",
+        "immutable release URLs/hashes"
+      ],
+      "tests": [
+        "release-pipeline/run-kgg-tests.cmd --level critical"
+      ]
+    },
+    {
+      "id": "android-wrapper",
+      "surface": "android",
+      "paths": [
+        "android-wrapper/**"
+      ],
+      "sourceStatus": "editable-native-source",
+      "patchBasis": true,
+      "protectedContracts": [
+        "WebView/native bridge",
+        "camera/permissions",
+        "APK identity"
+      ],
+      "tests": [
+        "release-pipeline/run-kgg-tests.cmd --level critical"
+      ]
+    },
+    {
+      "id": "plugin-ui-lab",
+      "surface": "tooling",
+      "paths": [
+        "kgg-plugin/**"
+      ],
+      "sourceStatus": "editable-tooling-source",
+      "patchBasis": true,
+      "protectedContracts": [
+        "read-only/browser boundaries",
+        "source hashes",
+        "UI-Lab contracts"
+      ],
+      "tests": [
+        "release-pipeline/test_kgg_real_browser_bridge.py",
+        "release-pipeline/run-kgg-tests.cmd --level critical"
+      ]
+    },
+    {
+      "id": "release-pipeline",
+      "surface": "tooling-release-tests",
+      "paths": [
+        "release-pipeline/**",
+        ".github/workflows/**"
+      ],
+      "sourceStatus": "editable-gates-and-tests",
+      "patchBasis": true,
+      "protectedContracts": [
+        "required gate",
+        "secret scan",
+        "release drift",
+        "preview/release separation"
+      ],
+      "tests": [
+        "release-pipeline/run-kgg-tests.cmd --level critical"
+      ]
+    },
+    {
+      "id": "docs-active",
+      "surface": "documentation",
+      "paths": [
+        "PROJECT_STATE.md",
+        "AGENTS.md",
+        "TOOL_ROUTING.md",
+        "CHATGPT_TOOL_ROUTING.md",
+        "CODEX_TOOL_ROUTING.md",
+        "APP_BOUNDARIES.md",
+        "docs/README.md",
+        "docs/design-system/**",
+        "tasks/**"
+      ],
+      "sourceStatus": "active-navigation-and-contracts",
+      "patchBasis": true,
+      "protectedContracts": [
+        "freshness labels",
+        "source-of-truth routing"
+      ],
+      "tests": [
+        "git diff --check",
+        "secret scan"
+      ]
+    },
+    {
+      "id": "generated-gpt-source",
+      "surface": "documentation-generated",
+      "paths": [
+        "docs/kgg-gpt-source/**",
+        "docs/kgg-patient-gpt-source/**"
+      ],
+      "sourceStatus": "generated-retrieval-artifacts",
+      "patchBasis": false,
+      "protectedContracts": [
+        "generated source identity"
+      ],
+      "tests": []
+    },
+    {
+      "id": "historical-releases",
+      "surface": "history",
+      "paths": [
+        "therapist-app/releases/**",
+        "therapist-app/admin.html",
+        "therapist-app/kollegen.html"
+      ],
+      "sourceStatus": "immutable-historical-evidence",
+      "patchBasis": false,
+      "protectedContracts": [
+        "release immutability",
+        "hash evidence"
+      ],
+      "tests": []
+    }
+  ]
+}
