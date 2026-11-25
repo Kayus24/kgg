@@ -82,7 +82,9 @@
     "kgg-v134-cockpit-qr-explicit-import",
     "kgg-v135-tablet-package-1024-tap",
     "kgg-v136-tablet-scan-flow-collision",
-    "kgg-v137-tablet-two-slot-edge-taps"
+    "kgg-v137-tablet-two-slot-edge-taps",
+    "kgg-v138-admin-qr-minimum-zoom",
+    "kgg-v139-admin-qr-full-frame"
   ],
   "parts": [
     "base-head.html",
@@ -182,6 +184,8 @@
     "patches/v135-tablet-package-1024-tap.html",
     "patches/v136-tablet-scan-flow-collision.html",
     "patches/v137-tablet-two-slot-edge-taps.html",
+    "patches/v138-admin-qr-minimum-zoom.html",
+    "patches/v139-admin-qr-full-frame.html",
     "footer.html"
   ]
 }

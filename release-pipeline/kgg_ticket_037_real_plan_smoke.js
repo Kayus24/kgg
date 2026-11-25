@@ -683,6 +683,31 @@ async function runPhoneCockpitEntry(browser) {
     // Resize replays the old v095 (80ms) and v102 (30ms) dock sync race.
     await page.evaluate(() => window.dispatchEvent(new Event('resize')));
     await page.waitForTimeout(180);
+    // v095/v102 synchronize the phone dock asynchronously after a resize.
+    // Check the actual DOM contract instead of assuming 180 ms is always enough in CI.
+    try {
+      await page.waitForFunction(() => {
+        const dock = document.querySelector("#kggPhoneCockpitDock");
+        const entry = document.querySelector("#kggTherapyCockpitButton");
+        const finish = document.querySelector("#finishBtn");
+        return !!dock && !!entry && !!finish &&
+          entry.parentElement === dock && finish.parentElement === dock;
+      }, null, { timeout: 3500 });
+    } catch (error) {
+      const snapshot = await page.evaluate(() => {
+        const entry = document.querySelector("#kggTherapyCockpitButton");
+        const finish = document.querySelector("#finishBtn");
+        return {
+          view: window.KGGTherapyCockpit?.getState?.().view,
+          bodyClasses: document.body.className,
+          entryParent: entry?.parentElement?.id,
+          finishParent: finish?.parentElement?.id,
+          finishClasses: finish?.className,
+          dockOwner: window.KGGPhoneDockOwnerV133,
+        };
+      });
+      throw new Error(`${test.id}: Phone-Dock nach Resize nicht stabil: ${JSON.stringify(snapshot)}; ${error.message}`);
+    }
     const firstLayout = await page.evaluate(() => {
       const dock = document.querySelector("#kggPhoneCockpitDock");
       const entry = document.querySelector("#kggTherapyCockpitButton");

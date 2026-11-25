@@ -1,0 +1,97 @@
+<!-- KGG PATCH START kgg-v141-preview-version-status -->
+<script id="kgg-v141-preview-version-status">
+(function(){
+  "use strict";
+  var PATCH_ID="kgg-v141-preview-version-status";
+  var modal=null;
+  function nativeStatus(){
+    try{
+      var bridge=window.KGGAndroidApp;
+      if(!bridge||typeof bridge.updateStatus!=="function")return null;
+      var data=JSON.parse(String(bridge.updateStatus()||""));
+      return data&&data.previewChannel===true?data:null;
+    }catch(_){return null;}
+  }
+  function webVersion(){
+    try{
+      var node=document.getElementById("kgg-source-truth");
+      var data=node&&JSON.parse(node.textContent||"{}");
+      var current=data&&data.currentVersion;
+      if(!current||!Number.isSafeInteger(current.versionCode))return null;
+      return {versionCode:current.versionCode,versionName:String(current.versionName||"")};
+    }catch(_){return null;}
+  }
+  function read(){
+    return {native:nativeStatus(),web:webVersion()};
+  }
+  function showText(id,value){
+    var node=document.getElementById(id);
+    if(node)node.textContent=value==null||value===""?"Nicht verfügbar":String(value);
+  }
+  function ensureDialog(){
+    if(modal&&modal.isConnected)return modal;
+    if(!document.body)return null;
+    var css=document.getElementById("kggPreviewStatusCss");
+    if(!css){
+      css=document.createElement("style");css.id="kggPreviewStatusCss";
+      css.textContent="#kggPreviewVersionDialog{position:fixed;inset:0;z-index:2147483001;display:flex;align-items:center;justify-content:center;background:rgba(10,15,30,.56);padding:16px;font-family:system-ui,sans-serif}"
+        +"#kggPreviewVersionDialog[hidden]{display:none}#kggPreviewVersionDialog .kgg-pvs-panel{width:min(100%,500px);max-height:90dvh;overflow:auto;border-radius:18px;background:white;color:#0f172a;padding:20px;box-shadow:0 20px 64px #0004}"
+        +"#kggPreviewVersionDialog h2{font-size:22px;margin:0 0 10px;font-weight:750}#kggPreviewVersionDialog .kgg-pvs-row{padding:9px 0;border-bottom:1px solid #e2e8f0;display:flex;gap:12px;justify-content:space-between;align-items:flex-start}"
+        +"#kggPreviewVersionDialog .kgg-pvs-label{color:#475569;min-width:42%;font-size:14px}#kggPreviewVersionDialog .kgg-pvs-value{min-width:0;text-align:right;font-weight:650;overflow-wrap:anywhere}"
+        +"#kggPreviewVersionDialog .kgg-pvs-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}#kggPreviewVersionDialog button{border:1px solid #94a3b8;background:#f8fafc;color:#0f172a;border-radius:10px;padding:12px 14px;font-weight:700;min-height:44px}"
+        +"#kggPreviewVersionDialog button:disabled{opacity:.5}#kggPreviewVersionDialog #kggPreviewStatusFeedback{font-size:14px;color:#475569;margin-top:12px;min-height:1em}";
+      document.head.appendChild(css);
+    }
+    modal=document.createElement("div");
+    modal.id="kggPreviewVersionDialog";modal.hidden=true;
+    modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
+    modal.setAttribute("aria-label","KGG Preview-Version");
+    modal.innerHTML='<div class="kgg-pvs-panel"><h2>KGG Preview-Version</h2>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Geladene HTML-Version</span><span class="kgg-pvs-value" id="kggPreviewStatusHtml"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Installierte APK</span><span class="kgg-pvs-value" id="kggPreviewStatusApk"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">HTML-Quelle laut Android</span><span class="kgg-pvs-value" id="kggPreviewStatusSource"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Preview-Release-ID</span><span class="kgg-pvs-value" id="kggPreviewStatusRelease"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Rollout-Code</span><span class="kgg-pvs-value" id="kggPreviewStatusRollout"></span></div>'
+      +'<div class="kgg-pvs-row"><span class="kgg-pvs-label">Native Gesundheitsprüfung</span><span class="kgg-pvs-value" id="kggPreviewStatusHealth"></span></div>'
+      +'<div class="kgg-pvs-actions"><button type="button" id="kggPreviewStatusCheck">HTML-Update prüfen</button><button type="button" id="kggPreviewStatusClose">Schließen</button></div>'
+      +'<p id="kggPreviewStatusFeedback" role="status" aria-live="polite"></p></div>';
+    document.body.appendChild(modal);
+    document.getElementById("kggPreviewStatusClose").addEventListener("click",close);
+    document.getElementById("kggPreviewStatusCheck").addEventListener("click",function(){
+      var bridge=window.KGGPreviewWebUpdateNative;
+      var feedback=document.getElementById("kggPreviewStatusFeedback");
+      try{
+        if(!bridge||typeof bridge.requestPreviewWebUpdate!=="function"){
+          feedback.textContent="Diese App kann keine native Preview-Aktualisierung anfordern.";return;
+        }
+        if(bridge.requestPreviewWebUpdate()!==true){
+          feedback.textContent="Die Update-Prüfung konnte nicht gestartet werden.";return;
+        }
+        feedback.textContent="HTML-Prüfung angefordert. Erst eine geänderte geladene HTML-Version bestätigt ein Update.";
+      }catch(_){feedback.textContent="Die Update-Prüfung konnte nicht gestartet werden.";}
+    });
+    modal.addEventListener("click",function(e){if(e.target===modal)close();});
+    modal.addEventListener("keydown",function(e){if(e.key==="Escape")close();});
+    return modal;
+  }
+  function open(){
+    var ui=ensureDialog();if(!ui)return false;
+    var status=read(),native=status.native,web=status.web;
+    showText("kggPreviewStatusHtml",web?"v"+web.versionCode+" ("+web.versionName+")":"Nicht ermittelbar");
+    showText("kggPreviewStatusApk",native&&native.versionName);
+    showText("kggPreviewStatusSource",native&&native.loadedHtmlSource);
+    showText("kggPreviewStatusRelease",native&&native.releaseId);
+    showText("kggPreviewStatusRollout",native&&native.rolloutCode);
+    showText("kggPreviewStatusHealth",!native?"Nicht ermittelbar":(native.pendingHealthCheck?"Noch offen":"Kein ausstehender Gesundheitscheck"));
+    var canCheck=!!(native&&window.KGGPreviewWebUpdateNative&&typeof window.KGGPreviewWebUpdateNative.requestPreviewWebUpdate==="function");
+    document.getElementById("kggPreviewStatusCheck").disabled=!canCheck;
+    document.getElementById("kggPreviewStatusFeedback").textContent=native?"HTML-Version und APK-Version sind getrennt. Diese Anzeige bestätigt nicht die neueste GitHub-Version.":"Keine native Preview-App erkannt.";
+    ui.hidden=false;return true;
+  }
+  function close(){if(modal)modal.hidden=true;}
+  window.KGGPreviewStatus=Object.freeze({read:read,open:open,close:close,isPreview:function(){return !!nativeStatus();}});
+  window.KGG_PATCHES=window.KGG_PATCHES||{};
+  window.KGG_PATCHES[PATCH_ID]={installed:true};
+})();
+</script>
+<!-- KGG PATCH END kgg-v141-preview-version-status -->

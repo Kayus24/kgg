@@ -170,6 +170,8 @@ async function createPage(browser, mode, detectorRaw = "") {
         window.KGG_PATCHES[patchId]
       );
     }, PATCH_ID, { timeout: 15000 });
+    await page.locator("#adminSecretsModal.open").waitFor({ state: "attached", timeout: 5000 });
+    await page.locator("#closeAdminSecrets").evaluate(button => button.click());
     assert(pageErrors.length === 0, `page boot errors: ${pageErrors.join(" | ")}`);
     return { context, page };
   } catch (error) {
@@ -204,6 +206,11 @@ async function runBarcodeCase(browser) {
     assert(result.test.constraints.audio === false, "live camera requested audio");
     assert(result.test.constraints.video.facingMode.ideal === "environment", "rear camera was not requested");
     assert(!Object.prototype.hasOwnProperty.call(result.test.constraints.video, "zoom"), "live camera must not force zoom");
+    const nativeFrame = result.test.constraints.video.advanced?.[0];
+    assert(nativeFrame?.resizeMode === "none", "live camera must prefer the native stream without WebView cropping");
+    assert(nativeFrame.aspectRatio?.min <= 4 / 3 && nativeFrame.aspectRatio?.max >= 4 / 3, "live camera must prefer a 4:3 camera frame");
+    assert(nativeFrame.width?.min === 960 && nativeFrame.height?.min === 720, "native frame preference must preserve QR scan resolution");
+    assert(!result.test.constraints.video.aspectRatio, "cameras without a native 4:3 mode must keep their fallback");
     assert(result.overlayCount === 1 && result.overlayHidden, "live camera overlay was duplicated or left open");
     assert(result.capabilities.webVideoCapture && result.capabilities.jsQR, "camera capability contract is incomplete");
     return { id: "barcode-detector-auto-transfer", status: "pass", decoderAttempts: result.test.detectorAttempts };

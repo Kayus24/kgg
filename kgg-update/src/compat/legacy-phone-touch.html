@@ -306,7 +306,23 @@
   function byId(id){ return document.getElementById(id); }
   function q(sel){ try { return document.querySelector(sel); } catch(err){ return null; } }
 
+  function isNativePreview(){
+    try{
+      var bridge=window.KGGAndroidApp;
+      if(!bridge||typeof bridge.updateStatus!=="function")return false;
+      var status=JSON.parse(String(bridge.updateStatus()||""));
+      return !!(status&&status.previewChannel===true);
+    }catch(err){return false;}
+  }
   function releaseOpen(){
+    if(isNativePreview()){
+      if(window.KGGPreviewStatus && typeof window.KGGPreviewStatus.open==="function"){
+        window.KGGPreviewStatus.open();
+      }else{
+        alert("Preview-Versionsanzeige noch nicht verfügbar.");
+      }
+      return;
+    }
     try{
       if(window.KGGReleaseCenter && typeof window.KGGReleaseCenter.open === "function"){
         window.KGGReleaseCenter.open();
@@ -370,8 +386,11 @@
       group.appendChild(admin);
     }
 
+    var label=isNativePreview()?"Preview-Version":"Update-Zentrale";
     if(!byId("kggReleaseCenterOpen")){
-      group.appendChild(makeButton("kggReleaseCenterOpen", "Update-Zentrale", "tabletSideMenuAction"));
+      group.appendChild(makeButton("kggReleaseCenterOpen", label, "tabletSideMenuAction"));
+    }else if(byId("kggReleaseCenterOpen").textContent!==label){
+      byId("kggReleaseCenterOpen").textContent=label;
     }
 
     return true;
@@ -380,9 +399,12 @@
   function ensurePhoneAdminEntry(){
     var tools = q(".adminCodePackageTools");
     if(!tools) return false;
+    var label=isNativePreview()?"Preview-Version":"Update-Zentrale";
     if(!byId("kggReleaseCenterOpenPhone")){
-      var phone = makeButton("kggReleaseCenterOpenPhone", "Update-Zentrale", "mutedBtn wide");
+      var phone = makeButton("kggReleaseCenterOpenPhone", label, "mutedBtn wide");
       tools.appendChild(phone);
+    }else if(byId("kggReleaseCenterOpenPhone").textContent!==label){
+      byId("kggReleaseCenterOpenPhone").textContent=label;
     }
     return true;
   }

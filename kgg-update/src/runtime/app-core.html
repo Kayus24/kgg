@@ -1,10 +1,10 @@
 <script>
 (function(){'use strict';
-  const VERSION='KGG_GITHUB_UPDATE_v137_tablet_two_slot_edge_taps';
+  const VERSION='KGG_GITHUB_UPDATE_v141_preview_version_status';
   window.KGG_ROLLOUT_PROFILE='admin';
   const SAFE_SOURCE_NOTE='Based on clean v2 app candidate. Legacy v155 is reference only; no hardcoded API keys. Textfeld ist Master; DB-Vorschlaege werden erst nach Auswahl uebernommen. Grossdruck ist ein PDF-Modus.';
   const PDF_RUNTIME_FINGERPRINT='PDF_ENGINE: TEMPLATE_MATCH_V1_RUNTIME_GUARD';
-  const KGG_BUILD_INFO={"release":"v137","buildTime":"2026-11-05T10:41:22Z","buildCode":"module-v137-tablet-two-slot-edge-taps","htmlFile":"kgg-update/index.html"};
+  const KGG_BUILD_INFO={"release":"v141","buildTime":"2026-11-11T09:13:39Z","buildCode":"module-v141-preview-version-status","htmlFile":"kgg-update/index.html"};
   // Feste Patienten-App-Basis-URL. Leer/ueberschreiben nur fuer lokalen Testmodus.
   const KGG_PATIENT_LATEST_BASE_URL='https://kayus24.github.io/kgg/';
   const patientBaseUrl=(window.KGG_PATIENT_BASE_URL||KGG_PATIENT_LATEST_BASE_URL).trim();
@@ -147,6 +147,7 @@
       tx.objectStore(mediaStoreName).put(record);
       tx.oncomplete=()=>resolve(record);
       tx.onerror=()=>reject(tx.error||new Error('Media-Blob konnte nicht gespeichert werden'));
+      tx.onabort=()=>reject(tx.error||new Error('Media-Blob-Speichern wurde abgebrochen'));
     }));
   }
   function getEncryptedMediaBlob(id){
@@ -155,6 +156,7 @@
       const req=tx.objectStore(mediaStoreName).get(id);
       req.onsuccess=()=>resolve(req.result||null);
       req.onerror=()=>reject(req.error||new Error('Media-Blob konnte nicht gelesen werden'));
+      tx.onabort=()=>reject(tx.error||new Error('Media-Blob-Lesen wurde abgebrochen'));
     }));
   }
   function deleteEncryptedMediaBlob(id){
@@ -163,6 +165,7 @@
       tx.objectStore(mediaStoreName).delete(id);
       tx.oncomplete=()=>resolve(true);
       tx.onerror=()=>resolve(false);
+      tx.onabort=()=>resolve(false);
     })).catch(()=>false);
   }
   function isMediaReferencedElsewhere(id,owner){
@@ -173,7 +176,8 @@
     return lists.some(ex=>{
       if(!ex)return false;
       if(owner&&String(ex.localId||ex.id)===String(ownerId))return false;
-      return ensureExerciseMediaList(ex).some(media=>String(media.id)===sid);
+      const stages=Array.isArray(ex.progressionVariants)?ex.progressionVariants:[];
+      return [ex,...stages].some(item=>ensureExerciseMediaList(item).some(media=>String(media.id)===sid));
     });
   }
   function deleteUnsharedMediaBlob(media,owner){
@@ -3072,17 +3076,75 @@
         const manifest=ensureMediaShape({...ref,crypto:{alg:'AES-GCM',iv:encrypted.iv,key:encrypted.key},encryptedSize:encrypted.encryptedSize,compressedSize:blob.bytes.length,storage:'indexeddb-local',status:'local-encrypted'});manifest.syncSha256=blob.item.sha256;media.set(ref.id,manifest);prepared.push({id:ref.id,blob:encrypted.blob,manifest,createdAt:manifest.createdAt});
       }
     }
-    // All documents, references and hashes have passed before any persistent or bank mutation.
-    for(const record of prepared)await putEncryptedMediaBlob(record);
-    return {doc,options:{...opts,media}};
+    // The import may still fail during the bank merge. Keep track only of blobs
+    // that were absent locally before this import, so existing media is never removed.
+    const newMediaIds=prepared.map(item=>item.id);
+    try{for(const record of prepared)await putEncryptedMediaBlob(record);}
+    catch(err){
+      const cleaned=await cleanupUnreferencedImportMedia(newMediaIds);
+      if(!cleaned)throw new Error('Importmedien konnten nicht zurueckgesetzt werden.');
+      throw err;
+    }
+    return {doc,options:{...opts,media},newMediaIds};
+  }
+  async function cleanupUnreferencedImportMedia(ids){
+    let success=true;
+    for(const id of ids){
+      if(!isMediaReferencedElsewhere(id,null)&&!(await deleteEncryptedMediaBlob(id)))success=false;
+    }
+    return success;
   }
   async function mergeNativeExerciseBankSyncTransportDocument(raw,options){
-    const prepared=await prepareNativeLibraryImport(raw,options),previousApplying=nativeExerciseSyncApplying;
-    const previousBank=bank.map(ex=>JSON.parse(JSON.stringify(ex))),previousDeleted=new Set(deletedBankIds),previousStored=localStorage.getItem(customBankKey),previousDeletedStored=localStorage.getItem(deletedBankKey);
+    // Check local storage access before asynchronous media preparation; no
+    // imported media must be written when the storage snapshot is unreadable.
+    localStorage.getItem(customBankKey);
+    localStorage.getItem(deletedBankKey);
+    // A native-backed import cannot use a potentially stale Web fallback
+    // if reading the actual native peer configuration fails.
+    nativeSyncFollowConfigForImportSnapshot();
+    const prepared=await prepareNativeLibraryImport(raw,options);
+    // An edit may have been confirmed while prepare awaited IndexedDB/crypto.
+    // Snapshot the CURRENT state immediately before the synchronous merge.
+    let previousBank,previousDeleted,previousStored,previousDeletedStored,previousFollowConfig;
+    try{
+      previousBank=bank.map(ex=>JSON.parse(JSON.stringify(ex)));
+      previousDeleted=new Set(deletedBankIds);
+      previousStored=localStorage.getItem(customBankKey);
+      previousDeletedStored=localStorage.getItem(deletedBankKey);
+      previousFollowConfig=JSON.parse(JSON.stringify(nativeSyncFollowConfigForImportSnapshot()));
+    }catch(err){
+      const cleaned=await cleanupUnreferencedImportMedia(prepared.newMediaIds);
+      if(!cleaned)throw new Error('Importmedien konnten nicht zurueckgesetzt werden.');
+      throw err;
+    }
+    // Keep the internal merge/rollback synchronous under this guard. Media
+    // cleanup can await IDB; user edits during that wait must receive revisions
+    // and queue their own sync work. No await may cross the finally below.
+    const previousApplying=nativeExerciseSyncApplying;
     nativeExerciseSyncApplying=true;
+    let mergeError=null,storesRestored=true;
     try{return mergeNativeExerciseBankSyncDocument(prepared.doc,prepared.options);}
-    catch(err){bank.splice(0,bank.length,...previousBank);deletedBankIds=previousDeleted;rememberNativeLibraryState();try{if(previousStored===null)localStorage.removeItem(customBankKey);else localStorage.setItem(customBankKey,previousStored);if(previousDeletedStored===null)localStorage.removeItem(deletedBankKey);else localStorage.setItem(deletedBankKey,previousDeletedStored);}catch(restoreError){}render();throw err;}
+    catch(err){
+      mergeError=err;
+      bank.splice(0,bank.length,...previousBank);
+      deletedBankIds=previousDeleted;
+      rememberNativeLibraryState();
+      for(const [key,value] of [[customBankKey,previousStored],[deletedBankKey,previousDeletedStored]]){
+        try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}
+        catch(restoreError){storesRestored=false;}
+      }
+      // Peer discovery is part of the same import transaction. Undo only
+      // changes made by a failed merge; successful discovery remains intact.
+      try{
+        const now=normalizeNativeSyncFollowConfig(nativeSyncFollowConfig());
+        if(JSON.stringify(now)!==JSON.stringify(previousFollowConfig)&&!writeNativeSyncFollowConfig(previousFollowConfig))storesRestored=false;
+      }catch(restoreError){storesRestored=false;}
+    }
     finally{nativeExerciseSyncApplying=previousApplying;}
+    const cleaned=await cleanupUnreferencedImportMedia(prepared.newMediaIds);
+    render();
+    if(!storesRestored||!cleaned)throw new Error('Lokaler Bibliotheks-Rollback unvollstaendig.');
+    throw mergeError;
   }
   async function resolveNativeSyncValue(value){return value&&typeof value.then==='function'?await value:value;}
   function normalizeNativeLocalLibraryRead(raw){
@@ -3113,7 +3175,11 @@
   }
   function scheduleNativeExerciseSync(delay){clearTimeout(nativeExerciseSyncTimer);nativeExerciseSyncTimer=setTimeout(()=>{nativeExerciseSyncTimer=null;runNativeExerciseBankSync();},delay);}
   function nativeSyncSafeFailureText(err){const message=String(err&&err.message||'');if(/32 MB|mesh_too_large/.test(message))return 'Abgleich ausstehend: gemeinsame Dateiliste groesser als 32 MB. Partnerauswahl verkleinern.';if(/8 MB|payload_too_large|document_too_large/.test(message))return 'Abgleich ausstehend: eine Bibliotheksdatei ist groesser als 8 MB.';if(/Bild.*gross/.test(message))return 'Abgleich ausstehend: ein Bibliotheksbild ist groesser als 2 MB.';if(/Bild.*fehl|Bildhash|Bildbytes|Bild-ID/.test(message))return 'Abgleich ausstehend: Bibliotheksbild fehlt oder ist beschaedigt. Bild und Dateizugriff pruefen.';return 'Abgleich ausstehend. Automatische Wiederholung; Verbindung und Dateizugriff pruefen.';}
+  // Keep a Cockpit SAF read separate from the ordinary sync run, but serialize
+  // both against the same provider so a pending normal push waits for the read.
+  let nativeCockpitRefreshRunning=null;
   async function runNativeExerciseBankSync(){
+    if(nativeCockpitRefreshRunning)await nativeCockpitRefreshRunning;
     if(nativeExerciseSyncRunning)return nativeExerciseSyncRunning;
     if(!nativeExerciseSyncAvailable()){setNativeExerciseSyncStatus('Automatischer Drive-Abgleich braucht die eingerichtete Android-Verbindung.',nativeExerciseSyncDirty);return false;}
     clearTimeout(nativeExerciseSyncTimer);nativeExerciseSyncTimer=null;
@@ -3134,6 +3200,30 @@
       finally{nativeExerciseSyncRunning=null;if((nativeExerciseSyncDirty||nativeExerciseSyncPullRequested)&&!nativeExerciseSyncTimer)scheduleNativeExerciseSync(350);}
     })();return nativeExerciseSyncRunning;
   }
+  // Cockpit-only fallback: read the already configured SAF library once, without
+  // calling the ordinary sync scheduler (which can flush pending Drive writes).
+  async function refreshCockpitExerciseBankFromDrive(){
+    const bridge=window.KGGNativeSync;
+    if(!nativeExerciseSyncAvailable()||nativeExerciseSyncRunning||nativeCockpitRefreshRunning||typeof bridge.status!=='function')return false;
+    try{
+      const status=bridge.status()||{};
+      if(status.transport!=='saf-document'||status.driveConfigured!==true)return false;
+    }catch(err){return false;}
+    const task=(async()=>{
+      // Claim this provider read before any asynchronous operation can yield.
+      await Promise.resolve();
+      try{
+        const remote=await resolveNativeSyncValue(bridge.read());
+        // Reuse validated import, followed-peer authorization and local rollback.
+        // An unmatched exercise remains unmatched in the calling decoder.
+        await mergeNativeExerciseBankSyncTransportDocument(normalizeNativeLocalLibraryRead(remote));
+        return true;
+      }catch(err){return false;}
+    })();
+    nativeCockpitRefreshRunning=task;
+    try{return await task;}
+    finally{if(nativeCockpitRefreshRunning===task)nativeCockpitRefreshRunning=null;}
+  }
   async function pullNativeExerciseBankSync(reason){nativeExerciseSyncPullRequested=true;return runNativeExerciseBankSync();}
   async function pushNativeExerciseBankSync(reason){nativeExerciseSyncDirty=true;return runNativeExerciseBankSync();}
   function queueNativeExerciseBankSync(reason){if(nativeExerciseSyncApplying)return;nativeExerciseSyncDirty=true;try{localStorage.setItem(nativeExerciseSyncPendingKey,'1');}catch(err){}scheduleNativeExerciseSync(350);}
@@ -3145,7 +3235,7 @@
     window.addEventListener('kgg:native-sync-ready',activate);window.addEventListener('kgg:native-sync-resume',refresh);window.addEventListener('pageshow',refresh);window.addEventListener('online',refresh);document.addEventListener('visibilitychange',refresh);
     const poll=()=>{if(document.visibilityState!=='hidden'&&nativeExerciseSyncAvailable())refresh();nativeExerciseSyncPollTimer=setTimeout(poll,15000);};nativeExerciseSyncPollTimer=setTimeout(poll,15000);
   }
-  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,buildTransport:buildNativeExerciseBankSyncTransportDocument,merge:mergeNativeExerciseBankSyncDocument,mergeTransport:mergeNativeExerciseBankSyncTransportDocument,pull:pullNativeExerciseBankSync,push:pushNativeExerciseBankSync};
+  window.KGGNativeExerciseSync={build:buildNativeExerciseBankSyncDocument,buildTransport:buildNativeExerciseBankSyncTransportDocument,merge:mergeNativeExerciseBankSyncDocument,mergeTransport:mergeNativeExerciseBankSyncTransportDocument,pull:pullNativeExerciseBankSync,refreshForCockpit:refreshCockpitExerciseBankFromDrive,push:pushNativeExerciseBankSync};
   const syncPairDeviceIdKey='kgg_sync_pair_device_id_v1';
   const syncPairFallbackConfigKey='kgg_sync_pair_follow_config_v1';
   const syncPairRoomIdKey='kgg_sync_room_id_v1';
@@ -3313,6 +3403,14 @@
     normalized.followedTherapists=Array.isArray(normalized.followedTherapists)?normalized.followedTherapists:[];
     return normalized;
   }
+  function nativeSyncFollowConfigForImportSnapshot(){
+    if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
+      const config=window.KGGNativeSync.getFollowConfig();
+      if(!config||typeof config!=='object'||Array.isArray(config))throw new Error('Native Partnerkonfiguration konnte nicht gelesen werden.');
+      return normalizeNativeSyncFollowConfig(config);
+    }
+    return normalizeNativeSyncFollowConfig(nativeSyncFollowConfig());
+  }
   function nativeSyncFollowConfig(){
     try{
       if(window.KGGNativeSync&&typeof window.KGGNativeSync.getFollowConfig==='function'){
@@ -3327,7 +3425,7 @@
       if(window.KGGNativeSync&&typeof window.KGGNativeSync.setFollowConfig==='function'){
         return !!window.KGGNativeSync.setFollowConfig(config||{});
       }
-    }catch(err){}
+    }catch(err){return false;}
     try{localStorage.setItem(syncPairFallbackConfigKey,JSON.stringify(config||{}));return true;}catch(err){return false;}
   }
   function syncPairRoomId(){
