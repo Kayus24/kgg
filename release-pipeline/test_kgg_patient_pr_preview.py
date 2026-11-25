@@ -79,6 +79,80 @@ class PatientPrPreviewTests(unittest.TestCase):
             with self.subTest(extra=extra), self.assertRaises(ValueError):
                 self.candidates(files + [extra])
 
+    def k2_patch(self):
+        return [
+            {"filename": "index.html", "status": "modified"},
+            {"filename": "patient-numpad-visibility-fix.js", "status": "modified"},
+            {"filename": preview.K2_MODULE, "status": "added"},
+        ] + [{"filename": name, "status": "modified"} for name in sorted(preview.K2_SUPPORT)] + [
+            {"filename": f"docs/kgg-patient-gpt-source/chunk-{i:03d}.md", "status": "modified"}
+            for i in range(1, 15)
+        ]
+
+    def test_k2_scope_excludes_inert_support_and_keeps_exact_runtime(self):
+        files = self.k2_patch()
+        self.assertGreater(len(files), 20)
+        self.assertEqual({e["filename"] for e in self.candidates(files)}, preview.K2_RUNTIME)
+        for extra in (
+            {"filename": "patient-new.js", "status": "added"},
+            {"filename": "patient-core.js", "status": "modified"},
+            {"filename": "release-pipeline/arbitrary.py", "status": "modified"},
+            {"filename": "../patient.js", "status": "added"},
+            {"filename": "index.html", "status": "modified"},
+        ):
+            with self.subTest(extra=extra), self.assertRaises(ValueError):
+                self.candidates(files + [extra])
+        with self.assertRaises(ValueError):
+            self.candidates(files + [{"filename": f"docs/kgg-patient-gpt-source/chunk-{i:03d}.md",
+                                      "status": "modified"} for i in range(50, 90)])
+        with self.assertRaises(ValueError):
+            self.candidates([e for e in files if e["filename"] != "index.html"])
+
+    def test_new_k2_module_keeps_blob_and_sensitive_sink_guards(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data = {name: b"const fixture = 1;" for name in preview.K2_RUNTIME}
+            for name in preview.K2_RUNTIME - {preview.K2_MODULE}:
+                (root / name).write_bytes(data[name])
+            def run(module, mode="100644", corrupt=False):
+                data[preview.K2_MODULE] = module
+                blobs = {name: hashlib.sha1(f"blob {len(value)}\0".encode() + value).hexdigest()
+                         for name, value in data.items()}
+                entries = [{"filename": name, "status": "added" if name == preview.K2_MODULE else "modified",
+                            "sha": blobs[name]} for name in sorted(data)]
+                def api(endpoint):
+                    if endpoint.startswith("compare/"):
+                        return {"status": "ahead", "merge_base_commit": {"sha": self.base}, "files": entries}
+                    if endpoint.startswith("git/commits/"):
+                        return {"tree": {"sha": "3" * 40}}
+                    if endpoint.startswith("git/trees/"):
+                        return {"truncated": False, "tree": [
+                            {"path": name, "mode": mode if name == preview.K2_MODULE else "100644",
+                             "type": "blob", "sha": blobs[name], "size": len(data[name])}
+                            for name in data]}
+                    name = next(name for name, digest in blobs.items() if endpoint.endswith(digest))
+                    value = data[name] + (b"x" if corrupt and name == preview.K2_MODULE else b"")
+                    return {"encoding": "base64", "content": base64.b64encode(value).decode()}
+                with patch.object(preview, "api", side_effect=api):
+                    preview.overlay(root, self.base, self.sha)
+            for module, mode, corrupt in (
+                (b"fetch('/private')", "100644", False),
+                (b"localStorage.clear()", "100644", False),
+                (b"const x=1;", "120000", False),
+                (b"const x=1;", "100644", True),
+                (b" " * (preview.K2_MAX_MODULE_BYTES + 1), "100644", False),
+            ):
+                with self.subTest(module=module[:50], mode=mode, corrupt=corrupt), self.assertRaises(ValueError):
+                    run(module, mode, corrupt)
+                self.assertFalse((root / preview.K2_MODULE).exists())
+            run(b"const x=1;")
+            self.assertEqual((root / preview.K2_MODULE).read_bytes(), b"const x=1;")
+            expected = [name for name in preview.DIRECT_FIRST_LOAD_MODULES if name != preview.K2_MODULE]
+            expected.insert(expected.index("patient-version-label.js"), preview.K2_MODULE)
+            self.assertEqual(preview.preview_modules(root), tuple(expected))
+            with patch.object(preview, "DIRECT_FIRST_LOAD_MODULES", tuple(expected)):
+                self.assertEqual(preview.preview_modules(root), tuple(expected))
+
     @staticmethod
     def png(size):
         def chunk(kind, data):
