@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `9890b2d27e8b1e45`.
+Generated retrieval pack. Source digest: `e48a0395eb26c67c`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -1508,6 +1508,7 @@ DIRECT_FIRST_LOAD_MODULES = (
     "patient-qr-fullscreen.js",
     "patient-numpad-card-guard.js",
     "patient-set-compact-view.js",
+    "patient-set-k2-inline-editor.js",
     "patient-version-label.js",
 )
 
