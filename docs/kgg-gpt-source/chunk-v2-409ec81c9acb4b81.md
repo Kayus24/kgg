@@ -110,20 +110,21 @@ Before editing this app, any LLM/agent/human should read these blocks:
     "cockpit-qr-explicit-import",
     "tablet-package-1024-tap",
     "tablet-scan-flow-collision",
-    "tablet-two-slot-edge-taps"
+    "tablet-two-slot-edge-taps",
+    "admin-qr-minimum-zoom"
   ],
   "currentVersion": {
-    "versionCode": 137,
-    "versionName": "1.0.137-tablet-two-slot-edge-taps",
-    "lastPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+    "versionCode": 138,
+    "versionName": "1.0.138-admin-qr-minimum-zoom",
+    "lastPatchId": "kgg-v138-admin-qr-minimum-zoom",
     "updatedBy": "kgg-module-scaffolder"
   },
-  "latestPatchId": "kgg-v137-tablet-two-slot-edge-taps",
+  "latestPatchId": "kgg-v138-admin-qr-minimum-zoom",
   "lastUpdateIntent": {
-    "id": "kgg-v137-tablet-two-slot-edge-taps",
-    "summary": "Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.",
+    "id": "kgg-v138-admin-qr-minimum-zoom",
+    "summary": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
     "touched": [
-      "Tablet-Layout"
+      "admin-camera-qr"
     ],
     "notTouched": [
       "PDF",

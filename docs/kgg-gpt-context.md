@@ -42,9 +42,9 @@ If this file conflicts with `kgg-update/version.json` or `therapist-app/android_
 
 ## Current Versions
 
-- Source web version: v137 / `1.0.137-tablet-two-slot-edge-taps`.
-- Source index URL: `index.html?v=137`.
-- Source notes: v137: Scanner- und Fertig-Überlagerung an Paket-/Basis-Rändern im Tablet-Zwei-Slot-Pane ohne Button-Verlust verhindern.
+- Source web version: v138 / `1.0.138-admin-qr-minimum-zoom`.
+- Source index URL: `index.html?v=138`.
+- Source notes: v138: Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback
 - Live Admin release: `r0439` / `1.0.131-qr-cockpit-tablet-integrated`.
 - Live Admin URL: `https://kayus24.github.io/kgg/therapist-app/releases/web/r0439/admin.html`.
 - Live colleague release: `r0426` / `1.0.65-source-control-char-guard`.

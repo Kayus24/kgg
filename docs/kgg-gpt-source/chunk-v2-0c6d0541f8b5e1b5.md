@@ -3,8 +3,39 @@
 <script type="application/json" id="kgg-changelog">
 {
   "schema": 1,
-  "latestVersionCode": 137,
+  "latestVersionCode": 138,
   "entries": [
+    {
+      "versionCode": 138,
+      "versionName": "1.0.138-admin-qr-minimum-zoom",
+      "patchId": "kgg-v138-admin-qr-minimum-zoom",
+      "status": "scaffolded",
+      "type": "module-patch",
+      "title": "Admin QR minimum zoom",
+      "reason": "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback",
+      "whatChanged": [
+        "Use the camera track minimum zoom when supported without blocking QR scanning or photo fallback"
+      ],
+      "touchedAreas": [
+        "admin-camera-qr"
+      ],
+      "notTouched": [
+        "PDF",
+        "QR/Patienten-App",
+        "Scan/OCR",
+        "Parser",
+        "Plan-State",
+        "Medien/Upload",
+        "API-Key-Logik",
+        "Android/APK",
+        "GitHub Manifest",
+        "Handy-Layout"
+      ],
+      "testStatus": {
+        "local": "pending",
+        "certification": "pending"
+      }
+    },
     {
       "versionCode": 137,
       "versionName": "1.0.137-tablet-two-slot-edge-taps",
