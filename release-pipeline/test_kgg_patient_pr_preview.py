@@ -147,9 +147,11 @@ class PatientPrPreviewTests(unittest.TestCase):
                 self.assertFalse((root / preview.K2_MODULE).exists())
             run(b"const x=1;")
             self.assertEqual((root / preview.K2_MODULE).read_bytes(), b"const x=1;")
-            expected = list(preview.DIRECT_FIRST_LOAD_MODULES)
+            expected = [name for name in preview.DIRECT_FIRST_LOAD_MODULES if name != preview.K2_MODULE]
             expected.insert(expected.index("patient-version-label.js"), preview.K2_MODULE)
             self.assertEqual(preview.preview_modules(root), tuple(expected))
+            with patch.object(preview, "DIRECT_FIRST_LOAD_MODULES", tuple(expected)):
+                self.assertEqual(preview.preview_modules(root), tuple(expected))
 
     @staticmethod
     def png(size):
