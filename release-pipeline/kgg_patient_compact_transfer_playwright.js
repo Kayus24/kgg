@@ -102,6 +102,17 @@ async function main(){
    const wdhPointerFinal=await page.evaluate(()=>{const t=document.querySelector("#kggPadTransfer"),h=document.querySelector('#kggPadPair .kggPairField[data-kgg-key="b"]');const tr=t.getBoundingClientRect(),hr=h.getBoundingClientRect(),ps=getComputedStyle(t,"::before");return{pointerX:tr.left+parseFloat(ps.left||"0"),headX:hr.left+hr.width/2}});
    assert(Math.abs(wdhPointerFinal.pointerX-wdhPointerFinal.headX)<=4,"remaining Wdh pointer did not finish under Wdh header: "+JSON.stringify(wdhPointerFinal));
    assert((await kg.inputValue())==="15","kg transfer did not commit 15");
+   const inline=page.locator("#kggK2InlineEditor");
+   if(await page.evaluate(()=>Boolean(window.__kggPatientK2InlineEditor))){
+    assert(await inline.count()===1,"K2 active inline editor missing");
+    assert(await inline.inputValue()==="15","active inline editor did not receive transferred kg");
+    console.log("TRANSFER_BEFORE_KEY",await inline.evaluate(el=>({value:el.value,start:el.selectionStart,end:el.selectionEnd,draft:window.__kggPadDraftApi.getValue(),active:document.activeElement?.id})));
+    await key(page,"2");
+    console.log("TRANSFER_AFTER_KEY",await inline.evaluate(el=>({value:el.value,start:el.selectionStart,end:el.selectionEnd,draft:window.__kggPadDraftApi.getValue(),active:document.activeElement?.id})));
+    assert(await inline.inputValue()==="152","next digit replaced transferred kg");
+    await page.locator('#pad .padGrid button[onclick="padBack()"]').click();
+    assert(await inline.inputValue()==="15","backspace did not preserve transferred kg");
+   }
    const committedColors=await Promise.all([kg.evaluate(el=>getComputedStyle(el).color),pair.locator(":scope > .set").nth(0).locator(".kggCompactUnit[data-kgg-key=\"a\"]").evaluate(el=>getComputedStyle(el).color)]);
    assert(committedColors[0]===committedColors[1],"committed kg number/unit are not equally black: "+JSON.stringify(committedColors));
    await page.locator('#kggPadTransfer button[data-kgg-transfer-key="b"]').click();await page.waitForTimeout(100);

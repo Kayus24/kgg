@@ -5,7 +5,7 @@
   if(window.__kggPatientK2InlineEditor===VERSION)return;
   window.__kggPatientK2InlineEditor=VERSION;
   const $=id=>document.getElementById(id);
-  let editor=null,activeField=null,installed=false;
+  let editor=null,activeField=null,installed=false,writingDraft=false;
   const draft=()=>window.__kggPadDraftApi;
   const controller=()=>window.__kggNumpadEditingApi;
   const padOpen=()=>!!($('pad')&&!$('pad').classList.contains('hide'));
@@ -54,12 +54,22 @@
     // Mark dirty before broadcasting the draft change: the existing transfer
     // renderer checks isDirty synchronously when it receives that event.
     controller()?.markDirty?.(); // transfer hints observe dirty before the draft event
-    draft()?.setValue(clean||'0');
+    writingDraft=true;
+    try{draft()?.setValue(clean||'0')}finally{writingDraft=false}
     controller()?.markDirty?.(); // refresh snapshot with the new buffer value
     editor.value=clean;
     editor.focus({preventScroll:true});
     const at=Math.max(0,Math.min(clean.length,position??clean.length));
     editor.setSelectionRange(at,at);
+  }
+  function syncExternalDraft(event){
+    if(writingDraft||!editing()||!editor?.isConnected||!activeField)return;
+    if(event.detail?.input!==activeField.__kggPairInput)return;
+    const value=String(draft()?.getValue?.()||'0');
+    if(editor.value===value)return;
+    editor.value=value;
+    editor.focus({preventScroll:true});
+    editor.setSelectionRange(value.length,value.length);
   }
   function clearField(field){
     if(!editing()||!field)return;
@@ -138,6 +148,7 @@
   function install(){
     if(installed||typeof window.openPad!=='function')return;
     installed=true;
+    window.addEventListener('kggpaddraftchange',syncExternalDraft);
     const oldOpen=window.openPad;
     window.openPad=function(){
       const out=oldOpen.apply(this,arguments);
