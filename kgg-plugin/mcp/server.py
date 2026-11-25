@@ -886,6 +886,9 @@ class Runtime:
             _fail(str(exc))
 
     def _close_visual(self, session_id: str) -> None:
+        session = self.sessions.get(session_id)
+        if session is not None:
+            session.pop("visual_chain_pending", None)
         browser = self.visual_sessions.pop(session_id, None)
         if browser is not None:
             try:
@@ -915,7 +918,7 @@ class Runtime:
         control_fingerprint = json.dumps(controls, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
         language = observed.get("language")
         if language is not None:
-            if language not in ("lang-de", "lang-en") or state not in ("patient-plan", "patient-numpad"):
+            if language not in ("lang-de", "lang-en") or state not in ("patient-plan", "patient-card-open", "patient-numpad"):
                 _fail("visual_observation_language_invalid")
             control_fingerprint += "|" + language
         observation_id = hashlib.sha256(
@@ -1635,6 +1638,16 @@ class Runtime:
         if decision["observation_id"] != observation["id"]:
             _fail("visual_observation_stale")
         _validate_swipe_bounds(decision, session["viewport"])
+        # Exactly one follow-up to a verified native patient card expansion.
+        # Do not turn same-state clicks or unrelated navigation into PASS.
+        if session.get("visual_chain_pending") and (
+            observation["state"] != "patient-card-open"
+            or decision["operation"] not in ("click", "tap")
+            or decision["expected_state_after"] != "patient-numpad"
+        ):
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            _fail("visual_chain_transition_invalid")
         session["status"] = "acting"
         session["used_requests"].append(checked["request_id"])
         browser = self.visual_sessions.get(session["session_id"])
@@ -1651,7 +1664,7 @@ class Runtime:
             # Preserve native layout states for existing callers. A language-toggle
             # decision can explicitly verify the independently observed language.
             language_action = (
-                observation["state"] in ("patient-plan", "patient-numpad")
+                observation["state"] in ("patient-plan", "patient-card-open", "patient-numpad")
                 and decision["operation"] in ("click", "tap")
                 and decision["label"] == "language-toggle"
                 and decision["expected_state_after"] in ("lang-de", "lang-en")
@@ -1690,16 +1703,33 @@ class Runtime:
             self._close_visual(session["session_id"])
             session["status"] = "failed"
             raise
-        finally:
-            self._close_visual(session["session_id"])
         before_artifact = observation["artifact"]
         after_artifact = verified["artifacts"][0] if verified["artifacts"] else None
         after_image = verified["images"][0] if verified["images"] else None
         if after_artifact is None or after_image is None:
+            self._close_visual(session["session_id"])
             session["status"] = "failed"
             _fail("visual_verification_missing_screenshot")
+        continuation = (observation["state"] == "patient-plan"
+                        and after_state == "patient-card-open"
+                        and decision["operation"] in ("click", "tap"))
+        if (continuation or session.get("visual_chain_pending")) and after_artifact["sha256"] == before_artifact["sha256"]:
+            self._close_visual(session["session_id"])
+            session["status"] = "failed"
+            _fail("visual_state_unchanged")
+        next_observation = None
+        if continuation:
+            try:
+                next_observation = self._record_visual_observation(session, verified)["observation"]
+            except ServerError:
+                self._close_visual(session["session_id"])
+                session["status"] = "failed"
+                raise
+            session["visual_chain_pending"] = True
+        else:
+            self._close_visual(session["session_id"])
         flow_stale = bool(session.get("flow_stale"))
-        session["status"] = "stale_fallback_completed" if flow_stale else "completed"
+        session["status"] = "awaiting_followup" if continuation else ("stale_fallback_completed" if flow_stale else "completed")
         evidence = {
             "schema": "kgg-ui-lab/visual-evidence/v1",
             "status": "PASS",
@@ -1735,6 +1765,7 @@ class Runtime:
             },
             "evidence": evidence,
             "session_status": session["status"],
+            **({"next_observation": next_observation} if next_observation is not None else {}),
             "_images": [observation["image"], after_image],
         }
 
