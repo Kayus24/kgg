@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 
 from kgg_patient_gpt_write_gate import (
-    ROOT, FORBIDDEN_NEW_SINKS, INTERFACE_MARKERS, allowed_patient_path,
+    ROOT, FORBIDDEN_NEW_SINKS, INTERFACE_MARKERS, DIRECT_FIRST_LOAD_MODULES, allowed_patient_path,
     contains_secret, copy_patient_runtime_file, patient_runtime_files, write_json, write_preview,
 )
 
@@ -27,6 +27,36 @@ SUPPORT_FILE = re.compile(
     r"|\.github/workflows/kgg-patient-ui-parity\.yml"
 )
 NEW_ICON = re.compile(r"kgg-icon-(192|512|maskable-512)-v[1-9][0-9]{0,5}\.png")
+# Narrow, trusted scope for the K2 inline NumPad integration. Do not execute
+# candidate support scripts or import candidate gate constants.
+K2_MODULE = "patient-set-k2-inline-editor.js"
+K2_RUNTIME = {"index.html", "patient-numpad-visibility-fix.js", K2_MODULE}
+K2_SUPPORT = {
+    "docs/kgg-custom-gpt-resource-manifest.json",
+    "docs/kgg-patient-custom-gpt-editor-snapshot.json",
+    "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
+    "docs/kgg-patient-custom-gpt-knowledge-testing.md",
+    "docs/kgg-patient-gpt-context.md",
+    "kgg-plugin/references/architecture/source-hashes.json",
+    "kgg-plugin/references/source-map.md",
+    "release-pipeline/kgg_patient_compact_transfer_playwright.js",
+    "release-pipeline/kgg_patient_continuous_days_playwright.js",
+    "release-pipeline/kgg_patient_gpt_write_gate.py",
+}
+K2_GENERATED = re.compile(r"docs/kgg-patient-gpt-source(?:-index\.json|/chunk-[0-9]{3}\.md)")
+K2_MAX_FILES = 40
+K2_MAX_MODULE_BYTES = 65536
+
+def k2_support(name):
+    return name in K2_SUPPORT or bool(K2_GENERATED.fullmatch(name)) or (
+        name == "release-pipeline/kgg_patient_numpad_commit_smoke.js"
+    )
+
+def preview_modules(candidate):
+    modules = list(DIRECT_FIRST_LOAD_MODULES)
+    if (candidate / K2_MODULE).is_file() and K2_MODULE not in modules:
+        modules.insert(modules.index("patient-version-label.js"), K2_MODULE)
+    return tuple(modules)
 
 
 def require(condition, reason):
@@ -89,9 +119,20 @@ def candidate_files(base, sha):
     require(diff["status"] == "ahead" and diff["merge_base_commit"]["sha"] == base,
             "PR must be based on current trusted main")
     files = diff["files"]
-    require(0 < len(files) <= 20, "PR exceeds the bounded preview file scope")
+    k2 = any(entry["filename"] == K2_MODULE and entry["status"] == "added" for entry in files)
+    require(0 < len(files) <= (K2_MAX_FILES if k2 else 20),
+            "PR exceeds the bounded preview file scope")
+    require(len({entry["filename"] for entry in files}) == len(files),
+            "duplicate paths in candidate diff")
     require(all(entry["status"] in {"added", "modified"} for entry in files),
             "deletions and renames are outside the preview scope")
+    if k2:
+        result = [entry for entry in files if not k2_support(entry["filename"])]
+        require({entry["filename"] for entry in result} == K2_RUNTIME
+                and all(entry["status"] == ("added" if entry["filename"] == K2_MODULE else "modified")
+                        for entry in result),
+                "K2 preview requires the exact bounded runtime scope")
+        return result
     result = [entry for entry in files if not SUPPORT_FILE.fullmatch(entry["filename"])]
     added = [entry for entry in result if entry["status"] == "added"]
     require(0 < len(result) <= 7 and len(result) - len(added) <= 4 and len(added) <= 3
@@ -111,8 +152,9 @@ def overlay(candidate, base, sha):
         name = entry["filename"]
         target = candidate / name
         new_icon = entry["status"] == "added" and NEW_ICON.fullmatch(name)
+        new_k2 = entry["status"] == "added" and name == K2_MODULE
         require(
-            (bool(new_icon) and not target.exists()
+            ((bool(new_icon) or new_k2) and not target.exists()
              or entry["status"] == "modified" and target.is_file()) and "/" not in name
             and (allowed_patient_path(name) or re.fullmatch(r"kgg-icon-[a-z0-9-]+\.png", name))
             and name not in {"patient-storage-scope.js", "update-recovery.html"},
@@ -130,13 +172,15 @@ def overlay(candidate, base, sha):
         git_blob = f"blob {len(data)}\0".encode() + data
         require(len(data) == blob["size"] and hashlib.sha1(git_blob).hexdigest() == blob["sha"],
                 "candidate blob failed integrity check")
+        if new_k2:
+            require(len(data) <= K2_MAX_MODULE_BYTES, "K2 module exceeds its size limit")
         if new_icon:
             size = 192 if new_icon[1] == "192" else 512
             require(len(data) >= 33 and data[:16] == b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
                     and struct.unpack(">II", data[16:24]) == (size, size),
                     "new icon has an invalid PNG header or dimensions")
         if not name.endswith(".png"):
-            old, new = target.read_text(encoding="utf-8"), data.decode("utf-8")
+            old, new = ("" if new_k2 else target.read_text(encoding="utf-8")), data.decode("utf-8")
             sensitive = (*FORBIDDEN_NEW_SINKS, *INTERFACE_MARKERS, "localStorage.clear", "sessionStorage.clear")
             require(not contains_secret(new) and all(new.count(item) == old.count(item) for item in sensitive),
                     "candidate changes protected interfaces or contains a token-shaped secret")
@@ -190,7 +234,8 @@ def main():
         metadata = write_preview(args.work, {
             "request_id": request_id, "base_sha": args.base, "risk_class": "ui",
             "title": f"Verified patient PR #{args.pr}", "summary": "Synthetic patient test plan",
-        }, hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest(), int(version[1]), candidate)
+        }, hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest(), int(version[1]), candidate,
+                                 expected_modules=preview_modules(candidate))
         metadata.update(binding, kind="kgg_patient_verified_pr_preview", files=file_hashes(meta_path.parent))
         write_json(meta_path, metadata)
     else:
