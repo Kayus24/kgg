@@ -1,0 +1,42 @@
+name: KGG K2 scanner WebKit A/B diagnostic
+
+on:
+  push:
+    branches: [fix/patient-k2-inline-field-20261120]
+    paths:
+      - "release-pipeline/kgg_patient_scan_fallback_ab_diagnostic.js"
+      - ".github/workflows/kgg-k2-scan-ab.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan-ab:
+    name: "WebKit scanner fallback / K2 ${{ matrix.variant }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [enabled, disabled]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: release-pipeline/package-lock.json
+      - name: Install existing pinned browser dependencies
+        shell: bash
+        run: |
+          cd release-pipeline
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps webkit
+      - name: Run unchanged scanner assertions with K2 enabled or isolated
+        env:
+          KGG_SCAN_FALLBACK_BROWSER: webkit
+          KGG_SCAN_FALLBACK_DISABLE_K2: "${{ matrix.variant == 'disabled' && '1' || '0' }}"
+        run: node release-pipeline/kgg_patient_scan_fallback_ab_diagnostic.js
