@@ -111,7 +111,7 @@
     "knowledge": [
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-architecture.md",
-        "sha256": "6e639f320c170d1c34cf00b8a95b65cca2e2b136d056532a2df5bc64660b2a46"
+        "sha256": "b2856a95ddb6b1f5aa683b2a44b6039374aa7b170e6dc346f2d0cfe0b1bd5a38"
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-operations.md",
@@ -123,7 +123,7 @@
       },
       {
         "path": "docs/kgg-patient-custom-gpt-knowledge-testing.md",
-        "sha256": "7ea5b367e239866b1ce55c90fa997cd97b4de18db2728a954a6f589aa560d683"
+        "sha256": "79a9a596a847cdd269155f313f47bf6d40730b0b6471383485ec9a18984ecc3e"
       }
     ],
     "actions": [

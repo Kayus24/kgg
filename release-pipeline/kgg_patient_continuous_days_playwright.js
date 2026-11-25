@@ -258,7 +258,41 @@ async function main(){
     await waitForRuntime(page);
     await seedCurrent(page,Array.from({length:12},(_,i)=>i+1),12);await assertHubDay(page,12);
     assert((await page.locator('#meta').innerText()).includes('12 Trainingstage'),'fixed plan lost its finite day label');
-    await page.locator('#plan > button.btn').click();await confirmTicket034FinishIfShown(page);await page.locator('#end').waitFor({state:'visible'});
+    // Observe the actual pointer/click path at the CI-only failing step.
+    // Diagnostics do not dispatch events, retry clicks or change app state.
+    const finishEvidence=await page.evaluate(()=>{
+      const events=[];
+      const label=el=>el instanceof Element?{tag:el.tagName,id:el.id,cls:String(el.className).slice(0,160)}:null;
+      const snapshot=()=>{
+        const btn=document.querySelector('#plan > button.btn'),main=document.querySelector('main');
+        const rect=btn?.getBoundingClientRect();
+        return {day:Number(d),doneCount:Array.isArray(done)?done.length:null,
+          button:label(btn),rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+          hit:rect?label(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2)):null,
+          scrollTop:main?.scrollTop,scrollHeight:main?.scrollHeight,viewportHeight:main?.clientHeight,
+          pad:label(document.getElementById('pad')),end:label(document.getElementById('end')),
+          modal:label(document.getElementById('kggTicket034FinishModal')),
+          active:label(document.activeElement),react:document.body.classList.contains('kggReactNumpadHeaderV1')};
+      };
+      for(const phase of ['capture','bubble']){
+        for(const type of ['pointerdown','pointerup','mousedown','mouseup','click']){
+          window.addEventListener(type,event=>{
+            if(events.length<40)events.push({type,phase,trusted:event.isTrusted,prevented:event.defaultPrevented,
+              target:label(event.target),x:event.clientX,y:event.clientY,scrollTop:document.querySelector('main')?.scrollTop});
+          },{capture:phase==='capture',passive:true});
+        }
+      }
+      window.__kggFixedFinishTestEvidence=()=>({events,after:snapshot()});
+      return snapshot();
+    });
+    try{
+      await page.locator('#plan > button.btn').click();await confirmTicket034FinishIfShown(page);await page.locator('#end').waitFor({state:'visible'});
+    }catch(error){
+      console.error('[fixed-finish-evidence] '+JSON.stringify({before:finishEvidence,
+        observed:await page.evaluate(()=>window.__kggFixedFinishTestEvidence()).catch(()=>null),pageErrors:errors}));
+      await captureEvidence(page,'fixed-finish-failure').catch(()=>{});
+      throw error;
+    }
     assert(decodePayload(await page.locator('#qr').getAttribute('data-payload')).d===12,'fixed plan final QR day is wrong');
     assert(await currentDay(page)===12,'fixed plan advanced beyond its hard end');
 

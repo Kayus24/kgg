@@ -177,7 +177,7 @@
     },
     {
       "path": "docs/kgg-custom-gpt-resource-manifest.json",
-      "sha256": "d09133c11fac7cd0370c10e57463b53c742aa57d64373ea7b63220deb6c807fc"
+      "sha256": "94876313ae950bee701f96d565b2b2e4650fd774bb0c8b3f44a32ff5c99e6b99"
     },
     {
       "path": "release-pipeline/test_kgg_admin_editor_sync_action_surface.py",

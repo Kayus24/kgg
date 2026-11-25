@@ -49,6 +49,7 @@ Reload before every diagnosis involving current code and before every Preview, P
 - `patient-qr-format.js`
 - `patient-qr-fullscreen.js`
 - `patient-set-compact-view.js`
+- `patient-set-k2-inline-editor.js`
 - `patient-set-summary-groups.js`
 - `patient-start-scan.js`
 - `patient-start-values-day1.js`
