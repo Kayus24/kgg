@@ -96,6 +96,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           artifact-ids: ${{ needs.stage.outputs.artifact_id }}
+          merge-multiple: true
           path: ${{ runner.temp }}/verified/previews/${{ needs.stage.outputs.request_id }}
       - name: Verify artifact integrity and current PR/CI binding
         env:

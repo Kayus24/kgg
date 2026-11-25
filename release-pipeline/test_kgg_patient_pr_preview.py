@@ -244,6 +244,7 @@ class PatientPrPreviewTests(unittest.TestCase):
         self.assertNotIn("npm ", publish)
         self.assertNotIn("node release-pipeline", publish)
         self.assertIn("KGG_PATIENT_PREVIEW_PUBLISH_TOKEN", publish)
+        self.assertIn("merge-multiple: true", publish)
 
 
 if __name__ == "__main__":
