@@ -1,6 +1,6 @@
 # KGG Patient GPT Knowledge: Testing
 
-Generated retrieval pack. Source digest: `9890b2d27e8b1e45`.
+Generated retrieval pack. Source digest: `97152231ae786f67`.
 
 Live GitHub context and source files override this static Knowledge pack.
 
@@ -1889,12 +1889,13 @@ def copy_patient_runtime_file(source: Path, root: Path, destination_root: Path) 
 
 
 def canonical_direct_first_load_modules(
-    html: str, worker: str, runtime_root: Path = ROOT
+    html: str, worker: str, runtime_root: Path = ROOT,
+    *, expected_modules: tuple[str, ...] = DIRECT_FIRST_LOAD_MODULES,
 ) -> list[str]:
     """Require the direct root document module contract used on first visit."""
     sources = [match.group("src") for match in MODULE_SCRIPT_PATTERN.finditer(html)]
     paths = [source.split("?", 1)[0].removeprefix("./") for source in sources]
-    if paths != list(DIRECT_FIRST_LOAD_MODULES):
+    if paths != list(expected_modules):
         fail("patient preview index.html must expose the exact direct first-load module list")
     if len(paths) != len(set(paths)):
         fail("patient preview direct first-load module list contains duplicate scripts")
@@ -1944,6 +1945,7 @@ def write_preview(
     digest: str,
     version: int,
     root: Path = ROOT,
+    *, expected_modules: tuple[str, ...] = DIRECT_FIRST_LOAD_MODULES,
 ) -> dict[str, Any]:
     request_id = payload["request_id"]
     preview_dir = preview_root / "previews" / request_id
@@ -2017,7 +2019,7 @@ def write_preview(
     )
     if (cache_name_count, storage_asset_count, index_scope_count, recovery_scope_count) != (1, 1, 1, 1):
         fail("patient preview could not isolate the service-worker scope")
-    canonical_direct_first_load_modules(preview_index, preview_worker, preview_dir)
+    canonical_direct_first_load_modules(preview_index, preview_worker, preview_dir, expected_modules=expected_modules)
     preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
     preview_worker_path.write_text(preview_worker, encoding="utf-8", newline="\n")
     preview_recovery_path = preview_dir / "update-recovery.html"
