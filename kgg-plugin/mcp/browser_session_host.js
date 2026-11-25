@@ -176,6 +176,7 @@ async function stateSnapshot(page, policy) {
         getComputedStyle(element).visibility !== "hidden";
       if (document.querySelector("#plan #list") && document.querySelector("#pad .padBox")) {
         const nativeState = visible(document.querySelector("#pad:not(.hide) .padBox")) ? "patient-numpad" :
+          visible(document.querySelector("#plan #list .ex.kggOpen")) ? "patient-card-open" :
           visible(document.querySelector("#plan #list")) ? "patient-plan" : null;
         if (nativeState) {
           const toggle = config.language_toggle_id && document.getElementById(config.language_toggle_id);

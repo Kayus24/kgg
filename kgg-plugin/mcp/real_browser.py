@@ -418,7 +418,7 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
         seen.add(label)
     result["controls"] = [dict(item) for item in controls]
     if "language" in value:
-        if value["language"] not in ("lang-de", "lang-en") or result["state"] not in ("patient-plan", "patient-numpad"):
+        if value["language"] not in ("lang-de", "lang-en") or result["state"] not in ("patient-plan", "patient-card-open", "patient-numpad"):
             raise RealBrowserError("real_browser_session_response_invalid")
         result["language"] = value["language"]
     action = value.get("action")
@@ -436,7 +436,7 @@ def _validate_session_response(value: Any) -> dict[str, Any]:
         }
         for key, state_key in (("before_language", "before_state"), ("after_language", "after_state")):
             if key in action:
-                if action[key] not in ("lang-de", "lang-en") or action[state_key] not in ("patient-plan", "patient-numpad"):
+                if action[key] not in ("lang-de", "lang-en") or action[state_key] not in ("patient-plan", "patient-card-open", "patient-numpad"):
                     raise RealBrowserError("real_browser_action_invalid")
                 result["action"][key] = action[key]
         if "navigation_completed" in action:

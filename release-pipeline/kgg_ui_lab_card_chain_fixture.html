@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Synthetic card chain</title>
+<style>.hide{display:none}.ex:not(.kggOpen) .details{display:none}
+.ex{position:absolute;top:515px;left:170px;width:190px}.ex>button{width:190px;height:70px}</style></head><body>
+<div id="plan"><div id="list"><section class="ex">
+  <button data-kgg-action="expand-card" onclick="this.parentElement.classList.add('kggOpen')">Open synthetic card</button>
+  <div class="details"><input class="num" value="0" readonly>
+  <button data-kgg-action="open-pad" onclick="document.getElementById('pad').classList.remove('hide')">Open synthetic pad</button></div>
+</section></div></div>
+<div id="pad" class="hide"><div class="padBox">Synthetic keypad</div></div>
+<button data-kgg-action="no-change">No change</button>
+<button id="kggLangSwitch" onclick="localStorage.setItem('kggPatientLang','en')">Synthetic language</button>
+</body></html>

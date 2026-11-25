@@ -19,8 +19,13 @@ When `KGG_REAL_BROWSER=1` is explicitly enabled and the runner advertises
 `visual_loop`, `observe_visual_state` and `execute_visual_action` keep one
 ephemeral page alive for exactly one bounded observe/decide/act/verify cycle.
 The decision is supplied by the calling agent; the bridge never invents a
-model decision. The default remains synthetic and the real host fails closed
-when Playwright or the session helper is unavailable.
+model decision. One narrow native patient continuation is allowed after a
+verified `patient-plan` -> `patient-card-open` click: the response exposes a
+fresh `next_observation` bound to the same page, and exactly one further
+click/tap must verify `patient-numpad`. Both steps require changed screenshots;
+wrong targets, stale observation IDs and unchanged clicks fail closed. All
+other actions still close after one cycle. The default remains synthetic and
+the real host fails closed when Playwright or the session helper is unavailable.
 
 For ChatGPT Fast clients unable to inspect image tool parts, the same observation
 also returns `observation.controls`: up to 24 visible, enabled, uniquely
