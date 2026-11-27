@@ -37,4 +37,4 @@ physical devices; those require separate explicit verification.
 Candidate snapshot hashes (SHA-256): `docs/kgg-custom-gpt-knowledge-testing.md` =
 `526435598da7fdf5a2081588cf18103c839389ea81fc8109ab8e7142a6348688`;
 `release-pipeline/kgg_test_battery.py` =
-`4edb060acb989bd93a4941085b627f56d168801495b3e30b5e6e8a9b3eb27913`.
+`9e0820e150571c9e15a76ebd233cae75e577a1124c80630a656d4541b21a4fd3`.

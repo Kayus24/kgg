@@ -123,6 +123,74 @@ SHA-256, content type, byte size, and session-bound retention. It exposes no
 continuous recording, stores no video artifact, and fails closed when the host
 capability is absent or a bound is invalid.
 
+## Local patient authoring for #377
+
+Use the already authorized Private Desktop Commander session on Max's PC for
+the local authoring step. Verify the host, exclusive worktree, full HEAD SHA
+and current UI Lab capabilities before any write. Reproduce the problem with
+synthetic data and keep the focused test unchanged for GREEN and replay.
+
+From that worktree, use `python release-pipeline/kgg_patient_gpt_write_gate.py`
+with these mode arguments:
+
+| Step | Arguments | Result |
+| --- | --- | --- |
+| Preflight | `--mode local_preflight --payload-file <worktree-json>` | Patient target, synthetic scope, HEAD and patch SHA-256, with a blank confirmation field |
+| Start | `--mode local_prepare --payload-file <worktree-json> --local-approval-file <worktree-json>` | Local job, PID, deadline and paths to the baseline and candidate after validation |
+| Status | `--mode local_status --local-job <request-id>` | Short, hash-checked job status |
+| Evidence | `--mode local_evidence --local-job <request-id>` | Status and baseline/candidate byte hashes |
+
+The confirmation file is the `confirmation` object from preflight with
+`approval_phrase` set to `Zulassen` after Max explicitly authorizes that exact
+local patch. The JSON binds the operator confirmation to the payload. Access to the command
+and worktree is governed by Private Desktop Commander.
+
+Use `dc_start_process` with the absolute script and input paths and a short
+tool timeout. Its PID identifies the session for `dc_read_process_output`.
+Read status by request ID when stdout is unavailable. An existing request ID
+returns its original receipt. If the deadline passes without a terminal
+receipt, treat `UNKNOWN` as requiring reconciliation through the existing
+process and result handoff. A failed or unknown job stays reserved. A targeted
+correction uses a new request ID and the same focused test.
+
+`COMPLETE` covers local authoring. For the #377 synthetic settings-button
+case, start the browser loop with a fresh approved request instead of running
+`local_prepare` first. Use the browser runner's `preflight` command with
+the same base SHA, schema, attempt and payload. It returns the confirmation
+object and result file path before starting any process. With the same
+authorized PDC host and absolute paths,
+run `python release-pipeline/kgg_patient_local_test.py start --base-sha <full-sha>
+--schema kgg.patient-local-test/v1 --attempt 1 --payload-file <file>
+--approval-file <file>`. The input names
+`playwright-card-settings-accessible-name` as its only focused test and limits
+the patch to `patient-card-settings.js`. This profile reproduces RED on the
+Git baseline before authoring, then runs the same browser script in fresh
+contexts for GREEN and replay. Its PASS covers those three phases.
+
+The `start` receipt contains the local worker PID, job/run IDs, deadline,
+and absolute `result_file`. Use `status` or `evidence` with the same
+`--base-sha` and `--attempt` to reconcile output. The worker writes
+`result.json` first, then a compact `notice.md` ending in `ENDE notice`.
+For an already authorized gptflow handoff, register that canonical notice
+path once as the existing PDC `result_file`. PDC owns destination
+verification, delivery and deduplication. Use the verified Kgg aps Lead's
+exact URL or registered self-marker. Check the gptflow job through
+`chatgpt_send_status`. With no verified destination or a disconnected
+extension, preserve the checkpoint and reconcile by ID. The notice
+wakes the Lead, who reads and checks the evidence independently.
+
+Only a reproduced candidate assertion failure permits the next attempt
+with a different patch, fresh authoring approval and the same browser
+script. Review the failed action and diagnose its cause before retrying.
+Attempts 1 through 3 are reserved once per source SHA in this profile.
+Continue with the existing risk-based regression and required gates.
+Before authoring, check the remote preview action's current capability and
+confirm that its PR and authorization requirements can be met. For a
+remote isolated preview, verify an authorized PR and its required CI for
+the exact SHA, then use the existing verified patient PR preview action.
+The HTML-only Admin preview uses its separate verified PR workflow.
+Keep `NOT_RUN` for phases without evidence.
+
 ## VC12 migration boundary
 
 The candidate is evaluated on three independent surfaces:

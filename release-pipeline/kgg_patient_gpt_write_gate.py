@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import base64
+from fnmatch import fnmatchcase
 import hashlib
+import io
 import json
 import os
 import re
@@ -13,9 +15,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any
+from datetime import datetime, timedelta, timezone
+from pathlib import Path, PurePosixPath, PureWindowsPath
+from time import monotonic
+from typing import Any, Callable
+from zipfile import BadZipFile, ZipFile
+
+from kgg_git_environment import sanitized_git_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +31,8 @@ MAX_PAYLOAD_BYTES = 60_000
 MAX_OPERATIONS = 4
 MAX_REPLACEMENT_BYTES = 40_000
 PATIENT_APPROVAL_PHRASE = "Zulassen"
+LOCAL_CANDIDATE_SCHEMA = "kgg.patient-local-candidate.v1"
+LOCAL_CANDIDATE_SECONDS = 30
 
 VERSION_MARKERS = (
     "const APP_VERSION",
@@ -68,6 +76,12 @@ RUNTIME_EXACT = {
     "manifest.json",
     "collapse-cards.js",
     "numpad-ui-fix.js",
+}
+PATIENT_RUNTIME_REQUIRED = ("index.html", "service-worker.js", "update-recovery.html", "icon.svg")
+PATIENT_RUNTIME_GLOBS = {
+    ".": ("*.js", "manifest*.json", "manifest*.webmanifest", "kgg-icon-*.png"),
+    "vendor": ("*.js",),
+    "patient-react-dist": ("*.js", "*.css"),
 }
 MODULE_SCRIPT_PATTERN = re.compile(r'<script src="(?P<src>\./[^"?]+\.js(?:\?[^"?]+)?)"></script>')
 DIRECT_FIRST_LOAD_MODULES = (
@@ -138,9 +152,11 @@ def git_sha(root: Path = ROOT) -> str:
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=root,
+        env=sanitized_git_environment(),
         check=True,
         text=True,
         capture_output=True,
+        timeout=10,
     )
     return result.stdout.strip()
 
@@ -436,24 +452,199 @@ def bump_patient_version(payload: dict[str, Any], root: Path = ROOT) -> int:
 
 
 def patient_runtime_files(root: Path = ROOT) -> list[Path]:
-    files: set[Path] = {
-        root / "index.html",
-        root / "service-worker.js",
-        root / "update-recovery.html",
-        root / "icon.svg",
-    }
-    for pattern in ("*.js", "manifest*.json", "manifest*.webmanifest", "kgg-icon-*.png"):
-        files.update(path for path in root.glob(pattern) if path.is_file())
-    vendor_root = root / "vendor"
-    files.update(path for path in vendor_root.glob("*.js") if path.is_file())
-    react_dist_root = root / "patient-react-dist"
-    files.update(
-        path
-        for pattern in ("*.js", "*.css")
-        for path in react_dist_root.glob(pattern)
-        if path.is_file()
-    )
+    files = {root / name for name in PATIENT_RUNTIME_REQUIRED}
+    for directory, patterns in PATIENT_RUNTIME_GLOBS.items():
+        for pattern in patterns:
+            files.update(path for path in (root / directory).glob(pattern) if path.is_file())
     return sorted(files)
+
+
+def local_candidate_job(root: Path, request_id: str) -> Path:
+    expected = root.resolve() / "tmp" / "kgg-patient-local-candidate" / clean_request_id(request_id)
+    if expected.resolve() != expected:
+        fail("local candidate job must stay within its canonical worktree path")
+    return expected
+
+
+def stage_local_runtime(root: Path, sha: str, destination: Path, deadline: float) -> None:
+    def git_bytes(*args: str) -> bytes:
+        remaining = deadline - monotonic()
+        if remaining <= 0:
+            raise subprocess.TimeoutExpired("local candidate", LOCAL_CANDIDATE_SECONDS)
+        return subprocess.check_output(["git", *args], cwd=root, timeout=remaining,
+                                       env=sanitized_git_environment())
+
+    tree = git_bytes("ls-tree", "-rz", sha)
+    files: list[str] = []
+    canonical_names: set[str] = set()
+    for entry in filter(None, tree.split(b"\0")):
+        meta, name = entry.split(b"\t", 1)
+        relative = PurePosixPath(name.decode("utf-8"))
+        path = relative.as_posix()
+        patterns = PATIENT_RUNTIME_GLOBS.get(relative.parent.as_posix(), ())
+        if path in PATIENT_RUNTIME_REQUIRED or any(fnmatchcase(relative.name, pattern) for pattern in patterns):
+            if not meta.startswith(b"100644 blob ") and not meta.startswith(b"100755 blob "):
+                fail("patient runtime must contain only regular Git blobs")
+            if path.casefold() in canonical_names or any(
+                not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9._-]*", part)
+                or part.endswith(".") or PureWindowsPath(part).is_reserved()
+                for part in relative.parts
+            ):
+                fail("patient runtime includes a nonportable or duplicate path")
+            canonical_names.add(path.casefold())
+            files.append(path)
+    if not set(PATIENT_RUNTIME_REQUIRED).issubset(files):
+        fail("Git source is missing required patient runtime files")
+    data = git_bytes("archive", "--format=zip", sha, "--", *files)
+    with ZipFile(io.BytesIO(data)) as archive:
+        for name in files:
+            target = destination / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(archive.read(name))
+
+
+def local_byte_hashes(directory: Path) -> dict[str, str]:
+    paths = sorted(directory.rglob("*"))
+    if any(path.resolve() != path for path in paths) or not directory.is_dir():
+        fail("local candidate contains an unsafe path")
+    return {
+        path.relative_to(directory).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in paths if path.is_file()
+    }
+
+
+def write_local_receipt(path: Path, record: dict[str, Any]) -> None:
+    pending = path.with_suffix(".pending")
+    with pending.open("x", encoding="utf-8") as output:
+        json.dump(record, output, sort_keys=True, indent=2)
+        output.write("\n")
+        output.flush()
+        os.fsync(output.fileno())
+    os.replace(pending, path)
+
+
+def local_candidate_evidence(request_id: str, root: Path = ROOT) -> dict[str, Any]:
+    job = local_candidate_job(root, request_id)
+    fallback = {"job_id": job.name, "preview_status": "NOT_RUN"}
+    if not job.exists():
+        return {**fallback, "status": "NOT_RUN"}
+    try:
+        terminal = job / "result.json"
+        path = terminal if terminal.is_file() else job / "start.json"
+        if path.resolve() != path:
+            fail("unsafe local receipt path")
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if record["schema"] != LOCAL_CANDIDATE_SCHEMA or record["job_id"] != job.name:
+            fail("local receipt schema or job mismatch")
+        if path == terminal:
+            if record["status"] == "COMPLETE":
+                for name, field in (("baseline", "baseline_sha256"), ("candidate", "sha256")):
+                    directory = job / name
+                    if (record[name] != directory.relative_to(root.resolve()).as_posix()
+                            or directory.resolve() != directory or local_byte_hashes(directory) != record[field]):
+                        return {**record, "status": "UNKNOWN", "reason": "snapshot_hash_mismatch"}
+            elif record["status"] not in {"FAIL", "BLOCKED", "TIMEOUT", "UNKNOWN"}:
+                fail("local receipt has an invalid terminal status")
+        elif datetime.now(timezone.utc) >= datetime.fromisoformat(record["deadline"]):
+            return {**record, "status": "UNKNOWN", "reason": "deadline_without_terminal_receipt"}
+        return record
+    except (GateError, OSError, ValueError, KeyError, TypeError):
+        return {**fallback, "status": "UNKNOWN", "reason": "receipt_unavailable_or_invalid"}
+
+
+def local_candidate_preflight(data: dict[str, Any], root: Path = ROOT) -> dict[str, Any]:
+    if not isinstance(data, dict):
+        fail("local payload must be a JSON object")
+    request_id = clean_request_id(data.get("request_id"))
+    sha = data.get("base_sha")
+    if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha) or sha != git_sha(root):
+        fail("local candidate requires the exact current worktree HEAD")
+    operations = data.get("operations")
+    if not isinstance(operations, list) or not 1 <= len(operations) <= MAX_OPERATIONS:
+        fail("local candidate requires 1-4 patient operations")
+    for operation in operations:
+        relative = operation.get("path") if isinstance(operation, dict) else None
+        if not isinstance(relative, str) or not allowed_patient_path(relative):
+            fail("local candidate operation must name a root patient file")
+        if relative not in {"index.html", "collapse-cards.js", "numpad-ui-fix.js"} and (
+            not relative.startswith("patient-") or relative in {"patient-start-scan.js", "patient-version-label.js"}
+        ):
+            fail("local candidate operation must stay within synthetic patient UI scope")
+    if data.get("risk_class", "standard") != "standard":
+        fail("local candidate supports standard patient UI risk only")
+    return {
+        "schema": LOCAL_CANDIDATE_SCHEMA, "target": "patient", "test_data": "synthetic",
+        "base_sha": sha, "request_id": request_id, "patch_sha256": payload_hash(data),
+        "approval_phrase": "",
+    }
+
+
+def prepare_local_candidate(
+    data: dict[str, Any], approval: dict[str, Any], root: Path = ROOT,
+    *, before_patch: Callable[[Path], None] | None = None,
+) -> dict[str, Any]:
+    """Stage a synthetic local snapshot using the existing patient authoring gate."""
+    root = root.resolve()
+    expected = local_candidate_preflight(data, root)
+    if approval != {**expected, "approval_phrase": PATIENT_APPROVAL_PHRASE}:
+        fail("local confirmation must match the current schema, patient target, synthetic scope, SHA and patch")
+    request_id, sha, digest = (expected[key] for key in ("request_id", "base_sha", "patch_sha256"))
+
+    job = local_candidate_job(root, request_id)
+    job.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        job.mkdir()
+    except FileExistsError:
+        previous = local_candidate_evidence(request_id, root)
+        if previous.get("patch_sha256", digest) != digest:
+            fail("job ID is already bound to a different patch")
+        return previous
+
+    started = datetime.now(timezone.utc)
+    deadline = monotonic() + LOCAL_CANDIDATE_SECONDS
+    record = {
+        "schema": LOCAL_CANDIDATE_SCHEMA, "job_id": request_id, "run_id": request_id,
+        "base_sha": sha, "patch_sha256": digest, "pid": os.getpid(), "target": "patient",
+        "test_data": "synthetic", "deadline": (started + timedelta(seconds=LOCAL_CANDIDATE_SECONDS)).isoformat(),
+        "status": "RUNNING", "preview_status": "NOT_RUN", "test_status": "NOT_RUN",
+    }
+    write_local_receipt(job / "start.json", record)
+    baseline, candidate = job / "baseline", job / "candidate"
+    try:
+        stage_local_runtime(root, sha, baseline, deadline)
+        payload = validate_payload(data, baseline)
+        if before_patch is not None:
+            before_patch(baseline)
+        shutil.copytree(baseline, candidate)
+        changed = apply_operations(payload, candidate)
+        result = dict(
+            status="COMPLETE", changed=changed, candidate=candidate.relative_to(root).as_posix(),
+            baseline=baseline.relative_to(root).as_posix(),
+            baseline_sha256=local_byte_hashes(baseline), sha256=local_byte_hashes(candidate),
+        )
+        if monotonic() >= deadline:
+            raise subprocess.TimeoutExpired("local candidate", LOCAL_CANDIDATE_SECONDS)
+        record.update(result)
+    except subprocess.TimeoutExpired:
+        record.update(status="TIMEOUT", reason="local_candidate_deadline")
+    except (PermissionError, FileNotFoundError):
+        record.update(status="BLOCKED", reason="local_dependency_or_permission")
+    except (GateError, subprocess.CalledProcessError) as exc:
+        record.update(status="FAIL", reason=str(exc) if isinstance(exc, GateError) else "git_stage_failed")
+    except (OSError, LookupError, UnicodeError, BadZipFile):
+        record.update(status="UNKNOWN", reason="local_stage_io_unconfirmed")
+    write_local_receipt(job / "result.json", record)
+    return record
+
+
+def local_json_input(path: Path | None, root: Path = ROOT) -> Any:
+    if path is None or not path.resolve().is_relative_to(root.resolve()):
+        fail("local gate input must be a file in this worktree")
+    with path.open("rb") as source:
+        data = source.read(MAX_PAYLOAD_BYTES + 1)
+    if len(data) > MAX_PAYLOAD_BYTES:
+        fail("local gate input exceeds the patient payload size limit")
+    return json.loads(data.decode("utf-8-sig"))
 
 
 def patient_runtime_relative_path(source: Path, root: Path) -> Path:
@@ -577,11 +768,18 @@ def write_preview(
         fail("patient preview could not add its storage scope")
     preview_worker_path = preview_dir / "service-worker.js"
     preview_worker = normalize(preview_worker_path.read_text(encoding="utf-8"))
-    preview_cache_prefix = f"kgg-patient-preview-{request_id}-"
+    # Request IDs contain no colon, so a longer request ID cannot share the namespace.
+    preview_cache_prefix = f"kgg-patient-preview-{request_id}:"
     preview_cache_name = f"{preview_cache_prefix}v{version}"
     preview_worker, cache_name_count = re.subn(
         r"const CACHE_NAME = 'kgg-handyplan-v[0-9]+-[a-z0-9-]+';",
         f"const CACHE_NAME = '{preview_cache_name}';",
+        preview_worker,
+        count=1,
+    )
+    preview_worker, cache_prefix_count = re.subn(
+        r"const CACHE_PREFIX = 'kgg-handyplan-';",
+        f"const CACHE_PREFIX = '{preview_cache_prefix}';",
         preview_worker,
         count=1,
     )
@@ -609,7 +807,7 @@ def write_preview(
         preview_worker,
         count=1,
     )
-    if (cache_name_count, storage_asset_count, index_scope_count, recovery_scope_count) != (1, 1, 1, 1):
+    if (cache_name_count, cache_prefix_count, storage_asset_count, index_scope_count, recovery_scope_count) != (1, 1, 1, 1, 1):
         fail("patient preview could not isolate the service-worker scope")
     canonical_direct_first_load_modules(preview_index, preview_worker, preview_dir, expected_modules=expected_modules)
     preview_index_path.write_text(preview_index, encoding="utf-8", newline="\n")
@@ -951,7 +1149,9 @@ def self_test(root: Path = ROOT, preview_output: Path | None = None) -> None:
             fail("self-test expected matching patient preview evidence")
         if (
             str(meta.get("previewCacheName") or "") not in preview_worker
-            or f"const CACHE_PREFIX='kgg-patient-preview-{validated['request_id']}-';"
+            or f"const CACHE_PREFIX = 'kgg-patient-preview-{validated['request_id']}:';"
+            not in preview_worker
+            or f"const CACHE_PREFIX='kgg-patient-preview-{validated['request_id']}:';"
             not in preview_recovery
         ):
             fail("self-test expected a request-isolated patient preview cache")
@@ -974,12 +1174,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode",
-        choices=["validate_only", "publish_preview", "create_pr", "publish_patient_live"],
+        choices=["validate_only", "publish_preview", "create_pr", "publish_patient_live",
+                 "local_preflight", "local_prepare", "local_status", "local_evidence"],
     )
     parser.add_argument("--payload-file", type=Path)
     parser.add_argument("--preview-root", type=Path)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))
     parser.add_argument("--approval-phrase", default="")
+    parser.add_argument("--local-approval-file", type=Path, help="Preflight confirmation bound to the exact local patch")
+    parser.add_argument("--local-job", help="Local request ID for status or evidence")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--self-test-preview-root", type=Path)
     args = parser.parse_args()
@@ -988,6 +1191,22 @@ def main() -> int:
         if args.self_test:
             self_test(preview_output=args.self_test_preview_root)
             return 0
+        if args.mode in {"local_preflight", "local_prepare", "local_status", "local_evidence"}:
+            if args.preview_root:
+                fail("local modes cannot use a preview publisher")
+            if args.mode == "local_preflight":
+                result = {"status": "PREFLIGHT", "preview_status": "NOT_RUN",
+                          "confirmation": local_candidate_preflight(local_json_input(args.payload_file))}
+            elif args.mode == "local_prepare":
+                result = prepare_local_candidate(local_json_input(args.payload_file), local_json_input(args.local_approval_file))
+            else:
+                if not args.local_job:
+                    fail("--local-job is required for local status or evidence")
+                result = local_candidate_evidence(args.local_job)
+            if args.mode in {"local_prepare", "local_status"}:
+                result = {key: value for key, value in result.items() if key not in {"sha256", "baseline_sha256"}}
+            print(json.dumps(result, sort_keys=True))
+            return int(result["status"] in {"FAIL", "BLOCKED", "TIMEOUT", "UNKNOWN"})
         if not args.mode or not args.payload_file:
             fail("--mode and --payload-file are required")
         payload = load_payload(args.payload_file)
@@ -1003,7 +1222,7 @@ def main() -> int:
             f"{args.mode} {payload['request_id']} {payload_hash(payload)[:12]}"
         )
         return 0
-    except (GateError, OSError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+    except (GateError, OSError, subprocess.SubprocessError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
