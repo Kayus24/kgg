@@ -650,6 +650,7 @@ def run_release_contracts() -> None:
             "release-pipeline/test_kgg_secret_scan.py",
             "release-pipeline/test_kgg_gpt_source_context.py",
             "release-pipeline/test_kgg_custom_gpt_resource_audit.py",
+            "release-pipeline/test_kgg_patient_local_candidate.py",
             "release-pipeline/test_kgg_brain_relay_worker.py",
         ]
     )

@@ -29,7 +29,7 @@
     },
     {
       "path": "release-pipeline/kgg_test_battery.py",
-      "sha256": "8cece815be3069358ee87d3794b585bb5e6a1fbe6117c4d787060749c347f7e8"
+      "sha256": "9e0820e150571c9e15a76ebd233cae75e577a1124c80630a656d4541b21a4fd3"
     },
     {
       "path": "release-pipeline/kgg_gpt_ab_compare.py",
@@ -185,7 +185,7 @@
     },
     {
       "path": "kgg-plugin/mcp/README.md",
-      "sha256": "4ab7ad9424e65a545e42f444437161cdb3591472f5dea6657014a49a98875b21"
+      "sha256": "9623c3da8b274e0d276fe070aa4818a89966544057f5df4210ac12c6d23813a5"
     },
     {
       "path": "release-pipeline/test_kgg_vc12_migration_contract.py",
